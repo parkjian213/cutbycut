@@ -281,7 +281,8 @@ a.btn{text-decoration:none;color:inherit}
 .log-v{margin-top:8px}.log-v b{color:var(--ink);font-size:13.5px}
 .log-v ul{margin:3px 0 0;padding-left:18px;display:grid;gap:2px;line-height:1.45}
 .trow{flex-wrap:wrap;align-items:center}
-.plan-tools .btn{flex:1 1 28%;white-space:nowrap;padding-inline:8px}
+.plan-tools{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.plan-tools .btn{white-space:nowrap;padding:6px 2px;font-size:13px;min-height:44px}
 .plan-stage{background:var(--raise);border:1px solid var(--line);border-radius:8px;touch-action:none;user-select:none;-webkit-user-select:none}
 .plan-stage svg{display:block;width:100%;height:auto}
 .plan-thumb{display:block;width:100%;text-align:left;padding:6px 12px;border-bottom:1px solid var(--line);background:transparent}
@@ -307,6 +308,22 @@ a.btn{text-decoration:none;color:inherit}
 .tin{border:0;background:transparent;font:700 17px/1.2 var(--code);padding:0;width:118px;max-width:100%;color:inherit;font-variant-numeric:tabular-nums}
 .tin:focus{outline:2px solid var(--s-ni)}
 .srow .t small{display:block;font:600 14px/1.2 var(--code);color:var(--muted)}
+.more{border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.more summary{cursor:pointer;min-height:46px;display:flex;align-items:center;padding:0 12px;font-weight:500;font-size:14px;color:var(--muted);list-style:none}
+.more summary::-webkit-details-marker{display:none}.more summary::before{content:"▸";margin-right:8px}.more[open] summary::before{content:"▾"}
+.more-in{display:grid;gap:14px;padding:4px 12px 14px}
+.mgroup{display:grid;gap:8px}.mgroup+.mgroup{border-top:1px solid var(--line);padding-top:14px}
+.mgroup h3{font-size:13.5px;color:var(--muted);font-weight:700}
+.mgroup .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.wx-h div span{display:block}
+.ex-note{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--soft);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:13.5px}
+.wx{display:grid;gap:8px}.wx-d{font-size:15px}.wx-d b{font-size:17px}
+.wx-h{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.wx-h div{flex:none;min-width:62px;text-align:center;background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:6px 4px;font-size:12px;line-height:1.35}
+.wx-h b{display:block;font:700 18px/1.1 var(--code)}
+.wx-h .rain{color:var(--s-ni);font-weight:700}
+.gear{display:flex;flex-wrap:wrap;gap:6px}
+.gear .chip[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--ok-fg)}
 .qr{background:#fff;padding:12px;width:fit-content;line-height:0}
 .qr img,.qr canvas{display:block}
 .steps{margin:0;padding-left:22px;display:grid;gap:9px;font-size:14.5px;line-height:1.5}
@@ -347,8 +364,9 @@ a.btn{text-decoration:none;color:inherit}
 "use strict";
 const BUILD="web";
 const VIEW_MODE=BUILD==="web"&&/^#view=/.test(location.hash);
-const APP_VER="2.9";
+const APP_VER="3.0";
 const CHANGELOG=[
+ ["3.0",["컷 편집 화면을 정리했어요. 설명 칸이 맨 위로 왔고, 자주 안 쓰는 칸은 '자세히'로 접혀요.","⋯ 메뉴를 보내기, 작품, 앱 설정으로 나눴어요.","배치도 아이콘과 글자를 키우고 버튼을 한 줄로 정리했어요.","씬 정보 창을 짧게 정리했어요.","예시 작품은 고쳐도 다른 기기로 넘어가지 않고, 내 작품으로 복사할 수 있어요.","콜시트에 촬영일 날씨 예보(설치한 앱에서)와 장비 체크리스트를 넣었어요.","샷리스트에서 컷을 검색할 수 있어요.","컷 번호를 1A처럼 직접 붙일 수 있어요.","지운 씬과 컷도 30일 동안 되살릴 수 있어요."]],
  ["2.9",["예상 시간, FPS, 촬영 회차, 렌즈를 숫자로 직접 넣을 수 있어요.","내 선택지 고치기: NG 이유, 예상 시간 버튼, FPS, 배치도 렌즈와 조명 이름을 내 마음대로 바꿔요.","내 컷 세트: 지금 씬의 컷 구성을 세트로 저장해 다른 씬에 넣어요.","내 용어: 용어 사전과 컷 선택에 내 용어를 추가해요.","콜시트에서 씬별 시작 시각을 직접 바꿀 수 있어요.","내 설정도 기기 연동으로 컴퓨터와 폰에 맞춰져요."]],
  ["2.8",["콜시트: 회차별 집합 시간, 장소, 촬영 순서와 예상 시간, 출연, 소품을 한 장으로 만들고 복사해요.","배치도: 씬마다 위에서 본 평면도에 인물, 카메라, 조명, 사물, 180도 선을 놓아요.","해 시간: 촬영일과 지역으로 일출, 일몰, 골든아워, 블루아워를 알려 줘요. 인터넷 없이도 계산돼요.","스태프 공유: 감독, 스태프가 볼 수만 있는 링크를 보내요.","용어 사전에 현장·실무 용어를 크게 늘렸어요."]],
  ["2.7",["첫 화면 작품 카드에 삭제 버튼을 넣었어요.","휴지통: 지운 작품을 30일 동안 보관하고 언제든 되살릴 수 있어요.","작품 안 오른쪽 위 메뉴 아이콘을 점 세 개(⋯)로 바꿨어요."]],
@@ -744,7 +762,7 @@ const MOVE_QUICK=["고정","팬 R","틸트 업","달리 인","핸드헬드","짐
 const LENS_QUICK=["광각","24mm","35mm","50mm","85mm"];
 const TERM_QUICK=["FR-IN","FR-OUT","OFF","V.O","F.I","F.O","O.L"];
 const NG_REASONS=["포커스","연기","대사","소리","프레임","조명","붐 인","동선","소품"];
-const DEFS={ng:NG_REASONS,mins:[5,10,15,20,30,45,60],fps:["24","30","60","120","240"],lenses:["16mm","24mm","35mm","50mm","85mm","135mm"],lights:["키","필","백","키커","창문빛","프랙티컬"],sets:[],myterms:[]};
+const DEFS={ng:NG_REASONS,mins:[5,10,15,20,30,45,60],fps:["24","30","60","120","240"],lenses:["16mm","24mm","35mm","50mm","85mm","135mm"],lights:["키","필","백","키커","창문빛","프랙티컬"],gear:["카메라 바디","렌즈","배터리","충전기","메모리 카드","카드 리더","삼각대","짐벌","모니터","마이크","녹음기","조명","스탠드","반사판","연장선","슬레이트","테이프","노트북"],sets:[],myterms:[]};
 function PC(){if(!S.prefs.c||typeof S.prefs.c!=="object")S.prefs.c={};const c=S.prefs.c;for(const k in DEFS)if(!Array.isArray(c[k]))c[k]=JSON.parse(JSON.stringify(DEFS[k]));return c}
 function pushPrefs(){const c=PC();if(Sync.col&&c.updatedAt)Sync.col.doc("prefs").set({kind:"prefs",updatedAt:c.updatedAt,data:JSON.parse(JSON.stringify(c))}).catch(()=>{})}
 let prefT=null;function prefsTouch(){PC().updatedAt=Date.now();saveLocal();clearTimeout(prefT);prefT=setTimeout(pushPrefs,800)}
@@ -830,13 +848,14 @@ let S={projects:{},synced:{},prefs:{},gone:{}};
 function loadLocal(){try{const r=localStorage.getItem(KEY);if(r){const v=JSON.parse(r);S.projects=v.projects||{};S.synced=v.synced||{};S.prefs=v.prefs||{};S.gone=v.gone||{};Object.keys(S.projects).forEach(k=>{S.projects[k]=normP(S.projects[k])})}}catch(e){}}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function normP(p){
+ if(p&&typeof p==="object"&&!Array.isArray(p.bin))p.bin=[];
  p=Object.assign({id:uid(),name:"제목 없는 작품",scenes:[],order:[],calls:{},director:"",dop:"",date:"",wrap:"",aspect:"16:9",fps:"",gear:"",updatedAt:Date.now()},p);
  if(!Array.isArray(p.scenes))p.scenes=[];if(!Array.isArray(p.order))p.order=[];
  p.scenes=p.scenes.map(sc=>{sc=Object.assign({id:uid(),no:"1",time:"D",place:"INT",loc:"",note:"",day:"1",cast:"",props:"",plan:null,cuts:[]},sc);if(!Array.isArray(sc.cuts))sc.cuts=[];
   sc.cuts=sc.cuts.map(c=>{c=Object.assign({id:uid(),size:"",angle:"",moves:[],lens:"",terms:[],desc:"",note:"",min:10,star:false,opt:false,status:"todo",takes:[],img:"",fps:""},c);["moves","terms","takes"].forEach(k=>{if(!Array.isArray(c[k]))c[k]=[]});return c});return sc});
  return p;
 }
-function touch(p){p.updatedAt=Date.now();delete p.example;if(S.gone[p.id])delete S.gone[p.id];saveLocal();queueSync(p)}
+function touch(p){p.updatedAt=Date.now();if(S.gone[p.id])delete S.gone[p.id];saveLocal();queueSync(p)}
 
 /* 기기 간 동기화: 있으면 쓰고, 없으면 이 기기에만 저장 */
 const Sync={db:null,col:null,state:"local",timers:{},busy:{},pendingRemote:{}};
@@ -915,7 +934,8 @@ function exampleProject(){
 /* ───────── 상태·계산 ───────── */
 const View={pid:null,tab:"list",dictCat:"size",dictQ:"",shootId:null,ngFor:null};
 const cur=()=>S.projects[View.pid];
-function allCuts(p){const o=[];p.scenes.forEach(sc=>sc.cuts.forEach((c,i)=>o.push({c,sc,no:sc.no+"-"+(i+1)})));return o}
+const cutNo=(sc,i)=>String(sc.cuts[i]&&sc.cuts[i].label||i+1);
+function allCuts(p){const o=[];p.scenes.forEach(sc=>sc.cuts.forEach((c,i)=>o.push({c,sc,no:sc.no+"-"+cutNo(sc,i)})));return o}
 function shootList(p){
  const a=allCuts(p),idx={};p.order.forEach((id,i)=>idx[id]=i);
  const known=a.filter(x=>x.c.id in idx).sort((x,y)=>idx[x.c.id]-idx[y.c.id]);
@@ -950,7 +970,7 @@ function projectHtml(p){
  return `<header class="top"><div class="wrap${wide}"><div class="top-in"><button class="icon" data-act="home" aria-label="작품 목록으로">${ICON.back}</button><h1>${esc(p.name)}</h1><button class="icon" data-act="project-menu" aria-label="메뉴: 내보내기, 작품 설정, 삭제">${ICON.more}</button></div>
  ${st.total?`<div class="prog"><div class="prog-t"><span><b>${st.done}</b> / ${st.total}컷 완료${st.skip?`, ${st.skip}컷 건너뜀`:""}</span><span>남은 ${st.remain}컷, 약 <b>${minLabel(st.remMin)}</b>${st.remain?` · ${clock(Date.now()+st.remMin*60000)} 종료 예상`:""}</span></div>${wrapHtml(p,st)}${barHtml(p,nowId)}</div>`:""}
  </div></header>
- <main class="wrap${wide}" id="main">${View.tab==="list"?listHtml(p):View.tab==="shoot"?shootHtml(p):View.tab==="call"?callHtml(p):dictHtml()}</main>
+ <main class="wrap${wide}" id="main">${p.example?`<div class="ex-note"><span>예시 작품이에요. 고쳐 봐도 다른 기기로 넘어가지 않아요.</span><button class="btn" data-act="ex-copy">내 작품으로 복사</button></div>`:""}${View.tab==="list"?listHtml(p):View.tab==="shoot"?shootHtml(p):View.tab==="call"?callHtml(p):dictHtml()}</main>
  <nav class="tabs" role="tablist" aria-label="화면">
   ${[["list","샷리스트",ICON.list],["shoot","촬영",ICON.cam],["call","콜시트",ICON.sheet],["dict","용어",ICON.book]].map(t=>`<button role="tab" aria-selected="${View.tab===t[0]}" data-act="tab" data-tab="${t[0]}">${t[2]}<span>${t[1]}</span></button>`).join("")}
  </nav>`;
@@ -959,19 +979,27 @@ function tapeHtml(c){const custom=c.size;return c.size?`<span class="tape">${esc
 function listHtml(p){
  if(!p.scenes.length)return `<div class="blank"><h3>씬을 추가해 시작하세요</h3><p>직접 적거나, 시나리오를 붙여넣어 씬을 한 번에 나눌 수 있어요.</p><div class="row" style="justify-content:center"><button class="btn solid" data-act="add-scene">첫 씬 추가</button><button class="btn" data-act="scenario">시나리오 붙여넣기</button></div></div>`;
  const f=View.filter||"all";
- const pass=c=>f==="all"||(f==="todo"&&c.status==="todo")||(f==="star"&&c.star)||(f==="opt"&&c.opt)||(f==="nosb"&&!c.img);
  const FL=[["all","전체"],["todo","남은 컷"],["star","★ 핵심"],["opt","선택 컷"],["nosb","콘티 없음"]];
- const scenes=p.scenes.map(sc=>{const rows=sc.cuts.map((c,i)=>pass(c)?cutRow(sc,c,i,f!=="all"):"").join("");if(f!=="all"&&!rows)return"";
+ return `<div class="field" style="margin-bottom:2px"><input id="list-q" class="input" type="search" placeholder="컷 찾기: OTS, 민서, 85mm" value="${esc(View.q||"")}" aria-label="컷 찾기" autocomplete="off"></div>
+ <div class="filter" role="group" aria-label="컷 보기">${FL.map(x=>`<button class="chip" data-act="filter" data-f="${x[0]}" aria-pressed="${f===x[0]}">${x[1]}</button>`).join("")}</div>
+ <div id="list-body">${listBody(p)}</div>`;
+}
+const normQ=q=>String(q||"").toLowerCase().replace(/[\s.\-]/g,"");
+function listBody(p){
+ const f=View.filter||"all",q=normQ(View.q);
+ const pass=c=>f==="all"||(f==="todo"&&c.status==="todo")||(f==="star"&&c.star)||(f==="opt"&&c.opt)||(f==="nosb"&&!c.img);
+ const hit=(sc,c,i)=>!q||normQ([sc.no+"-"+cutNo(sc,i),sc.loc,sc.cast,sc.props,c.size,(findT("size",c.size)||{}).ko,c.angle,c.moves.join(" "),c.lens,c.fps&&c.fps+"fps",c.terms.join(" "),c.desc,c.note].join(" ")).includes(q);
+ const filtered=f!=="all"||!!q;
+ const scenes=p.scenes.map(sc=>{const rows=sc.cuts.map((c,i)=>pass(c)&&hit(sc,c,i)?cutRow(sc,c,i,filtered):"").join("");if(filtered&&!rows)return"";
  return `<section class="scene" aria-label="씬 ${esc(sc.no)}">
   <div class="strip" style="${stripVars(sc)}"><button class="strip-main" data-act="edit-scene" data-id="${sc.id}" aria-label="씬 ${esc(sc.no)} 정보 고치기"><span class="strip-no">S#${esc(sc.no)}</span><span class="strip-tt"><b>${esc(sc.loc||"장소 미정")}</b><span>${sc.time} ${sc.place}${(+sc.day||1)>1||hasDays(p)?` / ${esc(sc.day)}회차`:""}</span></span></button><button class="strip-add" data-act="add-cut" data-id="${sc.id}" aria-label="씬 ${esc(sc.no)}에 컷 추가">+ 컷</button></div>
-  ${planThumb(sc)}<div class="cuts" data-sort="cuts" data-scene="${sc.id}">${rows}</div>
-  ${f==="all"?`<button class="add-set" data-act="preset" data-id="${sc.id}">컷 세트로 한 번에 추가</button>`:""}
+  ${filtered?"":planThumb(sc)}<div class="cuts" data-sort="cuts" data-scene="${sc.id}">${rows}</div>
+  ${filtered?"":`<button class="add-set" data-act="preset" data-id="${sc.id}">컷 세트로 한 번에 추가</button>`}
  </section>`}).join("");
- const lint=lintOf(p);
- return `<div class="filter" role="group" aria-label="컷 보기">${FL.map(x=>`<button class="chip" data-act="filter" data-f="${x[0]}" aria-pressed="${f===x[0]}">${x[1]}</button>`).join("")}</div>
- ${lint?`<p class="lint">${esc(lint)}</p>`:""}
- ${scenes||`<div class="blank"><h3>해당하는 컷이 없어요</h3><p>다른 보기를 골라 보세요.</p></div>`}
- <div class="fab-row"><button class="btn grow" data-act="add-scene">+ 씬 추가</button><button class="btn quiet grow" data-act="scenario">시나리오 붙여넣기</button></div>`;
+ const lint=filtered?"":lintOf(p);
+ return `${q?`<p class="scn-status" style="margin-bottom:8px">"${esc(View.q)}" 찾은 컷 ${p.scenes.reduce((a,sc)=>a+sc.cuts.filter((c,i)=>pass(c)&&hit(sc,c,i)).length,0)}개</p>`:""}${lint?`<p class="lint">${esc(lint)}</p>`:""}
+ ${scenes||`<div class="blank"><h3>${q?"찾는 컷이 없어요":"해당하는 컷이 없어요"}</h3><p>${q?"다른 말로 찾아 보세요.":"다른 보기를 골라 보세요."}</p></div>`}
+ ${filtered?"":`<div class="fab-row"><button class="btn grow" data-act="add-scene">+ 씬 추가</button><button class="btn quiet grow" data-act="scenario">시나리오 붙여넣기</button></div>`}`;
 }
 const hasDays=p=>new Set(p.scenes.map(s=>s.day||"1")).size>1;
 function lintOf(p){
@@ -983,10 +1011,10 @@ function lintOf(p){
 }
 function cutRow(sc,c,i,noDrag){return `<article class="cut ${c.status==="done"?"is-done":c.status==="skip"?"is-skip":""}" data-item="${c.id}">
  <button class="cut-main" data-act="edit-cut" data-id="${c.id}">
-  <span class="cut-l1"><span class="cut-no">${esc(sc.no)}-${i+1}</span>${tapeHtml(c)}${c.star?'<span class="star" aria-label="핵심 컷">★</span>':""}<span class="cut-spec">${esc(specLine(c))}</span>${(c.terms||[]).map(t=>`<span class="tape term">${esc(t)}</span>`).join("")}${c.opt?'<span class="mark opt">선택</span>':""}${c.status==="done"?'<span class="mark ok">OK</span>':c.status==="skip"?'<span class="mark skip">건너뜀</span>':""}</span>
+  <span class="cut-l1"><span class="cut-no">${esc(sc.no)}-${esc(cutNo(sc,i))}</span>${tapeHtml(c)}${c.star?'<span class="star" aria-label="핵심 컷">★</span>':""}<span class="cut-spec">${esc(specLine(c))}</span>${(c.terms||[]).map(t=>`<span class="tape term">${esc(t)}</span>`).join("")}${c.opt?'<span class="mark opt">선택</span>':""}${c.status==="done"?'<span class="mark ok">OK</span>':c.status==="skip"?'<span class="mark skip">건너뜀</span>':""}</span>
   <span class="cut-desc ${c.desc?"":"none"}">${esc(c.desc||"어떻게 찍을지 한 문장으로 적어 주세요.")}</span>
   ${c.note?`<span class="cut-note">${esc(c.note)}</span>`:""}
-  ${c.img&&IMG[c.img]?`<img class="cut-thumb" src="${IMG[c.img]}" alt="${esc(sc.no)}-${i+1} 콘티">`:""}
+  ${c.img&&IMG[c.img]?`<img class="cut-thumb" src="${IMG[c.img]}" alt="${esc(sc.no)}-${esc(cutNo(sc,i))} 콘티">`:""}
  </button>
  <div class="cut-side"><span class="cut-min">${+c.min||0}분</span>${noDrag?"":`<span class="drag" data-drag aria-hidden="true">${ICON.grip}</span>`}</div>
 </article>`}
@@ -1003,7 +1031,7 @@ function shootHtml(p){
  return `${dayChips(p)}<div class="shoot-grid"><div class="shoot">
  <section class="slate" aria-label="현재 컷" style="">
   <div class="slate-top"><span class="tally"><i></i>${c.status==="done"?"OK 완료":c.status==="skip"?"건너뜀":"지금 찍는 컷"} (${posi+1}/${l.length})</span><span style="${stripVars(x.sc)};background:var(--sbg);color:var(--sfg);padding:1px 7px;font-weight:700">${x.sc.time} ${x.sc.place} ${esc(x.sc.loc)}</span></div>
-  <div class="slate-nums"><div><small>씬</small><b>${esc(x.sc.no)}</b></div><div><small>컷</small><b>${esc(x.no.split("-").pop())}</b></div><div><small>테이크</small><b class="take">${takeNo}</b></div><button class="slate-open" data-act="clap-open">슬레이트</button></div>
+  <div class="slate-nums"><div><small>씬</small><b>${esc(x.sc.no)}</b></div><div><small>컷</small><b>${esc(x.no.slice(String(x.sc.no).length+1))}</b></div><div><small>테이크</small><b class="take">${takeNo}</b></div><button class="slate-open" data-act="clap-open">슬레이트</button></div>
   <div class="row"><span class="tape ${c.size?"":"empty"}">${esc(c.size||"사이즈 미정")}</span>${c.star?'<span class="star" style="font-size:24px" aria-label="핵심 컷">★</span>':""}${c.terms.map(t=>`<span class="tape term">${esc(t)}</span>`).join("")}${c.opt?'<span class="mark opt" style="color:inherit">선택</span>':""}</div>
   <p class="slate-spec" style="margin-top:9px">${esc(specLine(c))}</p>
   <p class="slate-desc">${esc(c.desc)}</p>${c.note?`<p class="slate-note">${esc(c.note)}</p>`:""}${c.img&&IMG[c.img]?`<img class="slate-img" src="${IMG[c.img]}" alt="콘티">`:""}
@@ -1073,13 +1101,18 @@ function quickChips(field,c){
 }
 function imgField(c){const src=c.img&&IMG[c.img];return src?`<button class="sb-prev" data-act="sketch" aria-label="콘티 고치기"><img src="${src}" alt="현재 콘티"></button><div class="row"><button class="btn quiet grow" data-act="sketch">콘티 고치기</button><button class="btn quiet" data-act="sketch-del">콘티 지우기</button></div>`:`<button class="btn quiet" data-act="sketch">콘티 그리기, 사진 넣기</button>`}
 function editorHtml(c){
- return `<div class="field" id="f-img">${imgField(c)}</div>`+["size","angle","moves","lens","terms"].map(f=>`<div class="field" id="f-${f}">${pickBtn(f,c)}${quickChips(f,c)}</div>`).join("")+
- `<div class="field"><label for="c-desc">어떻게 찍을지 (카메라 위치, 담을 것, 핵심 한 가지)</label><textarea id="c-desc" class="input" rows="3" placeholder="노트북 너머 정면, 뒤에서 다가오는 인물로 초점을 넘김.">${esc(c.desc)}</textarea></div>
- <div class="field"><label for="c-note">메모</label><input id="c-note" class="input" placeholder="소품, 배우, 주의할 점" value="${esc(c.note)}"></div>
- <div class="field"><span class="flabel">예상 시간</span><div class="chips" id="min-chips">${minChips(c)}</div><div class="row" style="align-items:center"><input id="c-min" class="input" type="number" inputmode="numeric" min="1" max="600" style="width:110px" value="${+c.min||""}" aria-label="예상 시간 직접 입력(분)"><span>분 직접 입력</span></div></div>
- <div class="field"><span class="flabel">촬영 프레임 (슬로모션이면 꼭 적기)</span><div class="chips" id="fps-chips">${fpsChips(c)}</div><div class="row" style="align-items:center"><input id="c-fps" class="input" inputmode="decimal" style="width:110px" placeholder="예: 48" value="${esc(c.fps||"")}" aria-label="FPS 직접 입력"><span>fps 직접 입력</span></div></div>
+ return `<div class="field"><label for="c-desc">어떻게 찍을지</label><textarea id="c-desc" class="input" rows="2" placeholder="카메라 위치, 담을 것, 핵심 한 가지. 예: 노트북 너머 정면, 다가오는 인물로 초점을 넘김.">${esc(c.desc)}</textarea></div>`+
+ ["size","angle","moves","lens","terms"].map(f=>`<div class="field" id="f-${f}">${pickBtn(f,c)}${quickChips(f,c)}</div>`).join("")+
+ `<div class="field"><span class="flabel">예상 시간</span><div class="chips" id="min-chips">${minChips(c)}</div></div>
  <div class="two"><button class="toggle" data-act="flag" data-k="star" aria-pressed="${!!c.star}">★ 핵심 컷</button><button class="toggle" data-act="flag" data-k="opt" aria-pressed="${!!c.opt}">선택 컷</button></div>
- <div class="row"><button class="btn quiet grow" data-act="move-cut" data-d="-1">위로</button><button class="btn quiet grow" data-act="move-cut" data-d="1">아래로</button><button class="btn quiet grow" data-act="dup-cut">복제</button><button class="btn danger grow" data-act="del-cut">삭제</button></div>`;
+ <div class="field" id="f-img">${imgField(c)}</div>
+ <details class="more" ${S.prefs.edMore?"open":""}><summary>자세히: 메모, 직접 입력, FPS, 컷 번호, 순서·삭제</summary><div class="more-in">
+ <div class="field"><label for="c-note">메모</label><input id="c-note" class="input" placeholder="소품, 배우, 주의할 점" value="${esc(c.note)}"></div>
+ <div class="row" style="align-items:center"><input id="c-min" class="input" type="number" inputmode="numeric" min="1" max="600" style="width:110px" value="${+c.min||""}" aria-label="예상 시간 직접 입력(분)"><span>분 직접 입력</span></div>
+ <div class="field"><span class="flabel">촬영 프레임 (슬로모션이면 꼭 적기)</span><div class="chips" id="fps-chips">${fpsChips(c)}</div><div class="row" style="align-items:center"><input id="c-fps" class="input" inputmode="decimal" style="width:110px" placeholder="예: 48" value="${esc(c.fps||"")}" aria-label="FPS 직접 입력"><span>fps 직접 입력</span></div></div>
+ <div class="row" style="align-items:center"><input id="c-label" class="input" maxlength="6" style="width:110px" placeholder="자동" value="${esc(c.label||"")}" aria-label="컷 번호 직접 입력"><span>컷 번호 직접 (예: 1A, 비우면 자동)</span></div>
+ <div class="row"><button class="btn quiet grow" data-act="move-cut" data-d="-1">위로</button><button class="btn quiet grow" data-act="move-cut" data-d="1">아래로</button><button class="btn quiet grow" data-act="dup-cut">복제</button><button class="btn danger grow" data-act="del-cut">삭제</button></div>
+ </div></details>`;
 }
 function fpsChips(c){return ["",...PC().fps].map(m=>`<button class="chip" data-act="fps" data-m="${m}" aria-pressed="${(c.fps||"")===m}">${m?m+"fps":"작품 기본"}</button>`).join("")}
 function minChips(c){return PC().mins.map(m=>`<button class="chip" data-act="min" data-m="${m}" aria-pressed="${+c.min===m}">${m}분</button>`).join("")}
@@ -1087,7 +1120,7 @@ let Ed=null;
 function openCutEditor(id,isNew){
  const p=cur(),f=findCut(p,id);if(!f)return;
  Ed={id};
- openSheet(`컷 ${f.sc.no}-${f.i+1}`,editorHtml(f.c),`<button class="btn quiet grow" data-act="close-sheet">닫기</button><button class="btn solid grow" data-act="add-next">저장하고 다음 컷</button>`,{onClose:()=>{Ed=null}});
+ openSheet(`컷 ${f.sc.no}-${cutNo(f.sc,f.i)}`,editorHtml(f.c),`<button class="btn quiet grow" data-act="close-sheet">닫기</button><button class="btn solid grow" data-act="add-next">저장하고 다음 컷</button>`,{onClose:()=>{Ed=null}});
  if(isNew)bindEditor();else bindEditor();
 }
 function bindEditor(){
@@ -1121,14 +1154,16 @@ function pickerList(q){
 }
 /* 씬 편집 */
 let ScEd=null;
-function sceneBody(sc){return `<div class="two"><div class="field"><label for="sc-no">씬 번호</label><input id="sc-no" class="input" inputmode="text" value="${esc(sc.no)}"></div><div class="field"><span class="flabel">실내·실외</span><div class="seg" id="seg-place">${segPlace(sc)}</div></div></div>
- <div class="field"><span class="flabel">시간대</span><div class="seg" id="seg-time">${segTime(sc)}</div></div>
+function sceneBody(sc){return `<div class="two"><div class="field"><label for="sc-no">씬 번호</label><input id="sc-no" class="input" inputmode="text" value="${esc(sc.no)}"></div><div class="field"><label for="sc-loc">장소</label><input id="sc-loc" class="input" placeholder="동아리실" value="${esc(sc.loc)}"></div></div>
+ <div class="seg" id="seg-place">${segPlace(sc)}</div>
+ <div class="seg" id="seg-time">${segTime(sc)}</div>
  <div class="field"><span class="flabel">촬영 회차</span><div class="row" style="align-items:center;flex-wrap:nowrap"><div class="seg" id="seg-day" style="flex:1">${segDay(sc)}</div><input id="sc-dayn" class="input" type="number" inputmode="numeric" min="1" max="99" style="width:76px" value="${esc(sc.day||"1")}" aria-label="촬영 회차 직접 입력"></div></div>
- <div class="field"><label for="sc-loc">장소</label><input id="sc-loc" class="input" placeholder="동아리실" value="${esc(sc.loc)}"></div>
  <div class="two"><div class="field"><label for="sc-cast">출연</label><input id="sc-cast" class="input" data-scf="cast" placeholder="민서, 지호" value="${esc(sc.cast||"")}"></div><div class="field"><label for="sc-props">소품·의상</label><input id="sc-props" class="input" data-scf="props" placeholder="교복, 안내문" value="${esc(sc.props||"")}"></div></div>
  <button class="btn" data-act="plan" data-id="${sc.id}">배치도 ${sc.plan&&sc.plan.items&&sc.plan.items.length?"고치기":"그리기"}</button>
+ <details class="more"><summary>씬 순서 바꾸기, 삭제</summary><div class="more-in">
  <div id="sc-prev"><div class="strip" style="${stripVars(sc)};padding:8px 12px;font-size:13.5px">스트립보드 색: ${sc.time} ${sc.place}</div></div>
- <div class="row"><button class="btn quiet grow" data-act="move-scene" data-d="-1">씬 위로</button><button class="btn quiet grow" data-act="move-scene" data-d="1">씬 아래로</button><button class="btn danger grow" data-act="del-scene">씬 삭제</button></div>`}
+ <div class="row"><button class="btn quiet grow" data-act="move-scene" data-d="-1">씬 위로</button><button class="btn quiet grow" data-act="move-scene" data-d="1">씬 아래로</button><button class="btn danger grow" data-act="del-scene">씬 삭제</button></div>
+ </div></details>`}
 const segDay=sc=>["1","2","3","4","5","6"].map(v=>`<button data-act="sc-day" data-v="${v}" aria-pressed="${(sc.day||"1")===v}">${v}</button>`).join("");
 const segPlace=sc=>["INT","EXT"].map(v=>`<button data-act="sc-place" data-v="${v}" aria-pressed="${sc.place===v}">${v==="INT"?"INT 실내":"EXT 실외"}</button>`).join("");
 const segTime=sc=>["D","N","M","E"].map(v=>`<button data-act="sc-time" data-v="${v}" aria-pressed="${sc.time===v}">${v} ${TIME_LABEL[v]}</button>`).join("");
@@ -1152,13 +1187,13 @@ function textPrompt(title,label,val,okLabel,cb,ph){
 /* ───────── 내보내기 ───────── */
 function textOf(p){
  const out=[`[${p.name}] 샷리스트`,""];
- p.scenes.forEach(sc=>{out.push(`S#${sc.no}  ${sc.time} ${sc.place} · ${sc.loc||"장소 미정"} · ${TIME_LABEL[sc.time]}`,"");sc.cuts.forEach((c,i)=>{out.push(`${sc.no}-${i+1}${c.star?" ★":""}${c.opt?" (선택)":""} · ${[c.size||"사이즈 미정",c.angle,c.moves.join(" + "),c.lens,c.fps?c.fps+"fps":"",...c.terms].filter(Boolean).join(" · ")}`);if(c.desc)out.push(c.desc);if(c.note)out.push("메모: "+c.note);out.push("")})});
+ p.scenes.forEach(sc=>{out.push(`S#${sc.no}  ${sc.time} ${sc.place} · ${sc.loc||"장소 미정"} · ${TIME_LABEL[sc.time]}`,"");sc.cuts.forEach((c,i)=>{out.push(`${sc.no}-${cutNo(sc,i)}${c.star?" ★":""}${c.opt?" (선택)":""} · ${[c.size||"사이즈 미정",c.angle,c.moves.join(" + "),c.lens,c.fps?c.fps+"fps":"",...c.terms].filter(Boolean).join(" · ")}`);if(c.desc)out.push(c.desc);if(c.note)out.push("메모: "+c.note);out.push("")})});
  return out.join("\n").trim();
 }
 function csvOf(p){
  const q=v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`;
  const rows=[["씬","컷","시간","장소구분","장소","샷 사이즈","앵글","무빙","렌즈","FPS","용어","어떻게 찍을지","메모","예상(분)","핵심","선택","상태","OK 테이크","테이크 기록"]];
- p.scenes.forEach(sc=>sc.cuts.forEach((c,i)=>{const ok=c.takes.filter(t=>t.r==="ok").map(t=>t.n).join(",");rows.push([sc.no,i+1,sc.time,sc.place,sc.loc,c.size,c.angle,c.moves.join(" + "),c.lens,c.fps,c.terms.join(", "),c.desc,c.note,c.min,c.star?"O":"",c.opt?"O":"",{todo:"대기",done:"완료",skip:"건너뜀"}[c.status],ok,c.takes.map(t=>`T${t.n} ${t.r.toUpperCase()}${t.note?" "+t.note:""}`).join(" / ")])}));
+ p.scenes.forEach(sc=>sc.cuts.forEach((c,i)=>{const ok=c.takes.filter(t=>t.r==="ok").map(t=>t.n).join(",");rows.push([sc.no,cutNo(sc,i),sc.time,sc.place,sc.loc,c.size,c.angle,c.moves.join(" + "),c.lens,c.fps,c.terms.join(", "),c.desc,c.note,c.min,c.star?"O":"",c.opt?"O":"",{todo:"대기",done:"완료",skip:"건너뜀"}[c.status],ok,c.takes.map(t=>`T${t.n} ${t.r.toUpperCase()}${t.note?" "+t.note:""}`).join(" / ")])}));
  return "﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n");
 }
 function printHtml(p){
@@ -1170,7 +1205,7 @@ function printHtml(p){
  th{background:#eee;font-weight:700}.s th{-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:13px}.n{font-weight:700;overflow-wrap:anywhere}.bx{display:inline-block;width:13px;height:13px;border:1.5px solid #111}
  .p{margin-bottom:12px}button{padding:10px 16px;font:inherit}@media print{.p{display:none}body{margin:0}}</style></head><body>
  <div class="p"><button onclick="window.print()">인쇄 또는 PDF로 저장</button></div><h1>${esc(p.name)} 샷리스트</h1><p class="m">${esc([p.date,p.director&&"감독 "+p.director,p.dop&&"촬영 "+p.dop,p.aspect,p.fps&&p.fps+"fps"].filter(Boolean).join(" / "))}${p.date||p.director||p.dop?"<br>":""}씬 ${p.scenes.length}개, 컷 ${st.total}개, 예상 ${minLabel(st.totalMin)}</p>
- ${p.scenes.map(sc=>{const k=color[stripKey(sc)];return `${sc.plan&&sc.plan.items&&sc.plan.items.length?`<div style="width:300px;margin:6px 0">${planSvg(sc.plan,{print:true})}</div>`:""}<table><colgroup><col style="width:6%"><col style="width:9%"><col style="width:18%"><col style="width:32%"><col style="width:13%"><col style="width:4%"><col style="width:14%"><col style="width:4%"></colgroup><thead><tr class="s"><th colspan="8" style="background:${k[0]};color:${k[1]}">S#${esc(sc.no)}  ${sc.time} ${sc.place}  ${esc(sc.loc)}</th></tr><tr><th>컷</th><th>사이즈</th><th>앵글 / 무빙 / 렌즈</th><th>어떻게 찍을지</th><th>메모</th><th>분</th><th>테이크</th><th class="c">OK</th></tr></thead><tbody>${sc.cuts.map((c,i)=>`<tr><td class="n">${esc(sc.no)}-${i+1}${c.star?" ★":""}</td><td class="n">${esc(c.size)}${c.terms.length?"<br>"+esc(c.terms.join(", ")):""}</td><td>${esc(specLine(c))}</td><td>${c.img&&IMG[c.img]?`<img src="${IMG[c.img]}" alt="" style="display:block;width:100%;max-width:190px;margin-bottom:4px;border:1px solid #999">`:""}${esc(c.desc)}${c.opt?" (선택)":""}</td><td>${esc(c.note)}</td><td>${+c.min||""}</td><td>${esc(c.takes.map(t=>`T${t.n} ${t.r.toUpperCase()}${t.note?" "+t.note:""}`).join(", "))}</td><td class="c"><span class="bx" style="${c.status==="done"?"background:#111":""}"></span></td></tr>`).join("")}</tbody></table>`}).join("")}
+ ${p.scenes.map(sc=>{const k=color[stripKey(sc)];return `${sc.plan&&sc.plan.items&&sc.plan.items.length?`<div style="width:300px;margin:6px 0">${planSvg(sc.plan,{print:true})}</div>`:""}<table><colgroup><col style="width:6%"><col style="width:9%"><col style="width:18%"><col style="width:32%"><col style="width:13%"><col style="width:4%"><col style="width:14%"><col style="width:4%"></colgroup><thead><tr class="s"><th colspan="8" style="background:${k[0]};color:${k[1]}">S#${esc(sc.no)}  ${sc.time} ${sc.place}  ${esc(sc.loc)}</th></tr><tr><th>컷</th><th>사이즈</th><th>앵글 / 무빙 / 렌즈</th><th>어떻게 찍을지</th><th>메모</th><th>분</th><th>테이크</th><th class="c">OK</th></tr></thead><tbody>${sc.cuts.map((c,i)=>`<tr><td class="n">${esc(sc.no)}-${esc(cutNo(sc,i))}${c.star?" ★":""}</td><td class="n">${esc(c.size)}${c.terms.length?"<br>"+esc(c.terms.join(", ")):""}</td><td>${esc(specLine(c))}</td><td>${c.img&&IMG[c.img]?`<img src="${IMG[c.img]}" alt="" style="display:block;width:100%;max-width:190px;margin-bottom:4px;border:1px solid #999">`:""}${esc(c.desc)}${c.opt?" (선택)":""}</td><td>${esc(c.note)}</td><td>${+c.min||""}</td><td>${esc(c.takes.map(t=>`T${t.n} ${t.r.toUpperCase()}${t.note?" "+t.note:""}`).join(", "))}</td><td class="c"><span class="bx" style="${c.status==="done"?"background:#111":""}"></span></td></tr>`).join("")}</tbody></table>`}).join("")}
  </body></html>`;
 }
 function safeName(s){return String(s).replace(/[\\/:*?"<>|]/g,"").trim().slice(0,60)||"샷리스트"}
@@ -1186,14 +1221,14 @@ async function saveFile(filename,data,mime){
  catch(e){toast("파일을 저장하지 못했어요. 텍스트 복사를 써 주세요.")}
 }
 function openExport(){
- const th=S.prefs.theme||"auto";
- openSheet("내보내기와 작품 설정",`
-  <div class="field"><span class="flabel">작품</span><div class="row"><button class="btn grow" data-act="project-info">작품 정보와 랩 시간</button><button class="btn quiet grow" data-act="scenario">시나리오 붙여넣기</button>${BUILD==="web"?`<button class="btn quiet grow" data-act="link">기기 연동</button>`:""}</div></div>
-  <div class="field"><span class="flabel">보내기</span><div class="row"><button class="btn grow" data-act="share">스태프 공유 (보기 전용)</button><button class="btn grow" data-act="copy-text">샷리스트 복사 (카톡, 노션)</button><button class="btn grow" data-act="copy-log">편집용 테이크 기록 복사</button></div></div>
-  <div class="field"><span class="flabel">파일로 저장</span><div class="row"><button class="btn grow" data-act="export-print">인쇄·PDF용</button><button class="btn grow" data-act="export-csv">엑셀용 CSV</button><button class="btn grow" data-act="export-json">백업 파일</button></div></div>
-  <div class="field"><span class="flabel">내 설정</span><div class="row"><button class="btn grow" data-act="my-opts">내 선택지 고치기</button></div></div>
-  <div class="field"><span class="flabel">화면</span><div class="seg" id="seg-theme">${["auto","light","dark"].map(v=>`<button data-act="theme" data-v="${v}" aria-pressed="${th===v}">${{auto:"자동",light:"밝게 (야외)",dark:"어둡게 (야간)"}[v]}</button>`).join("")}</div></div>
-  <div class="field"><span class="flabel">정리</span><div class="row"><button class="btn quiet grow" data-act="rename">이름 바꾸기</button><button class="btn quiet grow" data-act="reset-shoot">촬영 기록 비우기</button><button class="btn danger grow" data-act="del-project">휴지통으로</button></div></div>`);
+ const th=S.prefs.theme||"auto",p=cur(),nb=(p.bin||[]).length;
+ openSheet("메뉴",`
+  <section class="mgroup"><h3>보내기</h3><div class="row"><button class="btn grow" data-act="share">스태프 공유 (보기 전용)</button><button class="btn grow" data-act="copy-text">샷리스트 복사</button><button class="btn grow" data-act="copy-log">테이크 기록 복사</button></div>
+  <div class="row"><button class="btn quiet grow" data-act="export-print">인쇄·PDF용 파일</button><button class="btn quiet grow" data-act="export-csv">엑셀 CSV</button><button class="btn quiet grow" data-act="export-json">백업 파일</button></div></section>
+  <section class="mgroup"><h3>이 작품</h3><div class="row"><button class="btn grow" data-act="project-info">작품 정보와 랩 시간</button><button class="btn grow" data-act="scenario">시나리오 붙여넣기</button><button class="btn grow" data-act="rename">이름 바꾸기</button></div>
+  <div class="row">${p.example?`<button class="btn grow" data-act="ex-copy">내 작품으로 복사</button>`:""}<button class="btn quiet grow" data-act="bin">지운 씬·컷 ${nb}</button><button class="btn quiet grow" data-act="reset-shoot">촬영 기록 비우기</button><button class="btn danger grow" data-act="del-project">휴지통으로</button></div></section>
+  <section class="mgroup"><h3>앱 설정</h3><div class="row"><button class="btn grow" data-act="my-opts">내 선택지·장비 목록</button>${BUILD==="web"?`<button class="btn grow" data-act="link">기기 연동</button>`:""}</div>
+  <div class="seg" id="seg-theme">${["auto","light","dark"].map(v=>`<button data-act="theme" data-v="${v}" aria-pressed="${th===v}">${{auto:"화면 자동",light:"밝게 (야외)",dark:"어둡게 (야간)"}[v]}</button>`).join("")}</div></section>`);
 }
 async function copyText(t){
  try{await navigator.clipboard.writeText(t);toast("샷리스트를 복사했어요.");return true}
@@ -1222,7 +1257,7 @@ function snapshot(p){return JSON.stringify(p)}
 function restore(id,json){S.projects[id]=normP(JSON.parse(json));touch(S.projects[id]);render()}
 function goNextTodo(p,fromId){const l=shootView(p);const i=l.findIndex(x=>x.c.id===fromId);const after=l.slice(i+1).concat(l.slice(0,i+1));const n=after.find(x=>x.c.status==="todo");View.shootId=n?n.c.id:null;View.ngFor=null}
 const A={
- open(el){View.pid=el.dataset.id;View.tab="list";View.shootId=null;View.filter="all";View.day="";setHash("p-"+View.pid);render();scrollTo(0,0)},
+ open(el){View.pid=el.dataset.id;View.tab="list";View.shootId=null;View.filter="all";View.day="";View.q="";binPurge(S.projects[el.dataset.id]);setHash("p-"+View.pid);render();scrollTo(0,0)},
  home(){View.pid=null;setHash("");render();scrollTo(0,0)},
  tab(el){View.tab=el.dataset.tab;View.ngFor=null;render();scrollTo(0,0)},
  "new-project"(){textPrompt("새 작품","작품 제목","","만들기",v=>{const p=normP({id:uid(),name:v,updatedAt:Date.now()});S.projects[p.id]=p;saveLocal();queueSync(p);View.pid=p.id;View.tab="list";setHash("p-"+p.id);render()})},
@@ -1234,7 +1269,7 @@ const A={
  "sc-place"(el){const p=cur(),sc=p.scenes.find(s=>s.id===ScEd.id);sc.place=el.dataset.v;touch(p);refreshSceneSeg(sc)},
  "sc-time"(el){const p=cur(),sc=p.scenes.find(s=>s.id===ScEd.id);sc.time=el.dataset.v;touch(p);refreshSceneSeg(sc)},
  "move-scene"(el){const p=cur(),i=p.scenes.findIndex(s=>s.id===ScEd.id),j=i+ +el.dataset.d;if(j<0||j>=p.scenes.length)return;const[x]=p.scenes.splice(i,1);p.scenes.splice(j,0,x);touch(p);toast("씬 순서를 바꿨어요.")},
- "del-scene"(){const p=cur(),snap=snapshot(p),id=p.id;p.scenes=p.scenes.filter(s=>s.id!==ScEd.id);touch(p);closeSheet();toast("씬을 삭제했어요.",()=>restore(id,snap))},
+ "del-scene"(){const p=cur(),snap=snapshot(p),id=p.id;const si=p.scenes.findIndex(s=>s.id===ScEd.id);if(si<0)return;binAdd(p,{type:"scene",index:si,scene:JSON.parse(JSON.stringify(p.scenes[si]))});p.scenes=p.scenes.filter(s=>s.id!==ScEd.id);touch(p);closeSheet();toast("씬을 지웠어요. 메뉴의 지운 씬·컷에서 되살릴 수 있어요.",()=>restore(id,snap))},
  "add-cut"(el){const p=cur(),sc=p.scenes.find(s=>s.id===el.dataset.id);const c=newCut(p,sc);render();openCutEditor(c.id,true)},
  "edit-cut"(el){openCutEditor(el.dataset.id)},
  "add-next"(){const p=cur(),f=findCut(p,Ed.id);closeSheet();const c=newCut(p,f.sc);render();openCutEditor(c.id,true)},
@@ -1244,9 +1279,9 @@ const A={
  "pick-custom"(el){const p=cur(),f=findCut(p,Ed.id),fld=Pk.field,v=el.dataset.v.slice(0,30);if(Array.isArray(f.c[fld])){if(!f.c[fld].includes(v))f.c[fld].push(v)}else f.c[fld]=v;touch(p);closeSheet()},
  min(el){const p=cur(),f=findCut(p,Ed.id);f.c.min=+el.dataset.m;touch(p);$("#min-chips").innerHTML=minChips(f.c);const i=$("#c-min");if(i)i.value=f.c.min},
  flag(el){const p=cur(),f=findCut(p,Ed.id),k=el.dataset.k;f.c[k]=!f.c[k];touch(p);el.setAttribute("aria-pressed",f.c[k])},
- "move-cut"(el){const p=cur(),f=findCut(p,Ed.id),j=f.i+ +el.dataset.d;if(j<0||j>=f.sc.cuts.length)return;f.sc.cuts.splice(f.i,1);f.sc.cuts.splice(j,0,f.c);touch(p);$(".sheet-head h2",el.closest(".sheet")).textContent=`컷 ${f.sc.no}-${j+1}`;toast(`${f.sc.no}-${j+1}번으로 옮겼어요.`)},
+ "move-cut"(el){const p=cur(),f=findCut(p,Ed.id),j=f.i+ +el.dataset.d;if(j<0||j>=f.sc.cuts.length)return;f.sc.cuts.splice(f.i,1);f.sc.cuts.splice(j,0,f.c);touch(p);$(".sheet-head h2",el.closest(".sheet")).textContent=`컷 ${f.sc.no}-${cutNo(f.sc,j)}`;toast(`${f.sc.no}-${cutNo(f.sc,j)}번으로 옮겼어요.`)},
  "dup-cut"(){const p=cur(),f=findCut(p,Ed.id);const n=JSON.parse(JSON.stringify(f.c));n.id=uid();n.status="todo";n.takes=[];n.star=false;if(n.img&&IMG[n.img]){const k="img_"+uid();imgPut(k,IMG[n.img]);n.img=k}else n.img="";f.sc.cuts.splice(f.i+1,0,n);touch(p);closeSheet();render();openCutEditor(n.id);toast("컷을 복제했어요.")},
- "del-cut"(){const p=cur(),snap=snapshot(p),id=p.id,f=findCut(p,Ed.id),label=f.sc.no+"-"+(f.i+1);f.sc.cuts.splice(f.i,1);p.order=p.order.filter(x=>x!==f.c.id);touch(p);closeSheet();toast(label+" 컷을 삭제했어요.",()=>restore(id,snap))},
+ "del-cut"(){const p=cur(),snap=snapshot(p),id=p.id,f=findCut(p,Ed.id),label=f.sc.no+"-"+cutNo(f.sc,f.i);binAdd(p,{type:"cut",sceneId:f.sc.id,sceneNo:f.sc.no,index:f.i,label,cut:JSON.parse(JSON.stringify(f.c))});f.sc.cuts.splice(f.i,1);p.order=p.order.filter(x=>x!==f.c.id);touch(p);closeSheet();toast(label+" 컷을 지웠어요. 메뉴의 지운 씬·컷에서 되살릴 수 있어요.",()=>restore(id,snap))},
  "shoot-go"(el){View.shootId=el.dataset.id;View.ngFor=null;render();const s=$(".slate");if(s&&innerWidth<860)scrollTo({top:0})},
  "shoot-step"(el){const p=cur(),l=shootView(p);if(!l.length)return;const i=l.findIndex(x=>x.c.id===View.shootId);const j=i+ +el.dataset.d;if(j<0){toast("첫 번째 컷이에요.");return}if(j>=l.length){toast("마지막 컷이에요.");return}View.shootId=l[j].c.id;View.ngFor=null;render()},
  take(el){const p=cur(),x=currentShoot(p);if(!x)return;const r=el.dataset.r,c=x.c;const n=c.takes.length?Math.max(...c.takes.map(t=>t.n))+1:1;c.takes.push({n,r,note:"",at:Date.now()});
@@ -1358,7 +1393,7 @@ let Sk=null;
 function openSketch(){
  const p=cur(),f=findCut(p,Ed.id),r=ASPECT[p.aspect]||16/9;
  const W=r>=1?960:540,H=Math.round(W/r);
- const w=openSheet(`콘티 ${f.sc.no}-${f.i+1}`,`<div class="sk-stage"><canvas id="sk-c" width="${W}" height="${H}" aria-label="콘티 그리는 칸"></canvas><div class="sk-grid" id="sk-grid" hidden></div></div>
+ const w=openSheet(`콘티 ${f.sc.no}-${cutNo(f.sc,f.i)}`,`<div class="sk-stage"><canvas id="sk-c" width="${W}" height="${H}" aria-label="콘티 그리는 칸"></canvas><div class="sk-grid" id="sk-grid" hidden></div></div>
   <div class="row" role="group" aria-label="펜">${[["#17222C","검정"],["#CF1F2E","빨강"],["#2F67B8","파랑"]].map((x,i)=>`<button class="pcolor" style="background:${x[0]}" data-act="sk-color" data-v="${x[0]}" aria-pressed="${i===0}" aria-label="${x[1]} 펜"></button>`).join("")}<button class="chip" data-act="sk-size" data-v="3" aria-pressed="true">가늘게</button><button class="chip" data-act="sk-size" data-v="8" aria-pressed="false">굵게</button><button class="chip" data-act="sk-eraser" aria-pressed="false">지우개</button></div>
   <div class="row"><button class="chip" data-act="sk-undo">되돌리기</button><button class="chip" data-act="sk-clear">전체 지우기</button><button class="chip" data-act="sk-base">${esc(f.c.size||"사이즈")} 그림 깔기</button><button class="chip" data-act="sk-photo">사진 넣기</button><button class="chip" data-act="sk-thirds" aria-pressed="false">3분할선</button></div>`,
   `<button class="btn quiet grow" data-act="close-sheet">취소</button><button class="btn solid grow" data-act="sk-save">콘티 저장</button>`,{onClose:()=>{Sk=null;const b=$("#f-img");if(b&&Ed){const q=findCut(cur(),Ed.id);if(q)b.innerHTML=imgField(q.c)}}});
@@ -1385,7 +1420,7 @@ function openClap(){
  const nd=new Date(),d=p.date||`${nd.getFullYear()}-${String(nd.getMonth()+1).padStart(2,"0")}-${String(nd.getDate()).padStart(2,"0")}`;const fps=c.fps||p.fps;
  const meta=[d,x.sc.time+" "+x.sc.place,p.director&&"감독 "+p.director,p.dop&&"촬영 "+p.dop,fps&&fps+"fps",p.aspect,c.terms.includes("MOS")&&"MOS"].filter(Boolean);
  $("#clap-slot").innerHTML=`<div class="clap" role="dialog" aria-modal="true" aria-label="디지털 슬레이트"><div class="clap-top"><span>${esc(p.name)}</span><button data-act="clap-close">닫기</button></div>
- <div class="clap-nums"><div><small>씬</small><b>${esc(x.sc.no)}</b></div><div><small>컷</small><b>${esc(x.no.split("-").pop())}</b></div><div><small>테이크</small><b class="tk-n">${take}</b></div></div>
+ <div class="clap-nums"><div><small>씬</small><b>${esc(x.sc.no)}</b></div><div><small>컷</small><b>${esc(x.no.slice(String(x.sc.no).length+1))}</b></div><div><small>테이크</small><b class="tk-n">${take}</b></div></div>
  <div class="clap-meta">${meta.map(m=>`<span>${esc(m)}</span>`).join("")}</div>
  <div class="clap-go"><button data-act="clap-sound" aria-pressed="${S.prefs.clapSound!==false}">${S.prefs.clapSound!==false?"소리 켬":"소리 끔"}</button><button class="go" data-act="clap-go">클랩</button><button data-act="clap-close">촬영 화면</button></div></div>`;
 }
@@ -1715,11 +1750,12 @@ function callHtml(p){
  <section class="csec"><h2>해 시간</h2>
   <div class="row"><select id="cl-city" class="input" style="flex:1;min-width:0" aria-label="지역">${[`<option value="">지역 고르기</option>`,...CITIES.map(x=>`<option ${c.city===x[0]?"selected":""}>${x[0]}</option>`),c.city==="현재 위치"?`<option selected>현재 위치</option>`:""].join("")}</select><button class="btn" data-act="call-geo">현재 위치</button></div>
   <div id="sun-box">${sunHtml(Object.assign({},c,{date:dateV}))}</div>
+  <div id="wx-box">${wxHtml(c,dateV)}</div>
  </section>
  <section class="csec"><h2>촬영 순서 ${rows.length?`(${minLabel(total)})`:""}</h2>
   ${rows.length?`<div class="sched">${rows.map(r=>`<div class="srow"><span class="sw" style="${stripVars(r.sc)}"></span><span class="t"><input class="tin" type="time" data-at="${r.sc.id}" value="${r.from!=null?fmtHm(r.from):""}" aria-label="S#${esc(r.sc.no)} 시작 시각"><small>${r.to!=null?"~"+fmtHm(r.to):""}${c.at&&c.at[r.sc.id]?" (직접)":""}</small></span><div style="min-width:0"><b>S#${esc(r.sc.no)} ${esc(r.sc.loc||"장소 미정")}</b><p>${r.sc.time} ${r.sc.place}, ${r.n}컷, ${minLabel(r.min)}${r.sc.cast?` · 출연 ${esc(r.sc.cast)}`:""}</p></div></div>`).join("")}</div><p class="scn-status">촬영 탭의 순서와 컷별 예상 시간으로 계산해요. 시각을 눌러 씬 시작을 직접 바꿀 수 있고, 지우면 자동 계산으로 돌아가요. ${hm(c.start)==null&&hm(c.call)==null?"첫 촬영이나 집합 시간을 넣으면 시각이 나와요.":""}</p>`:`<div class="blank"><h3>${esc(day)}회차에 씬이 없어요</h3><p>씬 정보에서 촬영 회차를 정해 주세요.</p></div>`}
  </section>
- <section class="csec"><h2>출연과 준비물</h2><p>${cast.length?"출연: "+esc(cast.join(", ")):"출연을 적은 씬이 없어요. 씬 정보에서 적을 수 있어요."}</p><p>${props.length?"소품·의상: "+esc(props.join(", ")):""}</p></section>
+ ${gearHtml(c)}<section class="csec"><h2>출연과 준비물</h2><p>${cast.length?"출연: "+esc(cast.join(", ")):"출연을 적은 씬이 없어요. 씬 정보에서 적을 수 있어요."}</p><p>${props.length?"소품·의상: "+esc(props.join(", ")):""}</p></section>
  <div class="row"><button class="btn solid grow" data-act="call-copy">콜시트 복사 (카톡)</button></div>`;
 }
 function callText(p,day){
@@ -1728,6 +1764,8 @@ function callText(p,day){
  if(dateV)out.push("날짜: "+dateV);if(c.call)out.push("집합: "+c.call+(c.place?" / "+c.place:""));else if(c.place)out.push("집합 장소: "+c.place);if(c.start)out.push("첫 촬영: "+c.start);if(c.contact)out.push("연락: "+c.contact);
  if(dateV&&c.lat){const t=sunTimes(dateV,+c.lat,+c.lng);if(t){const f=d=>clock(d.getTime());out.push(`해: 일출 ${f(t.rise)}, 일몰 ${f(t.set)}, 저녁 골든아워 ${f(t.goldPmStart)}~`)}}
  out.push("","촬영 순서");rows.forEach(r=>out.push(`${r.from!=null?fmtHm(r.from)+"~"+fmtHm(r.to)+" ":""}S#${r.sc.no} ${r.sc.time} ${r.sc.place} ${r.sc.loc||""} (${r.n}컷)${r.sc.cast?" 출연: "+r.sc.cast:""}${r.sc.props?" 준비: "+r.sc.props:""}`));
+ const wk=wxKey(c,dateV);if(wk&&WX[wk]&&WX[wk].d){const d=WX[wk].d;out.push(`날씨: ${wmo(d.code)}, ${Math.round(d.min)}~${Math.round(d.max)}°C, 강수확률 ${d.rain??"-"}%, 바람 최대 ${Math.round(d.wind)}m/s`)}
+ if(PC().gear.length)out.push("","챙길 장비: "+PC().gear.join(", "));
  if(c.note)out.push("","공지: "+c.note);
  return out.join("\n");
 }
@@ -1745,13 +1783,13 @@ function planSvg(plan,o={}){
  const items=[...plan.items].sort((a,b)=>(a.t==="o"?0:1)-(b.t==="o"?0:1));
  items.forEach(it=>{
   let body="";
-  if(it.t==="p")body=`<circle r="3.2" fill="${blu}"/><path d="M-1.6 -2.8L0 -5.2L1.6 -2.8Z" fill="${blu}"/>`;
-  else if(it.t==="c"){const f=lensMm(it.lens);body=cone(2*Math.atan(18/f)*180/Math.PI,26,red,.13)+`<rect x="-2.6" y="-1.8" width="5.2" height="3.6" rx=".6" fill="${ink}"/><rect x="-1.1" y="-3.2" width="2.2" height="1.6" fill="${ink}"/>`}
-  else if(it.t==="l")body=cone(50,16,amb,.16)+`<circle r="2.1" fill="${amb}"/><rect x="-1.6" y="-3" width="3.2" height="1" fill="${amb}"/>`;
-  else body=`<rect x="-5" y="-3" width="10" height="6" rx=".8" fill="${soft}" stroke="${ink}" stroke-width=".25"/>`;
-  const sel=o.edit&&o.sel===it.id?`<circle cx="${it.x}" cy="${it.y}" r="6.2" fill="none" stroke="${red}" stroke-width=".4" stroke-dasharray="1.2 1"/>`:"";
+  if(it.t==="p")body=`<circle r="4.2" fill="${blu}"/><path d="M-2.2 -3.6L0 -6.8L2.2 -3.6Z" fill="${blu}"/>`;
+  else if(it.t==="c"){const f=lensMm(it.lens);body=cone(2*Math.atan(18/f)*180/Math.PI,26,red,.13)+`<rect x="-3.4" y="-2.3" width="6.8" height="4.6" rx=".8" fill="${ink}"/><rect x="-1.5" y="-4.1" width="3" height="2" fill="${ink}"/>`}
+  else if(it.t==="l")body=cone(50,16,amb,.16)+`<circle r="2.9" fill="${amb}"/><rect x="-2.2" y="-4" width="4.4" height="1.3" fill="${amb}"/>`;
+  else body=`<rect x="-6.5" y="-3.8" width="13" height="7.6" rx="1" fill="${soft}" stroke="${ink}" stroke-width=".3"/>`;
+  const sel=o.edit&&o.sel===it.id?`<circle cx="${it.x}" cy="${it.y}" r="7.4" fill="none" stroke="${red}" stroke-width=".4" stroke-dasharray="1.2 1"/>`:"";
   const lab=[it.label,it.t==="c"?(it.lens||"50mm"):""].filter(Boolean).join(" ");
-  g+=`<g ${o.edit?`data-pi="${it.id}" style="cursor:grab"`:""}>${sel}<g transform="translate(${it.x} ${it.y}) rotate(${it.r||0})">${body}</g><text x="${it.x}" y="${it.y+(it.t==="o"?.9:6.4)}" font-size="2.5" fill="${ink}" text-anchor="middle" font-family="IBM Plex Sans KR,Malgun Gothic,sans-serif" pointer-events="none">${esc(lab)}</text></g>`;
+  g+=`<g ${o.edit?`data-pi="${it.id}" style="cursor:grab"`:""}>${sel}<g transform="translate(${it.x} ${it.y}) rotate(${it.r||0})">${body}</g><text x="${it.x}" y="${it.y+(it.t==="o"?1.2:8.2)}" font-size="3.4" font-weight="600" fill="${ink}" text-anchor="middle" font-family="IBM Plex Sans KR,Malgun Gothic,sans-serif" pointer-events="none">${esc(lab)}</text></g>`;
  });
  return `<svg viewBox="0 0 ${PW} ${PH}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="배치도">${g}</svg>`;
 }
@@ -1770,7 +1808,7 @@ function planRedraw(){const sv=$("#plan-svg");if(sv)sv.outerHTML=planSvg(planOf(
 function openPlan(id){
  const p=cur(),sc=p.scenes.find(s=>s.id===id);if(!sc)return;PL.sc=sc;PL.sel=null;planOf(sc);
  const w=openSheet(`S#${sc.no} 배치도`,`<div class="plan-stage" id="plan-stage">${planSvg(sc.plan,{edit:true}).replace("<svg ",'<svg id="plan-svg" ')}</div>
-  <div class="row plan-tools"><button class="btn grow" data-act="pl-add" data-t="p">+ 인물</button><button class="btn grow" data-act="pl-add" data-t="c">+ 카메라</button><button class="btn grow" data-act="pl-add" data-t="l">+ 조명</button><button class="btn grow" data-act="pl-add" data-t="o">+ 사물</button><button class="btn grow" id="pl-line" data-act="pl-line" aria-pressed="${!!sc.plan.line}">180도 선</button></div>
+  <div class="plan-tools" role="group" aria-label="추가"><button class="btn" data-act="pl-add" data-t="p">＋인물</button><button class="btn" data-act="pl-add" data-t="c">＋카메라</button><button class="btn" data-act="pl-add" data-t="l">＋조명</button><button class="btn" data-act="pl-add" data-t="o">＋사물</button><button class="btn toggle" id="pl-line" data-act="pl-line" aria-pressed="${!!sc.plan.line}">180°선</button></div>
   <div id="plan-sel" style="min-height:240px">${planSelHtml()}</div>`,`<button class="btn solid grow" data-act="close-sheet">완료</button>`,{onClose:()=>{PL.sc=null;PL.sel=null}});
  const stage=$("#plan-stage",w);let drag=null;
  const pt=e=>{const sv=$("#plan-svg");const m=sv.getScreenCTM();if(!m)return[0,0];const q=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());return[Math.min(PW,Math.max(0,q.x)),Math.min(PH,Math.max(0,q.y))]};
@@ -1821,7 +1859,7 @@ function renderView(){
  <main class="wrap" style="padding-block:16px 40px">
  ${callDays(p).map(d=>{const t=callText(p,d).split("\n");return `<section class="csec"><h2>${esc(d)}회차 콜시트</h2><div class="sched" style="padding:10px 12px;white-space:pre-wrap;font-size:14px;line-height:1.55">${esc(t.slice(1).join("\n").trim())}</div></section>`}).join("")}
  <h2 style="font-size:15px;margin:6px 0 10px">샷리스트</h2>
- ${p.scenes.map(sc=>`<section class="scene"><div class="strip" style="${stripVars(sc)}"><div class="strip-main"><span class="strip-no">S#${esc(sc.no)}</span><span class="strip-tt"><b>${esc(sc.loc||"장소 미정")}</b><span>${sc.time} ${sc.place}${sc.cast?" · "+esc(sc.cast):""}</span></span></div></div>${sc.plan&&sc.plan.items&&sc.plan.items.length?`<div class="plan-thumb big">${planSvg(sc.plan)}</div>`:""}<div class="cuts">${sc.cuts.map((c,i)=>`<article class="cut ${c.status==="done"?"is-done":c.status==="skip"?"is-skip":""}"><div class="cut-main"><span class="cut-l1"><span class="cut-no">${esc(sc.no)}-${i+1}</span>${tapeHtml(c)}${c.star?'<span class="star">★</span>':""}<span class="cut-spec">${esc(specLine(c))}</span>${c.terms.map(t=>`<span class="tape term">${esc(t)}</span>`).join("")}${c.opt?'<span class="mark opt">선택</span>':""}${c.status==="done"?'<span class="mark ok">OK</span>':""}</span><span class="cut-desc">${esc(c.desc)}</span>${c.note?`<span class="cut-note">${esc(c.note)}</span>`:""}${c.img&&IMG[c.img]?`<img class="cut-thumb" src="${IMG[c.img]}" alt="콘티">`:""}</div><div class="cut-side"><span class="cut-min">${+c.min||0}분</span></div></article>`).join("")}</div></section>`).join("")}
+ ${p.scenes.map(sc=>`<section class="scene"><div class="strip" style="${stripVars(sc)}"><div class="strip-main"><span class="strip-no">S#${esc(sc.no)}</span><span class="strip-tt"><b>${esc(sc.loc||"장소 미정")}</b><span>${sc.time} ${sc.place}${sc.cast?" · "+esc(sc.cast):""}</span></span></div></div>${sc.plan&&sc.plan.items&&sc.plan.items.length?`<div class="plan-thumb big">${planSvg(sc.plan)}</div>`:""}<div class="cuts">${sc.cuts.map((c,i)=>`<article class="cut ${c.status==="done"?"is-done":c.status==="skip"?"is-skip":""}"><div class="cut-main"><span class="cut-l1"><span class="cut-no">${esc(sc.no)}-${esc(cutNo(sc,i))}</span>${tapeHtml(c)}${c.star?'<span class="star">★</span>':""}<span class="cut-spec">${esc(specLine(c))}</span>${c.terms.map(t=>`<span class="tape term">${esc(t)}</span>`).join("")}${c.opt?'<span class="mark opt">선택</span>':""}${c.status==="done"?'<span class="mark ok">OK</span>':""}</span><span class="cut-desc">${esc(c.desc)}</span>${c.note?`<span class="cut-note">${esc(c.note)}</span>`:""}${c.img&&IMG[c.img]?`<img class="cut-thumb" src="${IMG[c.img]}" alt="콘티">`:""}</div><div class="cut-side"><span class="cut-min">${+c.min||0}분</span></div></article>`).join("")}</div></section>`).join("")}
  </main>`;
 }
 
@@ -1843,13 +1881,13 @@ Object.assign(A,{
 });
 document.addEventListener("input",e=>{
  const t=e.target;if(!t.dataset)return;
- if(t.dataset.call){const p=cur();if(!p)return;const c=callOf(p,curDay(p));c[t.dataset.call]=t.value;touch(p);if(t.dataset.call==="date"){const b=$("#sun-box");if(b)b.innerHTML=sunHtml(c)}}
+ if(t.dataset.call){const p=cur();if(!p)return;const c=callOf(p,curDay(p));c[t.dataset.call]=t.value;touch(p);if(t.dataset.call==="date"){const b=$("#sun-box");if(b)b.innerHTML=sunHtml(c);const wb=$("#wx-box");if(wb)wb.innerHTML=wxHtml(c,c.date)}}
  else if(t.dataset.scf&&ScEd){const p=cur(),sc=p.scenes.find(s=>s.id===ScEd.id);if(sc){sc[t.dataset.scf]=t.value.slice(0,120);touch(p)}}
 });
-document.addEventListener("change",e=>{if(e.target.id==="cl-city"){const p=cur(),c=callOf(p,curDay(p)),x=CITIES.find(k=>k[0]===e.target.value);if(x){c.city=x[0];c.lat=x[1];c.lng=x[2]}else if(!e.target.value){delete c.city;delete c.lat;delete c.lng}touch(p);const b=$("#sun-box");if(b)b.innerHTML=sunHtml(Object.assign({},c,{date:c.date||(curDay(p)==="1"?p.date:"")}))}});
+document.addEventListener("change",e=>{if(e.target.id==="cl-city"){const p=cur(),c=callOf(p,curDay(p)),x=CITIES.find(k=>k[0]===e.target.value);if(x){c.city=x[0];c.lat=x[1];c.lng=x[2]}else if(!e.target.value){delete c.city;delete c.lat;delete c.lng}touch(p);const dv=c.date||(curDay(p)==="1"?p.date:"")||"";const b=$("#sun-box");if(b)b.innerHTML=sunHtml(Object.assign({},c,{date:dv}));const wb=$("#wx-box");if(wb)wb.innerHTML=wxHtml(c,dv)}});
 
 /* ───────── 내 설정 고치기 ───────── */
-const OPT_FIELDS=[["ng","NG 이유 버튼",""],["mins","예상 시간 버튼 (분)","숫자"],["fps","FPS 버튼","숫자"],["lenses","배치도 카메라 렌즈","예: 24mm"],["lights","배치도 조명 이름",""]];
+const OPT_FIELDS=[["ng","NG 이유 버튼",""],["mins","예상 시간 버튼 (분)","숫자"],["fps","FPS 버튼","숫자"],["lenses","배치도 카메라 렌즈","예: 24mm"],["lights","배치도 조명 이름",""],["gear","장비 목록 (콜시트 체크용)",""]];
 function cleanList(k,txt){let a=String(txt).split(/[,，、\n]/).map(x=>x.trim()).filter(Boolean);
  if(k==="mins")a=a.map(x=>Math.round(+x.replace(/[^\d.]/g,""))).filter(x=>x>=1&&x<=600);
  if(k==="fps")a=a.map(x=>x.replace(/[^\d.]/g,"")).filter(x=>+x>0&&+x<=2000);
@@ -1882,6 +1920,71 @@ document.addEventListener("change",e=>{const t=e.target,p=cur();if(!p)return;
  else if(t.id==="pl-lens-in"){const it=plSel();const v=t.value.replace(/[^\d]/g,"");if(it&&+v>=4&&+v<=2000){it.lens=v+"mm";touch(p);planRedraw()}}
  else if(t.dataset&&t.dataset.at){const c=callOf(p,curDay(p));if(!c.at||typeof c.at!=="object")c.at={};if(t.value)c.at[t.dataset.at]=t.value;else delete c.at[t.dataset.at];touch(p);render()}
 });
+
+/* ───────── 날씨 예보 (Open-Meteo, 웹 앱 전용) ───────── */
+const WX={};
+const wmo=c=>c==null?"-":c===0?"맑음":c===1?"대체로 맑음":c===2?"구름 조금":c===3?"흐림":c<=48?"안개":c<=57?"이슬비":c<=67?"비":c<=77?"눈":c<=82?"소나기":c<=86?"눈 소나기":"뇌우";
+function wxKey(c,date){return c&&c.lat&&date?`${(+c.lat).toFixed(2)},${(+c.lng).toFixed(2)},${date}`:""}
+function wxHtml(c,date){
+ if(BUILD!=="web")return `<p class="scn-status">날씨 예보는 설치한 앱에서 볼 수 있어요.</p>`;
+ const k=wxKey(c,date);if(!k)return "";
+ const t0=new Date();t0.setHours(0,0,0,0);const diff=Math.round((new Date(date+"T00:00")-t0)/864e5);
+ if(diff>15)return `<p class="scn-status">날씨 예보는 촬영일 16일 전부터 나와요.</p>`;
+ if(diff<-60)return "";
+ const w=WX[k];
+ if(!w){loadWx(k,c,date);return `<p class="scn-status">날씨를 불러오는 중이에요.</p>`}
+ if(w.loading)return `<p class="scn-status">날씨를 불러오는 중이에요.</p>`;
+ if(w.err)return `<p class="scn-status">${esc(w.err)} <button class="chip" data-act="wx-retry" data-k="${esc(k)}">다시 불러오기</button></p>`;
+ const d=w.d;
+ return `<div class="wx"><p class="wx-d"><b>${esc(wmo(d.code))}</b> ${Math.round(d.min)}~${Math.round(d.max)}°C · 강수확률 ${d.rain??"-"}% · 바람 최대 ${Math.round(d.wind)}m/s</p>
+ <div class="wx-h">${w.h.filter(x=>x.hr>=5&&x.hr<=22&&x.hr%2===1).map(x=>`<div><span>${String(x.hr).padStart(2,"0")}시</span><b>${Math.round(x.temp)}°</b><span>${esc(wmo(x.code))}</span><span class="rain">${x.rain??"-"}%</span></div>`).join("")}</div>
+ <p class="scn-status">예보는 바뀔 수 있어요. 촬영 전날 다시 확인하세요. 날씨 자료: Open-Meteo</p></div>`;
+}
+async function loadWx(k,c,date){
+ if(WX[k]&&!WX[k].err)return;WX[k]={loading:true};
+ const tz=encodeURIComponent((Intl.DateTimeFormat().resolvedOptions().timeZone)||"Asia/Seoul");
+ const u=`https://api.open-meteo.com/v1/forecast?latitude=${(+c.lat).toFixed(4)}&longitude=${(+c.lng).toFixed(4)}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m&timezone=${tz}&wind_speed_unit=ms&start_date=${date}&end_date=${date}`;
+ try{
+  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),12000);
+  const r=await fetch(u,{signal:ctl.signal});clearTimeout(tm);if(!r.ok)throw 0;const j=await r.json();
+  const dl=j.daily||{},hr=j.hourly||{};if(!dl.time||!dl.time.length)throw 0;
+  WX[k]={d:{code:dl.weather_code[0],max:dl.temperature_2m_max[0],min:dl.temperature_2m_min[0],rain:dl.precipitation_probability_max?dl.precipitation_probability_max[0]:null,wind:dl.wind_speed_10m_max[0]},
+   h:(hr.time||[]).map((t,i)=>({hr:+t.slice(11,13),temp:hr.temperature_2m[i],rain:hr.precipitation_probability?hr.precipitation_probability[i]:null,code:hr.weather_code[i],wind:hr.wind_speed_10m[i]}))};
+ }catch(e){WX[k]={err:navigator.onLine===false?"인터넷이 없어 날씨를 못 불러왔어요.":"날씨를 불러오지 못했어요."}}
+ const b=$("#wx-box"),p=cur();if(b&&p&&View.tab==="call"){const day=curDay(p),cc=callOf(p,day),dv=cc.date||(day==="1"?p.date:"")||"";if(wxKey(cc,dv)===k)b.innerHTML=wxHtml(cc,dv)}
+}
+
+/* ───────── 장비 체크 ───────── */
+function gearHtml(c){const g=PC().gear;if(!g.length)return "";const got=c.gear&&typeof c.gear==="object"?c.gear:{};const n=g.filter(x=>got[x]).length;
+ return `<section class="csec"><h2>장비 체크 (${n}/${g.length})</h2><div class="gear">${g.map(x=>`<button class="chip" data-act="gear-tg" data-v="${esc(x)}" aria-pressed="${!!got[x]}">${got[x]?"✓ ":""}${esc(x)}</button>`).join("")}</div><div class="row"><button class="btn quiet" data-act="gear-clear">체크 모두 지우기</button><button class="btn quiet" data-act="my-opts">장비 목록 고치기</button></div></section>`}
+
+/* ───────── 지운 씬·컷 보관 ───────── */
+const BIN_DAYS=30;
+function binAdd(p,e){if(!Array.isArray(p.bin))p.bin=[];p.bin.unshift(Object.assign({id:"b"+uid(),at:Date.now()},e));if(p.bin.length>100)p.bin.length=100}
+function binPurge(p){if(!p||!Array.isArray(p.bin))return;const lim=Date.now()-BIN_DAYS*864e5,n=p.bin.length;p.bin=p.bin.filter(e=>e.at>=lim);if(p.bin.length!==n&&!p.example)touch(p)}
+function openBin(){
+ const p=cur();binPurge(p);const l=p.bin||[];
+ if(!l.length){toast("지운 씬이나 컷이 없어요.");return}
+ openSheet("지운 씬·컷",`<p style="color:var(--muted);font-size:14px">지운 씬과 컷은 ${BIN_DAYS}일 동안 여기 있다가 자동으로 지워져요.</p><div class="dict">${l.map(e=>{const left=Math.max(1,Math.ceil((e.at+BIN_DAYS*864e5-Date.now())/864e5));const t=e.type==="scene"?`<h3>S#${esc(e.scene.no)} ${esc(e.scene.loc||"")} <small>씬, 컷 ${e.scene.cuts.length}개</small></h3>`:`<h3>${esc(e.label)} ${esc(e.cut.size||"")} <small>컷</small></h3><p>${esc(e.cut.desc||"")}</p>`;return `<div class="ditem trow"><div style="min-width:0;flex:1">${t}<p>${left}일 뒤 완전히 삭제</p></div><div class="row" style="flex:none"><button class="btn" data-act="bin-back" data-id="${e.id}">되살리기</button><button class="btn danger" data-act="bin-kill" data-id="${e.id}">완전 삭제</button></div></div>`}).join("")}</div>`,`<button class="btn danger grow" data-act="bin-empty">모두 완전히 삭제</button>`);
+}
+
+Object.assign(A,{
+ "ex-copy"(){const p=cur();const n=normP(JSON.parse(JSON.stringify(p)));n.id=uid();n.name=String(p.name).replace(/^예시:\s*/,"")||"내 작품";delete n.example;delete n.trashed;S.projects[n.id]=n;touch(n);while(sheetStack.length)closeSheet();View.pid=n.id;View.tab="list";setHash("p-"+n.id);render();toast(`"${n.name}"을 내 작품으로 만들었어요.`)},
+ bin(){while(sheetStack.length)closeSheet();openBin()},
+ "bin-back"(el){const p=cur(),i=(p.bin||[]).findIndex(e=>e.id===el.dataset.id);if(i<0)return;const e=p.bin[i];
+  if(e.type==="scene"){const sc=normP({scenes:[e.scene]}).scenes[0];if(p.scenes.some(x=>x.id===sc.id))sc.id=uid();p.scenes.splice(Math.min(e.index,p.scenes.length),0,sc)}
+  else{let sc=p.scenes.find(x=>x.id===e.sceneId);if(!sc){sc=normP({scenes:[{no:e.sceneNo||nextSceneNo(p),loc:"되살린 컷"}]}).scenes[0];p.scenes.push(sc)}const c=normP({scenes:[{cuts:[e.cut]}]}).scenes[0].cuts[0];if(allCuts(p).some(x=>x.c.id===c.id))c.id=uid();sc.cuts.splice(Math.min(e.index,sc.cuts.length),0,c)}
+  p.bin.splice(i,1);touch(p);closeSheet();render();if(p.bin.length)openBin();toast(e.type==="scene"?`S#${e.scene.no} 씬을 되살렸어요.`:`${e.label} 컷을 되살렸어요.`)},
+ "bin-kill"(el){const p=cur();p.bin=(p.bin||[]).filter(e=>e.id!==el.dataset.id);touch(p);closeSheet();if(p.bin.length)openBin();toast("완전히 삭제했어요.")},
+ "bin-empty"(){openSheet("모두 완전히 삭제할까요?",`<p>지운 씬·컷 ${(cur().bin||[]).length}개가 되살릴 수 없게 지워져요.</p>`,`<button class="btn quiet grow" data-act="close-sheet">취소</button><button class="btn danger grow" data-act="bin-empty-yes">모두 완전히 삭제</button>`)},
+ "bin-empty-yes"(){const p=cur();p.bin=[];touch(p);while(sheetStack.length)closeSheet();toast("지운 씬·컷을 비웠어요.")},
+ "gear-tg"(el){const p=cur(),c=callOf(p,curDay(p));if(!c.gear||typeof c.gear!=="object")c.gear={};const v=el.dataset.v;if(c.gear[v])delete c.gear[v];else c.gear[v]=true;touch(p);render()},
+ "gear-clear"(){const p=cur(),c=callOf(p,curDay(p));c.gear={};touch(p);render()},
+ "wx-retry"(el){delete WX[el.dataset.k];render()}
+});
+document.addEventListener("toggle",e=>{const d=e.target;if(d.classList&&d.classList.contains("more")&&d.closest("#f-img")===null&&$("#c-desc")&&d.contains($("#c-min"))){S.prefs.edMore=d.open;saveLocal()}},true);
+document.addEventListener("input",e=>{if(e.target.id==="list-q"){View.q=e.target.value;const b=$("#list-body"),p=cur();if(b&&p)b.innerHTML=listBody(p)}});
+document.addEventListener("change",e=>{if(e.target.id==="c-label"&&Ed){const p=cur(),f=findCut(p,Ed.id);const v=e.target.value.trim().replace(/[^\w가-힣]/g,"").slice(0,6);if(v)f.c.label=v;else delete f.c.label;e.target.value=v;touch(p);const h=$(".sheet-head h2",e.target.closest(".sheet"));if(h)h.textContent=`컷 ${f.sc.no}-${cutNo(f.sc,f.sc.cuts.indexOf(f.c))}`}});
 
 /* ───────── 시작 ───────── */
 function routeFromHash(){const h=location.hash.slice(1);if(h.startsWith("p-")&&S.projects[h.slice(2)]){View.pid=h.slice(2)}else if(!h)View.pid=null}
