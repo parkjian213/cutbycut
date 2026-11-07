@@ -272,6 +272,28 @@ textarea.input{min-height:76px;resize:vertical;line-height:1.45}
 .clap-flash{position:fixed;inset:0;background:#fff;z-index:70}
 .copybox{width:100%;min-height:220px;font-size:13px;line-height:1.5}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* 2.2: 테두리를 줄이고 모서리를 둥글게 정리 */
+:root{--r:10px}
+.tape{clip-path:none;border-radius:5px;padding:4px 8px}
+.tape.term{border-radius:5px}
+.btn{border-width:1px;border-color:var(--line);border-radius:var(--r)}
+.btn.solid{border-color:var(--ink)}.btn.danger{border-color:var(--tally)}
+.chip,.toggle,.pick,.input,.preset,.tile{border-width:1px;border-radius:8px}
+.seg button{border-width:1px;margin-left:-1px}
+.seg button:first-child{border-radius:8px 0 0 8px}.seg button:last-child{border-radius:0 8px 8px 0}
+.pitem{border-radius:var(--r);border-color:var(--line)}
+.scene{border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.strip{box-shadow:none;border-radius:9px 9px 0 0;border-bottom:1px solid var(--line)}
+.cuts{border:0;background:transparent}
+.scene>:last-child,.scene .cuts:last-child .cut:last-child{border-radius:0 0 9px 9px}
+.add-set{border:0;border-top:1px solid var(--line)}
+.cut{background:transparent}
+.cut-main{padding:12px 4px 12px 14px;gap:6px}
+.cut-spec{color:var(--muted)}
+.slate,.act,.blank,.done-card{border-radius:var(--r)}
+.takes,.queue,.dict{border-radius:var(--r);overflow:hidden}
+.sheet{border-radius:16px 16px 0 0}
+@media (min-width:760px){.sheet{border-radius:16px}}
 </style>
 
 <div id="app"></div>
@@ -650,7 +672,7 @@ function homeHtml(){
  <main style="padding-block:0 40px"><div class="plist">${list.map(p=>{const st=stats(p);return `<button class="pitem" data-act="open" data-id="${esc(p.id)}"><h3>${esc(p.name)}</h3><div class="pmeta">씬 ${p.scenes.length}개, 컷 ${st.total}개, 예상 ${minLabel(st.totalMin)}</div>${p.scenes.length?`<div class="strips">${p.scenes.map(sc=>`<i style="background:var(--s-${stripKey(sc)})" title="S#${esc(sc.no)}"></i>`).join("")}</div>`:""}${barHtml(p)}</button>`}).join("")}</div>
  ${list.length?"":`<div class="blank"><h3>첫 작품을 만들어 보세요</h3><p>작품 제목만 넣으면 바로 컷을 적을 수 있어요.</p></div>`}
  <div class="row" style="margin-top:14px"><button class="btn solid grow" data-act="new-project">새 작품 만들기</button><button class="btn quiet" data-act="import">백업 불러오기</button></div>
- <p class="sync" id="sync-line">${esc(syncText())}</p><p class="sync" style="margin-top:4px">앱 버전 2.1</p></main></div>`;
+ <p class="sync" id="sync-line">${esc(syncText())}</p><p class="sync" style="margin-top:4px">앱 버전 2.2</p></main></div>`;
 }
 function barHtml(p,nowId){const a=allCuts(p);if(!a.length)return"";const ordered=View.tab==="shoot"?shootList(p):a;return `<div class="bar" role="img" aria-label="전체 ${a.length}컷 중 ${a.filter(x=>x.c.status==="done").length}컷 완료">${ordered.map(x=>`<i class="${x.c.id===nowId?"now":x.c.status==="done"?"done":x.c.status==="skip"?"skip":""}"></i>`).join("")}</div>`}
 function projectHtml(p){
