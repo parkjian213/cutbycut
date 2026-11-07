@@ -297,13 +297,16 @@ a.btn{text-decoration:none;color:inherit}
 .sched{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .srow{display:flex;gap:10px;padding:10px 12px;border-top:1px solid var(--line);align-items:flex-start}
 .srow:first-child{border-top:0}
-.srow .t{font:700 17px/1.2 var(--code);min-width:92px;font-variant-numeric:tabular-nums}
+.srow .t{font:700 17px/1.2 var(--code);width:120px;flex:none;font-variant-numeric:tabular-nums}
 .srow .sw{width:8px;align-self:stretch;flex:none;background:var(--sbg);box-shadow:inset 0 0 0 1px rgba(23,34,44,.25);border-radius:2px}
 .srow p{font-size:13px;color:var(--muted)}
 .vbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--ink);color:var(--paper);padding-block:10px}
 .vbar .wrap{display:flex;gap:10px;align-items:center;justify-content:space-between}
 .vbar b{font-size:16px}.vbar span{font-size:12.5px;opacity:.8}
 .vbar .btn{border-color:var(--paper);color:var(--paper);min-height:38px;padding:4px 12px}
+.tin{border:0;background:transparent;font:700 17px/1.2 var(--code);padding:0;width:118px;max-width:100%;color:inherit;font-variant-numeric:tabular-nums}
+.tin:focus{outline:2px solid var(--s-ni)}
+.srow .t small{display:block;font:600 14px/1.2 var(--code);color:var(--muted)}
 .qr{background:#fff;padding:12px;width:fit-content;line-height:0}
 .qr img,.qr canvas{display:block}
 .steps{margin:0;padding-left:22px;display:grid;gap:9px;font-size:14.5px;line-height:1.5}
@@ -344,8 +347,9 @@ a.btn{text-decoration:none;color:inherit}
 "use strict";
 const BUILD="web";
 const VIEW_MODE=BUILD==="web"&&/^#view=/.test(location.hash);
-const APP_VER="2.8";
+const APP_VER="2.9";
 const CHANGELOG=[
+ ["2.9",["예상 시간, FPS, 촬영 회차, 렌즈를 숫자로 직접 넣을 수 있어요.","내 선택지 고치기: NG 이유, 예상 시간 버튼, FPS, 배치도 렌즈와 조명 이름을 내 마음대로 바꿔요.","내 컷 세트: 지금 씬의 컷 구성을 세트로 저장해 다른 씬에 넣어요.","내 용어: 용어 사전과 컷 선택에 내 용어를 추가해요.","콜시트에서 씬별 시작 시각을 직접 바꿀 수 있어요.","내 설정도 기기 연동으로 컴퓨터와 폰에 맞춰져요."]],
  ["2.8",["콜시트: 회차별 집합 시간, 장소, 촬영 순서와 예상 시간, 출연, 소품을 한 장으로 만들고 복사해요.","배치도: 씬마다 위에서 본 평면도에 인물, 카메라, 조명, 사물, 180도 선을 놓아요.","해 시간: 촬영일과 지역으로 일출, 일몰, 골든아워, 블루아워를 알려 줘요. 인터넷 없이도 계산돼요.","스태프 공유: 감독, 스태프가 볼 수만 있는 링크를 보내요.","용어 사전에 현장·실무 용어를 크게 늘렸어요."]],
  ["2.7",["첫 화면 작품 카드에 삭제 버튼을 넣었어요.","휴지통: 지운 작품을 30일 동안 보관하고 언제든 되살릴 수 있어요.","작품 안 오른쪽 위 메뉴 아이콘을 점 세 개(⋯)로 바꿨어요."]],
  ["2.6",["업데이트 내역을 앱 버전 아래에서 볼 수 있게 했어요."]],
@@ -740,6 +744,12 @@ const MOVE_QUICK=["고정","팬 R","틸트 업","달리 인","핸드헬드","짐
 const LENS_QUICK=["광각","24mm","35mm","50mm","85mm"];
 const TERM_QUICK=["FR-IN","FR-OUT","OFF","V.O","F.I","F.O","O.L"];
 const NG_REASONS=["포커스","연기","대사","소리","프레임","조명","붐 인","동선","소품"];
+const DEFS={ng:NG_REASONS,mins:[5,10,15,20,30,45,60],fps:["24","30","60","120","240"],lenses:["16mm","24mm","35mm","50mm","85mm","135mm"],lights:["키","필","백","키커","창문빛","프랙티컬"],sets:[],myterms:[]};
+function PC(){if(!S.prefs.c||typeof S.prefs.c!=="object")S.prefs.c={};const c=S.prefs.c;for(const k in DEFS)if(!Array.isArray(c[k]))c[k]=JSON.parse(JSON.stringify(DEFS[k]));return c}
+function pushPrefs(){const c=PC();if(Sync.col&&c.updatedAt)Sync.col.doc("prefs").set({kind:"prefs",updatedAt:c.updatedAt,data:JSON.parse(JSON.stringify(c))}).catch(()=>{})}
+let prefT=null;function prefsTouch(){PC().updatedAt=Date.now();saveLocal();clearTimeout(prefT);prefT=setTimeout(pushPrefs,800)}
+const CAT_LABEL={size:"샷 사이즈",angle:"앵글",move:"카메라 무빙",lens:"렌즈",term:"시나리오·편집",field:"현장·실무"};
+function applyMyTerms(){for(let i=T.length-1;i>=0;i--)if(T[i].mine)T.splice(i,1);PC().myterms.forEach(m=>{if(m&&m.code&&CAT_LABEL[m.cat])T.push({cat:m.cat,sec:"내 용어",code:String(m.code).slice(0,30),ko:String(m.ko||m.code).slice(0,40),en:"",desc:String(m.desc||"").slice(0,300),dg:"",mine:true})})}
 const findT=(cat,code)=>T.find(t=>t.cat===cat&&t.code===code);
 
 /* ───────── 그림 ───────── */
@@ -841,15 +851,16 @@ async function initSync(){
  }catch(e){Sync.state="local";refreshSync()}
 }
 function onRemote(snap){
- const seen={},seenImg={};
+ const seen={},seenImg={};let seenPrefs=false;
  let changed=false;
- snap.docs.forEach(d=>{if(S.gone[d.id]){seen[d.id]=true;delRemote(d.id);return}const r=d.data();if(r&&r.kind==="img"){seenImg[d.id]=true;if(!IMG[d.id]&&typeof r.data==="string"){IMG[d.id]=r.data;idbPut(d.id,r.data);changed=true}return}if(!r||!r.id||!Array.isArray(r.scenes))return;seen[r.id]=true;const l=S.projects[r.id];
+ snap.docs.forEach(d=>{if(S.gone[d.id]){seen[d.id]=true;delRemote(d.id);return}const r=d.data();if(r&&r.kind==="prefs"){seenPrefs=true;const lc=PC();if((r.updatedAt||0)>(lc.updatedAt||0)&&r.data&&typeof r.data==="object"){S.prefs.c=r.data;PC();applyMyTerms();changed=true}else if((lc.updatedAt||0)>(r.updatedAt||0))pushPrefs();return}if(r&&r.kind==="img"){seenImg[d.id]=true;if(!IMG[d.id]&&typeof r.data==="string"){IMG[d.id]=r.data;idbPut(d.id,r.data);changed=true}return}if(!r||!r.id||!Array.isArray(r.scenes))return;seen[r.id]=true;const l=S.projects[r.id];
   if(!l||(r.updatedAt||0)>(l.updatedAt||0)||l.example){
     if(sheetStack.length&&View.pid===r.id){Sync.pendingRemote[r.id]=r}
     else{S.projects[r.id]=normP(JSON.parse(JSON.stringify(r)));changed=true}
   }else if((l.updatedAt||0)>(r.updatedAt||0)){queueSync(l)}
   S.synced[r.id]=true});
  if(!snap.metadata.fromCache){
+  if(!seenPrefs&&PC().updatedAt)pushPrefs();
   Object.keys(S.projects).forEach(id=>{const p=S.projects[id];if(seen[id]||p.example)return;
    if(S.synced[id]){if(!(Sync.timers[id]||Sync.busy[id])){delete S.projects[id];delete S.synced[id];changed=true}}else queueSync(p)});
   Object.values(S.projects).forEach(p=>{if(p.example)return;allCuts(p).forEach(x=>{const i=x.c.img;if(i&&IMG[i]&&!seenImg[i])pushImg(i)})});
@@ -998,7 +1009,7 @@ function shootHtml(p){
   <p class="slate-desc">${esc(c.desc)}</p>${c.note?`<p class="slate-note">${esc(c.note)}</p>`:""}${c.img&&IMG[c.img]?`<img class="slate-img" src="${IMG[c.img]}" alt="콘티">`:""}
  </section>
  ${planThumb(x.sc,true)}<div class="acts"><button class="act ng" data-act="take" data-r="ng">NG<small>다시 찍기</small></button><button class="act keep" data-act="take" data-r="keep">KEEP<small>일단 보관</small></button><button class="act okb" data-act="take" data-r="ok">OK<small>완료, 다음 컷</small></button></div>
- ${View.ngFor===c.id&&c.takes.length?`<div class="reasons"><span>테이크 ${c.takes[c.takes.length-1].n}을 왜 다시 찍나요? (안 눌러도 돼요)</span>${NG_REASONS.map(r=>`<button class="chip" data-act="reason" data-r="${esc(r)}" aria-pressed="${c.takes[c.takes.length-1].note===r}">${esc(r)}</button>`).join("")}</div>`:""}
+ ${View.ngFor===c.id&&c.takes.length?`<div class="reasons"><span>테이크 ${c.takes[c.takes.length-1].n}을 왜 다시 찍나요? (안 눌러도 돼요)</span>${PC().ng.map(r=>`<button class="chip" data-act="reason" data-r="${esc(r)}" aria-pressed="${c.takes[c.takes.length-1].note===r}">${esc(r)}</button>`).join("")}<button class="chip" data-act="reason-new">+ 직접</button></div>`:""}
  <div class="nav2"><button class="btn quiet" data-act="shoot-step" data-d="-1">이전 컷</button><button class="btn quiet" data-act="skip">${c.status==="skip"?"다시 찍기로":"건너뛰기"}</button><button class="btn quiet" data-act="shoot-step" data-d="1">다음 컷</button></div>
  ${c.takes.length?`<div class="takes" aria-label="테이크 기록">${[...c.takes].reverse().map(t=>`<div class="take"><b>T${t.n}</b><span class="tk ${t.r}">${t.r.toUpperCase()}</span><input class="take-note" data-n="${t.n}" value="${esc(t.note)}" placeholder="메모, 파일 번호" aria-label="테이크 ${t.n} 메모"><button class="icon" data-act="del-take" data-n="${t.n}" aria-label="테이크 ${t.n} 기록 지우기">${ICON.close}</button></div>`).join("")}</div>`:""}
  </div><div class="queue-col">${queueHtml(p,l,c.id)}</div></div>`;
@@ -1009,12 +1020,12 @@ function groupBySec(list){const g=[];list.forEach(t=>{let x=g.find(y=>y.cat===t.
 function dictHtml(){
  return `<div class="field"><label for="dict-q">용어 찾기</label><input id="dict-q" class="input" type="search" placeholder="FR-IN, 바스트, 오버랩…" value="${esc(View.dictQ)}" autocomplete="off"></div>
  <div class="filter">${Object.entries(CATS).map(([k,v])=>`<button class="chip" data-act="dict-cat" data-cat="${k}" aria-pressed="${View.dictCat===k}">${v.title.split("·")[0]}</button>`).join("")}</div>
- <div id="dict-list">${dictList()}</div>`;
+ <div class="row" style="margin-bottom:8px"><button class="btn quiet" data-act="myterm-new">+ 내 용어 추가</button></div><div id="dict-list">${dictList()}</div>`;
 }
 function dictList(){
  const q=View.dictQ.trim();const list=T.filter(t=>q?matchT(t,q):t.cat===View.dictCat);
  if(!list.length)return `<div class="blank"><h3>"${esc(q)}" 용어가 없어요</h3><p>다른 말로 찾아 보거나, 컷을 적을 때 직접 입력할 수 있어요.</p></div>`;
- return groupBySec(list).map(g=>`<h2 class="dsec">${esc(q?CATS[g.cat].title+", "+g.sec:g.sec)}</h2><div class="dict">${g.items.map(t=>`<div class="ditem">${t.dg||t.cat==="size"?dgHtml(t):""}<div style="min-width:0"><h3><span class="code">${esc(t.code)}</span>${t.ko!==t.code?`<span>${esc(t.ko)}</span>`:""}${t.en?`<small>${esc(t.en)}</small>`:""}</h3>${t.desc?`<p>${esc(t.desc)}</p>`:""}</div></div>`).join("")}</div>`).join("");
+ return groupBySec(list).map(g=>`<h2 class="dsec">${esc(q?CATS[g.cat].title+", "+g.sec:g.sec)}</h2><div class="dict">${g.items.map(t=>`<div class="ditem">${t.dg||t.cat==="size"?dgHtml(t):""}<div style="min-width:0"><h3><span class="code">${esc(t.code)}</span>${t.ko!==t.code?`<span>${esc(t.ko)}</span>`:""}${t.en?`<small>${esc(t.en)}</small>`:""}</h3>${t.desc?`<p>${esc(t.desc)}</p>`:""}</div>${t.mine?`<button class="icon" style="margin-left:auto" data-act="myterm-del" data-cat="${t.cat}" data-code="${esc(t.code)}" aria-label="${esc(t.code)} 삭제">${ICON.trash}</button>`:""}</div>`).join("")}</div>`).join("");
 }
 
 /* ───────── 시트 ───────── */
@@ -1065,13 +1076,13 @@ function editorHtml(c){
  return `<div class="field" id="f-img">${imgField(c)}</div>`+["size","angle","moves","lens","terms"].map(f=>`<div class="field" id="f-${f}">${pickBtn(f,c)}${quickChips(f,c)}</div>`).join("")+
  `<div class="field"><label for="c-desc">어떻게 찍을지 (카메라 위치, 담을 것, 핵심 한 가지)</label><textarea id="c-desc" class="input" rows="3" placeholder="노트북 너머 정면, 뒤에서 다가오는 인물로 초점을 넘김.">${esc(c.desc)}</textarea></div>
  <div class="field"><label for="c-note">메모</label><input id="c-note" class="input" placeholder="소품, 배우, 주의할 점" value="${esc(c.note)}"></div>
- <div class="field"><span class="flabel">예상 시간</span><div class="chips" id="min-chips">${minChips(c)}</div></div>
- <div class="field"><span class="flabel">촬영 프레임 (슬로모션이면 꼭 적기)</span><div class="chips" id="fps-chips">${fpsChips(c)}</div></div>
+ <div class="field"><span class="flabel">예상 시간</span><div class="chips" id="min-chips">${minChips(c)}</div><div class="row" style="align-items:center"><input id="c-min" class="input" type="number" inputmode="numeric" min="1" max="600" style="width:110px" value="${+c.min||""}" aria-label="예상 시간 직접 입력(분)"><span>분 직접 입력</span></div></div>
+ <div class="field"><span class="flabel">촬영 프레임 (슬로모션이면 꼭 적기)</span><div class="chips" id="fps-chips">${fpsChips(c)}</div><div class="row" style="align-items:center"><input id="c-fps" class="input" inputmode="decimal" style="width:110px" placeholder="예: 48" value="${esc(c.fps||"")}" aria-label="FPS 직접 입력"><span>fps 직접 입력</span></div></div>
  <div class="two"><button class="toggle" data-act="flag" data-k="star" aria-pressed="${!!c.star}">★ 핵심 컷</button><button class="toggle" data-act="flag" data-k="opt" aria-pressed="${!!c.opt}">선택 컷</button></div>
  <div class="row"><button class="btn quiet grow" data-act="move-cut" data-d="-1">위로</button><button class="btn quiet grow" data-act="move-cut" data-d="1">아래로</button><button class="btn quiet grow" data-act="dup-cut">복제</button><button class="btn danger grow" data-act="del-cut">삭제</button></div>`;
 }
-function fpsChips(c){return ["","24","30","60","120","240"].map(m=>`<button class="chip" data-act="fps" data-m="${m}" aria-pressed="${(c.fps||"")===m}">${m?m+"fps":"작품 기본"}</button>`).join("")}
-function minChips(c){return [5,10,15,20,30,45,60].map(m=>`<button class="chip" data-act="min" data-m="${m}" aria-pressed="${+c.min===m}">${m}분</button>`).join("")}
+function fpsChips(c){return ["",...PC().fps].map(m=>`<button class="chip" data-act="fps" data-m="${m}" aria-pressed="${(c.fps||"")===m}">${m?m+"fps":"작품 기본"}</button>`).join("")}
+function minChips(c){return PC().mins.map(m=>`<button class="chip" data-act="min" data-m="${m}" aria-pressed="${+c.min===m}">${m}분</button>`).join("")}
 let Ed=null;
 function openCutEditor(id,isNew){
  const p=cur(),f=findCut(p,id);if(!f)return;
@@ -1112,7 +1123,7 @@ function pickerList(q){
 let ScEd=null;
 function sceneBody(sc){return `<div class="two"><div class="field"><label for="sc-no">씬 번호</label><input id="sc-no" class="input" inputmode="text" value="${esc(sc.no)}"></div><div class="field"><span class="flabel">실내·실외</span><div class="seg" id="seg-place">${segPlace(sc)}</div></div></div>
  <div class="field"><span class="flabel">시간대</span><div class="seg" id="seg-time">${segTime(sc)}</div></div>
- <div class="field"><span class="flabel">촬영 회차</span><div class="seg" id="seg-day">${segDay(sc)}</div></div>
+ <div class="field"><span class="flabel">촬영 회차</span><div class="row" style="align-items:center;flex-wrap:nowrap"><div class="seg" id="seg-day" style="flex:1">${segDay(sc)}</div><input id="sc-dayn" class="input" type="number" inputmode="numeric" min="1" max="99" style="width:76px" value="${esc(sc.day||"1")}" aria-label="촬영 회차 직접 입력"></div></div>
  <div class="field"><label for="sc-loc">장소</label><input id="sc-loc" class="input" placeholder="동아리실" value="${esc(sc.loc)}"></div>
  <div class="two"><div class="field"><label for="sc-cast">출연</label><input id="sc-cast" class="input" data-scf="cast" placeholder="민서, 지호" value="${esc(sc.cast||"")}"></div><div class="field"><label for="sc-props">소품·의상</label><input id="sc-props" class="input" data-scf="props" placeholder="교복, 안내문" value="${esc(sc.props||"")}"></div></div>
  <button class="btn" data-act="plan" data-id="${sc.id}">배치도 ${sc.plan&&sc.plan.items&&sc.plan.items.length?"고치기":"그리기"}</button>
@@ -1131,8 +1142,8 @@ function refreshSceneSeg(sc){$("#seg-day").innerHTML=segDay(sc);$("#seg-place").
 function nextSceneNo(p){const n=p.scenes.map(s=>parseInt(s.no,10)).filter(x=>!isNaN(x));return String(n.length?Math.max(...n)+1:1)}
 function newScene(p){const prev=p.scenes[p.scenes.length-1];const sc={id:uid(),no:nextSceneNo(p),time:prev?prev.time:"D",place:prev?prev.place:"INT",loc:"",note:"",day:prev?prev.day:"1",cuts:[]};p.scenes.push(sc);touch(p);return sc}
 function newCut(p,sc){const prev=sc.cuts[sc.cuts.length-1];const c=normP({scenes:[{cuts:[{size:"",angle:"아이레벨",moves:["고정"],lens:prev?prev.lens:"",fps:prev?prev.fps:""}]}]}).scenes[0].cuts[0];sc.cuts.push(c);touch(p);return c}
-function textPrompt(title,label,val,okLabel,cb){
- const w=openSheet(title,`<div class="field"><label for="tp-v">${esc(label)}</label><input id="tp-v" class="input" value="${esc(val)}" placeholder="예: 마지막 동아리실"></div>`,`<button class="btn solid grow" data-act="tp-ok">${esc(okLabel)}</button>`);
+function textPrompt(title,label,val,okLabel,cb,ph){
+ const w=openSheet(title,`<div class="field"><label for="tp-v">${esc(label)}</label><input id="tp-v" class="input" value="${esc(val)}" placeholder="${esc(ph||"예: 마지막 동아리실")}"></div>`,`<button class="btn solid grow" data-act="tp-ok">${esc(okLabel)}</button>`);
  const inp=$("#tp-v",w);setTimeout(()=>{inp.focus();inp.select()},30);
  const ok=()=>{const v=inp.value.trim();if(!v){inp.focus();return}closeSheet();cb(v)};
  w._ok=ok;inp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();ok()}});
@@ -1180,6 +1191,7 @@ function openExport(){
   <div class="field"><span class="flabel">작품</span><div class="row"><button class="btn grow" data-act="project-info">작품 정보와 랩 시간</button><button class="btn quiet grow" data-act="scenario">시나리오 붙여넣기</button>${BUILD==="web"?`<button class="btn quiet grow" data-act="link">기기 연동</button>`:""}</div></div>
   <div class="field"><span class="flabel">보내기</span><div class="row"><button class="btn grow" data-act="share">스태프 공유 (보기 전용)</button><button class="btn grow" data-act="copy-text">샷리스트 복사 (카톡, 노션)</button><button class="btn grow" data-act="copy-log">편집용 테이크 기록 복사</button></div></div>
   <div class="field"><span class="flabel">파일로 저장</span><div class="row"><button class="btn grow" data-act="export-print">인쇄·PDF용</button><button class="btn grow" data-act="export-csv">엑셀용 CSV</button><button class="btn grow" data-act="export-json">백업 파일</button></div></div>
+  <div class="field"><span class="flabel">내 설정</span><div class="row"><button class="btn grow" data-act="my-opts">내 선택지 고치기</button></div></div>
   <div class="field"><span class="flabel">화면</span><div class="seg" id="seg-theme">${["auto","light","dark"].map(v=>`<button data-act="theme" data-v="${v}" aria-pressed="${th===v}">${{auto:"자동",light:"밝게 (야외)",dark:"어둡게 (야간)"}[v]}</button>`).join("")}</div></div>
   <div class="field"><span class="flabel">정리</span><div class="row"><button class="btn quiet grow" data-act="rename">이름 바꾸기</button><button class="btn quiet grow" data-act="reset-shoot">촬영 기록 비우기</button><button class="btn danger grow" data-act="del-project">휴지통으로</button></div></div>`);
 }
@@ -1230,7 +1242,7 @@ const A={
  quick(el){const p=cur(),f=findCut(p,Ed.id);setValue(el.dataset.field,el.dataset.v,f.c);touch(p);refreshField(el.dataset.field)},
  "pick-val"(el){const p=cur(),f=findCut(p,Ed.id),fld=Pk.field;if(CATS[Pk.cat].single){f.c[fld]=el.dataset.v;touch(p);closeSheet();return}setValue(fld,el.dataset.v,f.c);touch(p);el.setAttribute("aria-pressed",Array.isArray(f.c[fld])&&f.c[fld].includes(el.dataset.v));if(fld==="moves"){const w=el.closest(".sheet-wrap");$("#pk-list",w).innerHTML=pickerList($("#pk-q",w).value)}},
  "pick-custom"(el){const p=cur(),f=findCut(p,Ed.id),fld=Pk.field,v=el.dataset.v.slice(0,30);if(Array.isArray(f.c[fld])){if(!f.c[fld].includes(v))f.c[fld].push(v)}else f.c[fld]=v;touch(p);closeSheet()},
- min(el){const p=cur(),f=findCut(p,Ed.id);f.c.min=+el.dataset.m;touch(p);$("#min-chips").innerHTML=minChips(f.c)},
+ min(el){const p=cur(),f=findCut(p,Ed.id);f.c.min=+el.dataset.m;touch(p);$("#min-chips").innerHTML=minChips(f.c);const i=$("#c-min");if(i)i.value=f.c.min},
  flag(el){const p=cur(),f=findCut(p,Ed.id),k=el.dataset.k;f.c[k]=!f.c[k];touch(p);el.setAttribute("aria-pressed",f.c[k])},
  "move-cut"(el){const p=cur(),f=findCut(p,Ed.id),j=f.i+ +el.dataset.d;if(j<0||j>=f.sc.cuts.length)return;f.sc.cuts.splice(f.i,1);f.sc.cuts.splice(j,0,f.c);touch(p);$(".sheet-head h2",el.closest(".sheet")).textContent=`컷 ${f.sc.no}-${j+1}`;toast(`${f.sc.no}-${j+1}번으로 옮겼어요.`)},
  "dup-cut"(){const p=cur(),f=findCut(p,Ed.id);const n=JSON.parse(JSON.stringify(f.c));n.id=uid();n.status="todo";n.takes=[];n.star=false;if(n.img&&IMG[n.img]){const k="img_"+uid();imgPut(k,IMG[n.img]);n.img=k}else n.img="";f.sc.cuts.splice(f.i+1,0,n);touch(p);closeSheet();render();openCutEditor(n.id);toast("컷을 복제했어요.")},
@@ -1250,7 +1262,7 @@ const A={
  "copy-text"(){copyText(textOf(cur()))},
  "export-print"(){const p=cur();saveFile(safeName(p.name)+" 샷리스트.html",printHtml(p),"text/html")},
  "export-csv"(){const p=cur();saveFile(safeName(p.name)+" 샷리스트.csv",csvOf(p),"text/csv")},
- "export-json"(){const p=cur();saveFile(safeName(p.name)+" 백업.json",JSON.stringify({app:"cutbycut",version:2,projects:[p],images:imagesOf(p)}),"application/json")},
+ "export-json"(){const p=cur();saveFile(safeName(p.name)+" 백업.json",JSON.stringify({app:"cutbycut",version:3,projects:[p],images:imagesOf(p),prefs:PC()}),"application/json")},
  rename(){const p=cur();closeSheet();textPrompt("이름 바꾸기","작품 제목",p.name,"바꾸기",v=>{p.name=v;touch(p);render()})},
  "reset-shoot"(){const p=cur(),snap=snapshot(p),id=p.id;allCuts(p).forEach(x=>{x.c.status="todo";x.c.takes=[]});View.shootId=null;touch(p);closeSheet();toast("촬영 기록을 비웠어요.",()=>restore(id,snap))},
  "del-project"(el){const id=el.dataset.id||View.pid,p=S.projects[id];if(!p)return;while(sheetStack.length)closeSheet();setTrash(p,Date.now());if(View.pid===id){View.pid=null;setHash("")}render();toast(`"${p.name}"을 휴지통으로 옮겼어요.`,()=>{setTrash(p,0);render()})},
@@ -1269,6 +1281,7 @@ $("#import-file").addEventListener("change",e=>{
  const f=e.target.files[0];e.target.value="";if(!f)return;
  const r=new FileReader();
  r.onload=()=>{try{const v=JSON.parse(r.result);const arr=Array.isArray(v.projects)?v.projects:(v.scenes?[v]:null);if(!arr||!arr.length)throw 0;
+   if(v.prefs&&typeof v.prefs==="object"&&(v.prefs.updatedAt||0)>(PC().updatedAt||0)){S.prefs.c=v.prefs;PC();applyMyTerms();prefsTouch()}
    if(v.images&&typeof v.images==="object")Object.entries(v.images).forEach(([k,d])=>{if(typeof d==="string"&&d.startsWith("data:image/"))imgPut(k,d)});
    arr.forEach(raw=>{const p=normP(raw);delete p.example;if(S.projects[p.id])p.id=uid();p.updatedAt=Date.now();S.projects[p.id]=p;queueSync(p)});saveLocal();render();toast(`작품 ${arr.length}개를 불러왔어요.`)}
   catch(err){toast("백업 파일이 아니에요. 이 앱에서 저장한 .json 파일을 골라 주세요.")}};
@@ -1437,7 +1450,9 @@ const PRESETS=[
   {size:"EMPTY",lens:"50mm",opt:true,desc:"인물이 들어오기 전 빈 공간, 편집 여유용으로 찍음.",min:5},
   {size:"INS",lens:"50mm",desc:"이야기에 필요한 소품이나 글자를 크게.",min:5}]}
 ];
-function openPreset(id){openSheet("컷 세트로 한 번에 추가",`<p style="color:var(--muted);font-size:14px">자주 쓰는 구성을 넣은 뒤 이 씬에 맞게 고치면 돼요.</p>${PRESETS.map((x,i)=>`<button class="preset" data-act="preset-add" data-i="${i}" data-id="${id}"><b>${esc(x.name)}</b><span>${esc(x.hint)}, ${x.cuts.length}컷</span></button>`).join("")}`)}
+function openPreset(id){const sc=cur().scenes.find(x=>x.id===id),mine=PC().sets;openSheet("컷 세트로 한 번에 추가",`<p style="color:var(--muted);font-size:14px">자주 쓰는 구성을 넣은 뒤 이 씬에 맞게 고치면 돼요.</p>
+ ${mine.length?`<h3 style="font-size:13.5px;color:var(--muted)">내 컷 세트</h3>${mine.map((x,i)=>`<div class="row" style="flex-wrap:nowrap"><button class="preset" style="flex:1;min-width:0" data-act="preset-add" data-mine="1" data-i="${i}" data-id="${id}"><b>${esc(x.name)}</b><span>${x.cuts.length}컷</span></button><button class="icon" data-act="set-del" data-i="${i}" data-id="${id}" aria-label="${esc(x.name)} 세트 삭제">${ICON.trash}</button></div>`).join("")}<h3 style="font-size:13.5px;color:var(--muted)">기본 세트</h3>`:""}
+ ${PRESETS.map((x,i)=>`<button class="preset" data-act="preset-add" data-i="${i}" data-id="${id}"><b>${esc(x.name)}</b><span>${esc(x.hint)}, ${x.cuts.length}컷</span></button>`).join("")}`,sc&&sc.cuts.length?`<button class="btn grow" data-act="set-save" data-id="${id}">S#${esc(sc.no)}의 컷 ${sc.cuts.length}개를 내 세트로 저장</button>`:"")}
 const mkCut=o=>Object.assign(normP({scenes:[{cuts:[{}]}]}).scenes[0].cuts[0],{angle:"아이레벨",moves:["고정"]},o);
 
 /* ───────── 시나리오 가져오기 ───────── */
@@ -1533,9 +1548,9 @@ Object.assign(A,{
  filter(el){View.filter=el.dataset.f;render()},
  day(el){View.day=el.dataset.d;View.shootId=null;View.ngFor=null;render()},
  preset(el){openPreset(el.dataset.id)},
- "preset-add"(el){const p=cur(),snap=snapshot(p),id=p.id,sc=p.scenes.find(s=>s.id===el.dataset.id),x=PRESETS[+el.dataset.i];const had=sc.cuts.some(c=>c.star);x.cuts.forEach(o=>{const c=mkCut(JSON.parse(JSON.stringify(o)));if(had)c.star=false;sc.cuts.push(c)});touch(p);closeSheet();toast(`${x.name} ${x.cuts.length}컷을 넣었어요.`,()=>restore(id,snap))},
- "sc-day"(el){const p=cur(),sc=p.scenes.find(s=>s.id===ScEd.id);sc.day=el.dataset.v;touch(p);refreshSceneSeg(sc)},
- fps(el){const p=cur(),f=findCut(p,Ed.id);f.c.fps=el.dataset.m;touch(p);$("#fps-chips").innerHTML=fpsChips(f.c)},
+ "preset-add"(el){const p=cur(),snap=snapshot(p),id=p.id,sc=p.scenes.find(s=>s.id===el.dataset.id),x=el.dataset.mine?PC().sets[+el.dataset.i]:PRESETS[+el.dataset.i];if(!x)return;const had=sc.cuts.some(c=>c.star);x.cuts.forEach(o=>{const c=mkCut(JSON.parse(JSON.stringify(o)));if(had)c.star=false;sc.cuts.push(c)});touch(p);closeSheet();toast(`${x.name} ${x.cuts.length}컷을 넣었어요.`,()=>restore(id,snap))},
+ "sc-day"(el){const p=cur(),sc=p.scenes.find(s=>s.id===ScEd.id);sc.day=el.dataset.v;touch(p);refreshSceneSeg(sc);const i=$("#sc-dayn");if(i)i.value=sc.day},
+ fps(el){const p=cur(),f=findCut(p,Ed.id);f.c.fps=el.dataset.m;touch(p);$("#fps-chips").innerHTML=fpsChips(f.c);const i=$("#c-fps");if(i)i.value=f.c.fps},
  sketch(){openSketch()},
  "sketch-del"(){const p=cur(),f=findCut(p,Ed.id);if(f.c.img)imgDel(f.c.img);f.c.img="";touch(p);$("#f-img").innerHTML=imgField(f.c);toast("콘티를 지웠어요.")},
  "sk-color"(el){Sk.color=el.dataset.v;Sk.eraser=false;setPressed(el,".pcolor",el);el.closest(".row").querySelector('[data-act="sk-eraser"]').setAttribute("aria-pressed",false)},
@@ -1678,10 +1693,10 @@ function callOf(p,day){if(!p.calls||typeof p.calls!=="object")p.calls={};if(!p.c
 function hm(str){const m=/^(\d{1,2}):(\d{2})/.exec(str||"");return m?+m[1]*60+ +m[2]:null}
 const fmtHm=m=>`${String(Math.floor(m/60)%24).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;
 function schedule(p,day){
- const c=callOf(p,day);let t=hm(c.start)??hm(c.call);
+ const c=callOf(p,day);let t=hm(c.start)??hm(c.call);const at=c.at&&typeof c.at==="object"?c.at:{};
  const order=[];shootList(p).filter(x=>(x.sc.day||"1")===day).forEach(x=>{let g=order.find(o=>o.sc===x.sc);if(!g){g={sc:x.sc,cuts:[]};order.push(g)}g.cuts.push(x.c)});
  p.scenes.filter(sc=>(sc.day||"1")===day&&!order.some(o=>o.sc===sc)).forEach(sc=>order.push({sc,cuts:[]}));
- return order.map(o=>{const min=o.cuts.reduce((a,c)=>a+(+c.min||0),0);const row={sc:o.sc,n:o.cuts.length,min,from:t,to:t==null?null:t+min};if(t!=null)t+=min;return row});
+ return order.map(o=>{if(hm(at[o.sc.id])!=null)t=hm(at[o.sc.id]);const min=o.cuts.reduce((a,c)=>a+(+c.min||0),0);const row={sc:o.sc,n:o.cuts.length,min,from:t,to:t==null?null:t+min};if(t!=null)t+=min;return row});
 }
 function curDay(p){const ds=callDays(p);return ds.includes(View.callDay)?View.callDay:ds[0]}
 function callHtml(p){
@@ -1702,7 +1717,7 @@ function callHtml(p){
   <div id="sun-box">${sunHtml(Object.assign({},c,{date:dateV}))}</div>
  </section>
  <section class="csec"><h2>촬영 순서 ${rows.length?`(${minLabel(total)})`:""}</h2>
-  ${rows.length?`<div class="sched">${rows.map(r=>`<div class="srow"><span class="sw" style="${stripVars(r.sc)}"></span><span class="t">${r.from!=null?fmtHm(r.from)+"~"+fmtHm(r.to):"시간 미정"}</span><div style="min-width:0"><b>S#${esc(r.sc.no)} ${esc(r.sc.loc||"장소 미정")}</b><p>${r.sc.time} ${r.sc.place}, ${r.n}컷, ${minLabel(r.min)}${r.sc.cast?` · 출연 ${esc(r.sc.cast)}`:""}</p></div></div>`).join("")}</div><p class="scn-status">촬영 탭의 순서와 컷별 예상 시간으로 계산해요. ${hm(c.start)==null&&hm(c.call)==null?"첫 촬영이나 집합 시간을 넣으면 시각이 나와요.":""}</p>`:`<div class="blank"><h3>${esc(day)}회차에 씬이 없어요</h3><p>씬 정보에서 촬영 회차를 정해 주세요.</p></div>`}
+  ${rows.length?`<div class="sched">${rows.map(r=>`<div class="srow"><span class="sw" style="${stripVars(r.sc)}"></span><span class="t"><input class="tin" type="time" data-at="${r.sc.id}" value="${r.from!=null?fmtHm(r.from):""}" aria-label="S#${esc(r.sc.no)} 시작 시각"><small>${r.to!=null?"~"+fmtHm(r.to):""}${c.at&&c.at[r.sc.id]?" (직접)":""}</small></span><div style="min-width:0"><b>S#${esc(r.sc.no)} ${esc(r.sc.loc||"장소 미정")}</b><p>${r.sc.time} ${r.sc.place}, ${r.n}컷, ${minLabel(r.min)}${r.sc.cast?` · 출연 ${esc(r.sc.cast)}`:""}</p></div></div>`).join("")}</div><p class="scn-status">촬영 탭의 순서와 컷별 예상 시간으로 계산해요. 시각을 눌러 씬 시작을 직접 바꿀 수 있고, 지우면 자동 계산으로 돌아가요. ${hm(c.start)==null&&hm(c.call)==null?"첫 촬영이나 집합 시간을 넣으면 시각이 나와요.":""}</p>`:`<div class="blank"><h3>${esc(day)}회차에 씬이 없어요</h3><p>씬 정보에서 촬영 회차를 정해 주세요.</p></div>`}
  </section>
  <section class="csec"><h2>출연과 준비물</h2><p>${cast.length?"출연: "+esc(cast.join(", ")):"출연을 적은 씬이 없어요. 씬 정보에서 적을 수 있어요."}</p><p>${props.length?"소품·의상: "+esc(props.join(", ")):""}</p></section>
  <div class="row"><button class="btn solid grow" data-act="call-copy">콜시트 복사 (카톡)</button></div>`;
@@ -1746,8 +1761,8 @@ function planSelHtml(){
  const it=PL.sc&&planOf(PL.sc).items.find(x=>x.id===PL.sel);
  if(!it)return `<p class="scn-status">항목을 눌러 고르고, 끌어서 옮겨요. 화살표 쪽이 보는 방향이에요.</p>`;
  return `<div class="field"><label for="pl-label">이름</label><input id="pl-label" class="input" value="${esc(it.label||"")}" maxlength="12"></div>
- ${it.t==="c"?`<div class="chips">${["16mm","24mm","35mm","50mm","85mm","135mm"].map(v=>`<button class="chip" data-act="pl-lens" data-v="${v}" aria-pressed="${(it.lens||"50mm")===v}">${v}</button>`).join("")}</div>`:""}
- ${it.t==="l"?`<div class="chips">${["키","필","백","키커","창문빛","프랙티컬"].map(v=>`<button class="chip" data-act="pl-name" data-v="${v}" aria-pressed="${it.label===v}">${v}</button>`).join("")}</div>`:""}
+ ${it.t==="c"?`<div class="chips">${PC().lenses.map(v=>`<button class="chip" data-act="pl-lens" data-v="${v}" aria-pressed="${(it.lens||"50mm")===v}">${v}</button>`).join("")}<input id="pl-lens-in" class="input" inputmode="numeric" style="width:96px;min-height:40px" placeholder="직접 mm" aria-label="렌즈 직접 입력"></div>`:""}
+ ${it.t==="l"?`<div class="chips">${PC().lights.map(v=>`<button class="chip" data-act="pl-name" data-v="${v}" aria-pressed="${it.label===v}">${v}</button>`).join("")}</div>`:""}
  <div class="row"><button class="btn quiet grow" data-act="pl-rot" data-d="-45">↺ 45°</button><button class="btn quiet grow" data-act="pl-rot" data-d="-15">↺ 15°</button><button class="btn quiet grow" data-act="pl-rot" data-d="15">↻ 15°</button><button class="btn quiet grow" data-act="pl-rot" data-d="45">↻ 45°</button></div>
  <div class="row"><button class="btn quiet grow" data-act="pl-dup">복제</button><button class="btn danger grow" data-act="pl-del">삭제</button></div>`;
 }
@@ -1833,10 +1848,45 @@ document.addEventListener("input",e=>{
 });
 document.addEventListener("change",e=>{if(e.target.id==="cl-city"){const p=cur(),c=callOf(p,curDay(p)),x=CITIES.find(k=>k[0]===e.target.value);if(x){c.city=x[0];c.lat=x[1];c.lng=x[2]}else if(!e.target.value){delete c.city;delete c.lat;delete c.lng}touch(p);const b=$("#sun-box");if(b)b.innerHTML=sunHtml(Object.assign({},c,{date:c.date||(curDay(p)==="1"?p.date:"")}))}});
 
+/* ───────── 내 설정 고치기 ───────── */
+const OPT_FIELDS=[["ng","NG 이유 버튼",""],["mins","예상 시간 버튼 (분)","숫자"],["fps","FPS 버튼","숫자"],["lenses","배치도 카메라 렌즈","예: 24mm"],["lights","배치도 조명 이름",""]];
+function cleanList(k,txt){let a=String(txt).split(/[,，、\n]/).map(x=>x.trim()).filter(Boolean);
+ if(k==="mins")a=a.map(x=>Math.round(+x.replace(/[^\d.]/g,""))).filter(x=>x>=1&&x<=600);
+ if(k==="fps")a=a.map(x=>x.replace(/[^\d.]/g,"")).filter(x=>+x>0&&+x<=2000);
+ if(k==="lenses")a=a.map(x=>/^\d+(\.\d+)?$/.test(x)?x+"mm":x);
+ return [...new Set(a.map(x=>typeof x==="string"?x.slice(0,20):x))].slice(0,30)}
+function openOpts(){const c=PC();const w=openSheet("내 선택지 고치기",`<p style="color:var(--muted);font-size:14px">쉼표로 나눠 적어요. 비우면 기본값으로 돌아가요. 기기 연동을 켜면 다른 기기에도 맞춰져요.</p>
+ ${OPT_FIELDS.map(([k,l,h])=>`<div class="field"><label for="op-${k}">${l}</label><textarea id="op-${k}" class="input" rows="2" data-opt="${k}" placeholder="${esc(h)}">${esc(c[k].join(", "))}</textarea></div>`).join("")}
+ <div class="field"><span class="flabel">내 컷 세트 ${c.sets.length}개 · 내 용어 ${c.myterms.length}개</span><p class="scn-status">컷 세트는 씬 아래 "컷 세트로 한 번에 추가"에서, 내 용어는 용어 탭에서 만들고 지워요.</p></div>`,`<button class="btn quiet grow" data-act="opts-reset">기본값으로 되돌리기</button><button class="btn solid grow" data-act="close-sheet">완료</button>`);
+ w.addEventListener("change",e=>{const k=e.target.dataset.opt;if(!k)return;const v=cleanList(k,e.target.value);PC()[k]=v.length?v:JSON.parse(JSON.stringify(DEFS[k]));e.target.value=PC()[k].join(", ");prefsTouch()});
+}
+function openMyTerm(){openSheet("내 용어 추가",`<div class="field"><label for="mt-code">용어</label><input id="mt-code" class="input" maxlength="30" placeholder="예: 기리까시"></div>
+ <div class="field"><label for="mt-ko">뜻 (짧게)</label><input id="mt-ko" class="input" maxlength="40" placeholder="예: 리버스 찍기"></div>
+ <div class="field"><label for="mt-desc">설명</label><textarea id="mt-desc" class="input" rows="2" maxlength="300"></textarea></div>
+ <div class="field"><span class="flabel">넣을 곳 (컷을 고를 때도 나와요)</span><div class="chips" id="mt-cat">${Object.entries(CAT_LABEL).map(([k,v],i)=>`<button class="chip" data-act="mt-cat" data-v="${k}" aria-pressed="${k==="field"}">${v}</button>`).join("")}</div></div><p class="scn-status" id="mt-s" aria-live="polite"></p>`,`<button class="btn solid grow" data-act="mt-save">추가</button>`)}
+Object.assign(A,{
+ "my-opts"(){while(sheetStack.length)closeSheet();openOpts()},
+ "opts-reset"(){const c=PC();OPT_FIELDS.forEach(([k])=>{c[k]=JSON.parse(JSON.stringify(DEFS[k]))});prefsTouch();closeSheet();openOpts();toast("선택지를 기본값으로 되돌렸어요.")},
+ "reason-new"(){textPrompt("NG 이유","NG 이유","","추가",v=>{const p=cur(),x=currentShoot(p);v=v.slice(0,20);const c=PC();if(!c.ng.includes(v)){c.ng.push(v);prefsTouch()}if(x&&x.c.takes.length){x.c.takes[x.c.takes.length-1].note=v;touch(p)}render()},"예: 반사")},
+ "set-save"(el){const sc=cur().scenes.find(x=>x.id===el.dataset.id);if(!sc)return;textPrompt("내 컷 세트로 저장","세트 이름",`S#${sc.no} ${sc.loc||""}`.trim(),"저장",v=>{const keep=["size","angle","moves","lens","terms","desc","min","star","opt","fps"];PC().sets.unshift({name:v.slice(0,30),cuts:sc.cuts.map(c=>Object.fromEntries(keep.map(k=>[k,JSON.parse(JSON.stringify(c[k]??""))])))});prefsTouch();while(sheetStack.length)closeSheet();openPreset(sc.id);toast("내 컷 세트로 저장했어요.")},"예: 내 대화 구성")},
+ "set-del"(el){const c=PC(),i=+el.dataset.i,x=c.sets[i];if(!x)return;c.sets.splice(i,1);prefsTouch();closeSheet();openPreset(el.dataset.id);toast(`"${x.name}" 세트를 지웠어요.`,()=>{c.sets.splice(i,0,x);prefsTouch()})},
+ "myterm-new"(){openMyTerm()},
+ "mt-cat"(el){el.parentNode.querySelectorAll(".chip").forEach(n=>n.setAttribute("aria-pressed",n===el))},
+ "mt-save"(el){const w=el.closest(".sheet-wrap"),code=$("#mt-code",w).value.trim(),st=$("#mt-s",w);if(!code){st.textContent="용어를 적어 주세요.";return}const cat=$('#mt-cat [aria-pressed="true"]',w).dataset.v;if(T.some(t=>t.cat===cat&&t.code===code)){st.textContent="같은 분류에 이미 있는 용어예요.";return}PC().myterms.push({cat,code,ko:$("#mt-ko",w).value.trim(),desc:$("#mt-desc",w).value.trim()});prefsTouch();applyMyTerms();closeSheet();View.dictCat=cat;View.dictQ="";render();toast(`"${code}"을 ${CAT_LABEL[cat]}에 추가했어요.`)},
+ "myterm-del"(el){const c=PC(),i=c.myterms.findIndex(m=>m.cat===el.dataset.cat&&m.code===el.dataset.code);if(i<0)return;const m=c.myterms.splice(i,1)[0];prefsTouch();applyMyTerms();render();toast(`"${m.code}"을 지웠어요.`,()=>{c.myterms.splice(i,0,m);prefsTouch();applyMyTerms();render()})}
+});
+document.addEventListener("change",e=>{const t=e.target,p=cur();if(!p)return;
+ if(t.id==="c-min"&&Ed){const f=findCut(p,Ed.id);const v=Math.round(+t.value);if(v>=1&&v<=600){f.c.min=v;touch(p)}t.value=f.c.min;$("#min-chips").innerHTML=minChips(f.c)}
+ else if(t.id==="c-fps"&&Ed){const f=findCut(p,Ed.id);const v=t.value.replace(/[^\d.]/g,"");f.c.fps=+v>0&&+v<=2000?v:"";t.value=f.c.fps;touch(p);$("#fps-chips").innerHTML=fpsChips(f.c)}
+ else if(t.id==="sc-dayn"&&ScEd){const sc=p.scenes.find(s=>s.id===ScEd.id);const v=Math.round(+t.value);if(v>=1&&v<=99){sc.day=String(v);touch(p)}t.value=sc.day;refreshSceneSeg(sc)}
+ else if(t.id==="pl-lens-in"){const it=plSel();const v=t.value.replace(/[^\d]/g,"");if(it&&+v>=4&&+v<=2000){it.lens=v+"mm";touch(p);planRedraw()}}
+ else if(t.dataset&&t.dataset.at){const c=callOf(p,curDay(p));if(!c.at||typeof c.at!=="object")c.at={};if(t.value)c.at[t.dataset.at]=t.value;else delete c.at[t.dataset.at];touch(p);render()}
+});
+
 /* ───────── 시작 ───────── */
 function routeFromHash(){const h=location.hash.slice(1);if(h.startsWith("p-")&&S.projects[h.slice(2)]){View.pid=h.slice(2)}else if(!h)View.pid=null}
 if(VIEW_MODE){loadView()}else{
-loadLocal();
+loadLocal();applyMyTerms();
 if(!S.prefs.seeded){S.prefs.seeded=true;const e=normP(exampleProject());S.projects[e.id]=e;saveLocal()}
 const justLinked=BUILD==="web"&&consumeLink();
 routeFromHash();
