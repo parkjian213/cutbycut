@@ -364,8 +364,9 @@ a.btn{text-decoration:none;color:inherit}
 "use strict";
 const BUILD="web";
 const VIEW_MODE=BUILD==="web"&&/^#view=/.test(location.hash);
-const APP_VER="3.0";
+const APP_VER="3.1";
 const CHANGELOG=[
+ ["3.1",["날씨를 더 정확하게: 촬영 장소를 이름으로 찾아 그 자리 예보를 받아요.","집합 시간부터 1시간 단위 예보와 비 양(mm)을 보여 줘요.","예보 기준 시각과 며칠 뒤 예보인지에 따른 믿을 정도를 알려 줘요.","네이버 날씨로 바로 비교해 볼 수 있어요."]],
  ["3.0",["컷 편집 화면을 정리했어요. 설명 칸이 맨 위로 왔고, 자주 안 쓰는 칸은 '자세히'로 접혀요.","⋯ 메뉴를 보내기, 작품, 앱 설정으로 나눴어요.","배치도 아이콘과 글자를 키우고 버튼을 한 줄로 정리했어요.","씬 정보 창을 짧게 정리했어요.","예시 작품은 고쳐도 다른 기기로 넘어가지 않고, 내 작품으로 복사할 수 있어요.","콜시트에 촬영일 날씨 예보(설치한 앱에서)와 장비 체크리스트를 넣었어요.","샷리스트에서 컷을 검색할 수 있어요.","컷 번호를 1A처럼 직접 붙일 수 있어요.","지운 씬과 컷도 30일 동안 되살릴 수 있어요."]],
  ["2.9",["예상 시간, FPS, 촬영 회차, 렌즈를 숫자로 직접 넣을 수 있어요.","내 선택지 고치기: NG 이유, 예상 시간 버튼, FPS, 배치도 렌즈와 조명 이름을 내 마음대로 바꿔요.","내 컷 세트: 지금 씬의 컷 구성을 세트로 저장해 다른 씬에 넣어요.","내 용어: 용어 사전과 컷 선택에 내 용어를 추가해요.","콜시트에서 씬별 시작 시각을 직접 바꿀 수 있어요.","내 설정도 기기 연동으로 컴퓨터와 폰에 맞춰져요."]],
  ["2.8",["콜시트: 회차별 집합 시간, 장소, 촬영 순서와 예상 시간, 출연, 소품을 한 장으로 만들고 복사해요.","배치도: 씬마다 위에서 본 평면도에 인물, 카메라, 조명, 사물, 180도 선을 놓아요.","해 시간: 촬영일과 지역으로 일출, 일몰, 골든아워, 블루아워를 알려 줘요. 인터넷 없이도 계산돼요.","스태프 공유: 감독, 스태프가 볼 수만 있는 링크를 보내요.","용어 사전에 현장·실무 용어를 크게 늘렸어요."]],
@@ -1748,7 +1749,7 @@ function callHtml(p){
   <div class="field"><label for="cl-note">공지</label><textarea id="cl-note" class="input" data-call="note" rows="2" placeholder="우천 시 실내 씬부터, 점심 12:30">${esc(c.note||"")}</textarea></div>
  </section>
  <section class="csec"><h2>해 시간</h2>
-  <div class="row"><select id="cl-city" class="input" style="flex:1;min-width:0" aria-label="지역">${[`<option value="">지역 고르기</option>`,...CITIES.map(x=>`<option ${c.city===x[0]?"selected":""}>${x[0]}</option>`),c.city==="현재 위치"?`<option selected>현재 위치</option>`:""].join("")}</select><button class="btn" data-act="call-geo">현재 위치</button></div>
+  <div class="row"><select id="cl-city" class="input" style="flex:1;min-width:0" aria-label="지역">${[`<option value="">지역 고르기</option>`,...CITIES.map(x=>`<option ${c.city===x[0]?"selected":""}>${x[0]}</option>`),c.city&&!CITIES.some(x=>x[0]===c.city)?`<option selected>${esc(c.city)}</option>`:""].join("")}</select><button class="btn" data-act="place-find">장소 검색</button><button class="btn" data-act="call-geo">현재 위치</button></div>
   <div id="sun-box">${sunHtml(Object.assign({},c,{date:dateV}))}</div>
   <div id="wx-box">${wxHtml(c,dateV)}</div>
  </section>
@@ -1932,27 +1933,49 @@ function wxHtml(c,date){
  if(diff>15)return `<p class="scn-status">날씨 예보는 촬영일 16일 전부터 나와요.</p>`;
  if(diff<-60)return "";
  const w=WX[k];
- if(!w){loadWx(k,c,date);return `<p class="scn-status">날씨를 불러오는 중이에요.</p>`}
- if(w.loading)return `<p class="scn-status">날씨를 불러오는 중이에요.</p>`;
+ if(!w||(!w.loading&&!w.err&&Date.now()-w.at>30*6e4)){loadWx(k,c,date);if(!w||w.err||!w.d)return `<p class="scn-status">날씨를 불러오는 중이에요.</p>`}
+ if(w.loading&&!w.d)return `<p class="scn-status">날씨를 불러오는 중이에요.</p>`;
  if(w.err)return `<p class="scn-status">${esc(w.err)} <button class="chip" data-act="wx-retry" data-k="${esc(k)}">다시 불러오기</button></p>`;
- const d=w.d;
- return `<div class="wx"><p class="wx-d"><b>${esc(wmo(d.code))}</b> ${Math.round(d.min)}~${Math.round(d.max)}°C · 강수확률 ${d.rain??"-"}% · 바람 최대 ${Math.round(d.wind)}m/s</p>
- <div class="wx-h">${w.h.filter(x=>x.hr>=5&&x.hr<=22&&x.hr%2===1).map(x=>`<div><span>${String(x.hr).padStart(2,"0")}시</span><b>${Math.round(x.temp)}°</b><span>${esc(wmo(x.code))}</span><span class="rain">${x.rain??"-"}%</span></div>`).join("")}</div>
- <p class="scn-status">예보는 바뀔 수 있어요. 촬영 전날 다시 확인하세요. 날씨 자료: Open-Meteo</p></div>`;
+ const d=w.d,trust=diff<=2?"1~2일 안 예보라 비교적 정확해요.":diff<=6?"3~6일 뒤 예보라 참고용이에요. 전날 다시 확인하세요.":"일주일 넘게 남은 예보라 많이 바뀔 수 있어요.";
+ const from=Math.max(0,Math.min(23,(hm(c.call)??hm(c.start)??360)/60|0));
+ const hrs=w.h.filter(x=>x.hr>=Math.max(0,from-1)&&x.hr<=Math.min(23,from+14));
+ const q=encodeURIComponent((c.city&&c.city!=="현재 위치"?c.city.split(",")[0]:"")+" 날씨");
+ return `<div class="wx"><p class="wx-d"><b>${esc(wmo(d.code))}</b> ${Math.round(d.min)}~${Math.round(d.max)}°C · 강수확률 ${d.rain??"-"}%${d.sum>0?` · 비 ${d.sum.toFixed(1)}mm`:""} · 바람 최대 ${Math.round(d.wind)}m/s</p>
+ <div class="wx-h">${hrs.map(x=>`<div><span>${String(x.hr).padStart(2,"0")}시</span><b>${Math.round(x.temp)}°</b><span>${esc(wmo(x.code))}</span><span class="rain">${x.mm>0?x.mm.toFixed(1)+"mm":(x.rain??"-")+"%"}</span><span>${Math.round(x.wind)}m/s</span></div>`).join("")}</div>
+ <p class="scn-status">${esc(c.city||"선택한 위치")} 기준 · ${clock(w.at)}에 받은 예보. ${trust} 날씨 자료: Open-Meteo</p>
+ <div class="row"><a class="btn quiet" href="https://search.naver.com/search.naver?query=${q}" target="_blank" rel="noopener">네이버 날씨로 비교</a><button class="btn quiet" data-act="wx-retry" data-k="${esc(k)}">새로 받기</button></div></div>`;
 }
 async function loadWx(k,c,date){
- if(WX[k]&&!WX[k].err)return;WX[k]={loading:true};
+ if(WX[k]&&WX[k].loading)return;const old=WX[k]&&WX[k].d?WX[k]:null;WX[k]=Object.assign({},old||{},{loading:true,err:null});
  const tz=encodeURIComponent((Intl.DateTimeFormat().resolvedOptions().timeZone)||"Asia/Seoul");
- const u=`https://api.open-meteo.com/v1/forecast?latitude=${(+c.lat).toFixed(4)}&longitude=${(+c.lng).toFixed(4)}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m&timezone=${tz}&wind_speed_unit=ms&start_date=${date}&end_date=${date}`;
+ const u=`https://api.open-meteo.com/v1/forecast?latitude=${(+c.lat).toFixed(4)}&longitude=${(+c.lng).toFixed(4)}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m&timezone=${tz}&wind_speed_unit=ms&start_date=${date}&end_date=${date}`;
  try{
   const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),12000);
-  const r=await fetch(u,{signal:ctl.signal});clearTimeout(tm);if(!r.ok)throw 0;const j=await r.json();
-  const dl=j.daily||{},hr=j.hourly||{};if(!dl.time||!dl.time.length)throw 0;
-  WX[k]={d:{code:dl.weather_code[0],max:dl.temperature_2m_max[0],min:dl.temperature_2m_min[0],rain:dl.precipitation_probability_max?dl.precipitation_probability_max[0]:null,wind:dl.wind_speed_10m_max[0]},
-   h:(hr.time||[]).map((t,i)=>({hr:+t.slice(11,13),temp:hr.temperature_2m[i],rain:hr.precipitation_probability?hr.precipitation_probability[i]:null,code:hr.weather_code[i],wind:hr.wind_speed_10m[i]}))};
- }catch(e){WX[k]={err:navigator.onLine===false?"인터넷이 없어 날씨를 못 불러왔어요.":"날씨를 불러오지 못했어요."}}
+  const r=await fetch(u,{signal:ctl.signal,cache:"no-store"});clearTimeout(tm);if(!r.ok)throw 0;const j=await r.json();
+  const dl=j.daily||{},hr=j.hourly||{};if(!dl.time||!dl.time.length)throw 0;const g=(o,n,i)=>o[n]?o[n][i]:null;
+  WX[k]={at:Date.now(),d:{code:g(dl,"weather_code",0),max:g(dl,"temperature_2m_max",0),min:g(dl,"temperature_2m_min",0),rain:g(dl,"precipitation_probability_max",0),sum:g(dl,"precipitation_sum",0)||0,wind:g(dl,"wind_speed_10m_max",0)||0},
+   h:(hr.time||[]).map((t,i)=>({hr:+t.slice(11,13),temp:g(hr,"temperature_2m",i),rain:g(hr,"precipitation_probability",i),mm:g(hr,"precipitation",i)||0,code:g(hr,"weather_code",i),wind:g(hr,"wind_speed_10m",i)||0}))};
+ }catch(e){WX[k]=old?Object.assign(old,{loading:false}):{err:navigator.onLine===false?"인터넷이 없어 날씨를 못 불러왔어요.":"날씨를 불러오지 못했어요."}}
  const b=$("#wx-box"),p=cur();if(b&&p&&View.tab==="call"){const day=curDay(p),cc=callOf(p,day),dv=cc.date||(day==="1"?p.date:"")||"";if(wxKey(cc,dv)===k)b.innerHTML=wxHtml(cc,dv)}
 }
+
+/* ───────── 장소 검색 (Open-Meteo 지오코딩) ───────── */
+function openPlace(){
+ const w=openSheet("촬영 장소 찾기",`<div class="row" style="flex-wrap:nowrap"><input id="pf-q" class="input" style="flex:1;min-width:0" placeholder="예: 해운대, 남산, 강릉 경포" autocomplete="off"><button class="btn solid" data-act="place-go">찾기</button></div><div id="pf-r"><p class="scn-status">동, 구, 관광지 이름으로 찾아요. 정확한 자리는 그 장소에서 "현재 위치"를 눌러도 돼요.</p></div>`);
+ const i=$("#pf-q",w);setTimeout(()=>i.focus(),40);i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();A["place-go"]()}});
+}
+let PF=[];
+
+Object.assign(A,{
+ "place-find"(){openPlace()},
+ async "place-go"(){const q=($("#pf-q")||{}).value||"";const box=$("#pf-r");if(!q.trim()){box.innerHTML=`<p class="scn-status">찾을 장소를 적어 주세요.</p>`;return}
+  if(BUILD!=="web"){box.innerHTML=`<p class="scn-status">장소 검색은 설치한 앱에서 돼요. 목록에서 지역을 고르거나 현재 위치를 써 주세요.</p>`;return}
+  box.innerHTML=`<p class="scn-status">찾는 중이에요.</p>`;
+  try{const r=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q.trim())}&count=8&language=ko&countryCode=KR`);if(!r.ok)throw 0;const j=await r.json();PF=(j.results||[]).filter(x=>isFinite(x.latitude)&&isFinite(x.longitude));
+   box.innerHTML=PF.length?`<div class="dict">${PF.map((x,i)=>`<button class="ditem" style="width:100%;text-align:left;background:none" data-act="place-pick" data-i="${i}"><div><h3>${esc(x.name)}</h3><p>${esc([x.admin2,x.admin1].filter(Boolean).join(", "))}</p></div></button>`).join("")}</div>`:`<p class="scn-status">"${esc(q)}"을 찾지 못했어요. 더 큰 지역 이름(구, 시)으로 찾아 보세요.</p>`}
+  catch(e){box.innerHTML=`<p class="scn-status">${navigator.onLine===false?"인터넷이 없어 찾을 수 없어요.":"찾지 못했어요. 잠시 뒤 다시 해 보세요."}</p>`}},
+ "place-pick"(el){const x=PF[+el.dataset.i];if(!x)return;const p=cur(),c=callOf(p,curDay(p));c.city=[x.name,x.admin1].filter(Boolean).join(", ").slice(0,40);c.lat=+(+x.latitude).toFixed(4);c.lng=+(+x.longitude).toFixed(4);touch(p);closeSheet();render();toast(`${x.name} 기준으로 해 시간과 날씨를 맞췄어요.`)}
+});
 
 /* ───────── 장비 체크 ───────── */
 function gearHtml(c){const g=PC().gear;if(!g.length)return "";const got=c.gear&&typeof c.gear==="object"?c.gear:{};const n=g.filter(x=>got[x]).length;
