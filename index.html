@@ -331,9 +331,10 @@ add("size","인물 사이즈",[
 ["BS","바스트 샷","Bust Shot","가슴 위까지. 표정과 상체 움직임이 함께 보인다.","c:-1,38"],
 ["MCU","미디엄 클로즈업","Medium Close-Up","가슴 윗부분과 어깨 위까지. BS와 CU의 중간.","c:0,30"],
 ["SS","숄더 샷","Shoulder Shot","어깨 위까지. 뉴스 앵커나 인터뷰에서 자주 쓴다.","c:0,25"],
+["UP","업샷","Up Shot","한국 현장에서 클로즈업을 부르는 말. CU와 같다.","c:0,21"],
 ["CU","클로즈업","Close-Up","얼굴이 화면을 채운다. 감정을 밀어 줄 때.","c:0,21"],
 ["BCU","빅 클로즈업","Big Close-Up","이마와 턱이 살짝 잘릴 만큼 얼굴을 채운다. VCU와 비슷하다.","c:3,16.5"],
-["CHOKER","초커","Choker","눈썹 위부터 턱 아래 목선까지. 목을 조르는 듯한 타이트한 프레임.","c:4,17.5"],
+["CHOKER","초커","Choker","눈썹 바로 위부터 입 아래까지. CU보다 더 조인 프레임.","c:4,17.5"],
 ["ECU","익스트림 클로즈업","Extreme Close-Up","눈, 입, 손가락처럼 아주 작은 부분만. XCU, ELCU와 같다.","c:6,11.2"],
 ["ITALIAN","이탈리안 샷","Italian Shot","두 눈만 가로로 가득 채운다. 세르지오 레오네의 결투 장면으로 유명하다.","c:6.5,10"],
 ]);
@@ -345,7 +346,7 @@ add("size","신체·디테일",[
 ["NECK","넥 샷","Neck Shot","목덜미나 목선 주변 디테일.","c:12,22"],
 ["BACKHEAD","뒤통수 샷","Back of Head","뒤통수를 걸고 앞을 바라보는 시점을 만든다.","back"],
 ["INS","인서트","Insert","물건, 글자, 화면처럼 정보를 주는 디테일 컷. 시나리오에도 그대로 쓴다.","ins"],
-["ECU-OBJ","사물 초근접","Object Macro","사물 표면, 글자, 작은 부품을 크게. 매크로 렌즈와 함께 쓴다.","ins"],
+["DETAIL","사물 초근접","Object Macro","사물 표면, 글자, 작은 부품을 크게. 매크로 렌즈와 함께 쓴다.","ins"],
 ]);
 add("size","인원·구도",[
 ["1S","원샷","One Shot","프레임 안에 인물 한 명.","c:-1,38"],
@@ -354,8 +355,8 @@ add("size","인원·구도",[
 ["GS","그룹 샷","Group Shot","여러 인물을 한 프레임에.","group"],
 ["CROWD","군중 샷","Crowd Shot","많은 사람을 넓게 담는다. 엑스트라 규모를 먼저 확인한다.","crowd"],
 ["OTS","오버 더 숄더","Over the Shoulder","앞사람 어깨 너머로 상대를 찍는다. 대화 장면의 기본.","ots"],
-["D-OTS","더티 오버숄더","Dirty Over the Shoulder","앞사람 어깨나 머리가 조금 걸린다. 더티 샷이라고도 한다.","ots"],
-["C-OTS","클린 샷","Clean Single","앞사람을 걸지 않고 상대만 깔끔하게 잡는다.","c:-1,38"],
+["DIRTY","더티 샷","Dirty Over the Shoulder","앞사람 어깨나 머리가 프레임에 조금 걸린다. 더티 OTS라고도 한다.","ots"],
+["CLEAN","클린 샷","Clean Single","앞사람을 걸지 않고 상대만 깔끔하게 잡는다.","c:-1,38"],
 ["REV","리버스 샷","Reverse Shot","앞 컷과 반대쪽에서 찍는다. 상대 인물의 짝 컷.","rev"],
 ["S/R","샷 리버스 샷","Shot / Reverse Shot","두 인물을 번갈아 보여 주는 대화 구성. 같은 렌즈와 높이로 짝을 맞춘다.","rev"],
 ["PROFILE","프로필 샷","Profile Shot","완전한 옆모습.","profile"],
@@ -460,7 +461,7 @@ add("move","줌·포커스",[
 ["포커스 아웃","포커스 아웃","Focus Out","초점이 맞던 화면이 흐려진다.","m:rack"],
 ]);
 add("lens","화각",[
-["어안","어안","Fisheye","8~16mm. 둥글게 왜곡된다.",""],["초광각","초광각","Ultra Wide","14~20mm. 공간이 크게 벌어진다.",""],["광각","광각","Wide","24~35mm. 공간과 관계를 담는다.",""],["표준","표준","Normal","40~50mm. 눈으로 보는 느낌에 가깝다.",""],["준망원","준망원","Short Tele","65~105mm. 얼굴이 자연스럽고 배경이 흐려진다.",""],["망원","망원","Telephoto","135mm 이상. 공간이 압축되고 인물이 고립된다.",""],
+["어안","어안","Fisheye","풀프레임 기준 8~15mm. 둥글게 왜곡된다.",""],["초광각","초광각","Ultra Wide","14~20mm. 공간이 크게 벌어진다.",""],["광각","광각","Wide","24~35mm. 공간과 관계를 담는다.",""],["표준","표준","Normal","40~50mm. 눈으로 보는 느낌에 가깝다.",""],["준망원","준망원","Short Tele","65~105mm. 얼굴이 자연스럽고 배경이 흐려진다.",""],["망원","망원","Telephoto","135mm 이상. 공간이 압축되고 인물이 고립된다.",""],
 ]);
 add("lens","초점거리",["12","14","16","18","20","24","28","35","40","50","60","65","75","85","90","100","105","135","150","200","300","400"].map(m=>[m+"mm",m+"mm","",""]));
 add("lens","종류",[
@@ -468,16 +469,16 @@ add("lens","종류",[
 ]);
 add("term","시나리오 기본",[
 ["S#","씬","Scene Number","씬 번호. S#12는 12번 씬이다."],["INT","실내","Interior","실내 장면."],["EXT","실외","Exterior","실외 장면."],["D","낮","Day","낮 장면."],["N","밤","Night","밤 장면."],["M","아침·새벽","Morning","아침 또는 새벽 장면."],["E","저녁","Evening","해 질 무렵과 저녁 장면. 효과음을 뜻하는 E와 구분한다."],
-["FR-IN","프레임 인","Frame In","인물이나 물건이 프레임 밖에서 안으로 들어온다.","frin"],["FR-OUT","프레임 아웃","Frame Out","인물이나 물건이 프레임 안에서 밖으로 나간다.","frout"],["ON","온 스크린","On Screen","인물이 화면에 보이면서 대사를 한다."],["OFF","오프","Off Screen","같은 장소에 있지만 화면에 안 보이는 인물의 목소리. O.S.와 같다."],["O.S","오프 스크린","Off Screen","화면 밖에서 들리는 소리나 대사."],["V.O","보이스 오버","Voice Over","장면 밖에서 입혀지는 목소리. 내레이션, 전화 목소리, 회상."],["NA","내레이션","Narration","해설 목소리. NAR.로도 쓴다."],["MONO","독백","Monologue","혼잣말이나 속마음."],["(E)","효과음","Effect","대본에서 E. 뒤에 쓰는 소리 표시."],["SE","효과음","Sound Effect","후반에서 넣는 효과음."],["BGM","배경 음악","Background Music","장면에 깔리는 음악."],["M.","음악","Music","대본에서 음악 시작과 끝을 표시."],["AMB","앰비언스","Ambience","공간의 배경 소리. 룸톤과 함께 현장에서 따로 녹음한다."],["CONT'D","이어서","Continued","같은 인물의 대사가 이어진다."],["B.G","배경","Background","인물 뒤의 배경 또는 배경 행동."],["F.G","전경","Foreground","인물 앞쪽 공간."],["자막","자막","Superimpose, Caption","화면에 글자를 얹는다. SUPER라고도 한다."],["타이틀","타이틀","Title","제목 화면."],["몽타주","몽타주","Montage","여러 짧은 컷을 이어 시간이나 의미를 압축한다. MON."],["회상","회상","Flashback","F.B. 과거 장면으로 돌아간다."],["F.F","플래시 포워드","Flash Forward","미래 장면을 먼저 보여 준다."],["인터컷","인터컷","Intercut","동시에 벌어지는 두 장소를 번갈아 붙인다."],["교차","교차 편집","Cross Cutting","서로 다른 행동을 번갈아 보여 긴장을 만든다."],["같은 장소","같은 장소","Same Location","앞 씬과 같은 장소임을 알린다."],["SAME","같은 시간","Same Time","앞 씬과 같은 시간임을 알린다."],["LATER","잠시 후","Later","같은 장소에서 조금 시간이 지났다."],["CUT BACK","컷 백","Cut Back","잠깐 다른 곳을 보여 주고 원래 장면으로 돌아온다."],
+["FR-IN","프레임 인","Frame In","인물이나 물건이 프레임 밖에서 안으로 들어온다.","frin"],["FR-OUT","프레임 아웃","Frame Out","인물이나 물건이 프레임 안에서 밖으로 나간다.","frout"],["ON","온 스크린","On Screen","인물이 화면에 보이면서 대사를 한다."],["OFF","오프","Off Screen","같은 공간에 있지만 화면에 안 보이는 인물의 목소리. 다른 공간이면 (E)를 쓴다."],["O.S","오프 스크린","Off Screen","영어 대본에서 OFF와 같은 뜻으로 쓰는 표기."],["V.O","보이스 오버","Voice Over","장면 밖에서 입혀지는 목소리. 내레이션, 전화 목소리, 회상."],["NA","내레이션","Narration","해설 목소리. NAR.로도 쓴다."],["MONO","독백","Monologue","혼잣말이나 속마음."],["(E)","이펙트","Effect","화면에 없는 인물의 대사나 소리. 문 밖, 전화기 너머처럼 다른 공간에서 들린다. 같은 공간이면 OFF를 쓴다."],["SE","효과음","Sound Effect","후반에서 넣는 효과음."],["BGM","배경 음악","Background Music","장면에 깔리는 음악."],["M.","음악","Music","대본에서 음악 시작과 끝을 표시."],["AMB","앰비언스","Ambience","공간의 배경 소리. 룸톤과 함께 현장에서 따로 녹음한다."],["CONT'D","이어서","Continued","같은 인물의 대사가 이어진다."],["B.G","배경","Background","인물 뒤의 배경 또는 배경 행동."],["F.G","전경","Foreground","인물 앞쪽 공간."],["자막","자막","Superimpose, Caption","화면에 글자를 얹는다. SUPER라고도 한다."],["타이틀","타이틀","Title","제목 화면."],["몽타주","몽타주","Montage","여러 짧은 컷을 이어 시간이나 의미를 압축한다. MON."],["회상","회상","Flashback","F.B. 과거 장면으로 돌아간다."],["F.F","플래시 포워드","Flash Forward","미래 장면을 먼저 보여 준다."],["인터컷","인터컷","Intercut","동시에 벌어지는 두 장소를 번갈아 붙인다."],["교차","교차 편집","Cross Cutting","서로 다른 행동을 번갈아 보여 긴장을 만든다."],["같은 장소","같은 장소","Same Location","앞 씬과 같은 장소임을 알린다."],["SAME","같은 시간","Same Time","앞 씬과 같은 시간임을 알린다."],["LATER","잠시 후","Later","같은 장소에서 조금 시간이 지났다."],["CUT BACK","컷 백","Cut Back","잠깐 다른 곳을 보여 주고 원래 장면으로 돌아온다."],
 ]);
 add("term","장면 전환",[
-["F.I","페이드 인","Fade In","검은 화면에서 서서히 밝아진다."],["F.O","페이드 아웃","Fade Out","서서히 어두워져 검은 화면이 된다."],["W.O","화이트 아웃","White Out","서서히 흰 화면이 된다."],["W.I","화이트 인","White In","흰 화면에서 서서히 장면이 나타난다."],["C.I","컷 인","Cut In","중간 과정 없이 장면이나 이미지가 곧바로 들어온다."],["C.O","컷 아웃","Cut Out","중간 과정 없이 장면이 곧바로 끊긴다."],["O.L","오버랩","Overlap","앞 장면이 사라지며 다음 장면이 겹쳐 나타난다. 디졸브와 같다."],["DIS","디졸브","Dissolve","두 화면이 겹치며 바뀐다."],["WIPE","와이프","Wipe","새 화면이 앞 화면을 밀어내듯 바뀐다."],["IRIS IN","아이리스 인","Iris In","동그란 구멍이 커지며 화면이 나타난다."],["IRIS OUT","아이리스 아웃","Iris Out","동그란 구멍이 작아지며 화면이 닫힌다."],["BLACK","암전","Black","화면을 완전히 까맣게 둔다."],["CUT TO","컷 투","Cut to","다음 장면으로 바로 넘어간다."],["SMASH","스매시 컷","Smash Cut","강한 대비로 갑자기 바뀐다."],["MATCH","매치 컷","Match Cut","모양이나 동작이 닮은 두 화면을 이어 붙인다."],["J.C","점프 컷","Jump Cut","같은 앵글에서 시간을 건너뛰어 튀게 붙인다."],["J-CUT","제이 컷","J-Cut","다음 장면의 소리가 화면보다 먼저 시작된다."],["L-CUT","엘 컷","L-Cut","앞 장면의 소리가 다음 화면까지 이어진다."],["S.B","사운드 브리지","Sound Bridge","소리로 두 장면을 잇는다."],["M.CUT","모션 컷","Cut on Action","움직이는 순간에 컷을 붙여 튀지 않게 한다."],
+["F.I","페이드 인","Fade In","검은 화면에서 서서히 밝아진다."],["F.O","페이드 아웃","Fade Out","서서히 어두워져 검은 화면이 된다."],["W.O","화이트 아웃","White Out","서서히 흰 화면이 된다."],["W.I","화이트 인","White In","흰 화면에서 서서히 장면이 나타난다."],["C.I","컷 인","Cut In","중간 과정 없이 장면이나 이미지가 곧바로 들어온다."],["C.O","컷 아웃","Cut Out","중간 과정 없이 장면이 곧바로 끊긴다."],["O.L","오버랩","Overlap","앞 장면이 사라지며 다음 장면이 겹쳐 나타난다. 디졸브와 같다."],["DIS","디졸브","Dissolve","두 화면이 겹치며 바뀐다."],["WIPE","와이프","Wipe","새 화면이 앞 화면을 밀어내듯 바뀐다."],["IRIS IN","아이리스 인","Iris In","동그란 구멍이 커지며 화면이 나타난다."],["IRIS OUT","아이리스 아웃","Iris Out","동그란 구멍이 작아지며 화면이 닫힌다."],["BLACK","암전","Black","화면을 완전히 까맣게 둔다."],["CUT TO","컷 투","Cut to","다음 장면으로 바로 넘어간다."],["SMASH","스매시 컷","Smash Cut","강한 대비로 갑자기 바뀐다."],["MATCH","매치 컷","Match Cut","모양이나 동작이 닮은 두 화면을 이어 붙인다."],["J.C","점프 컷","Jump Cut","같은 앵글에서 시간을 건너뛰어 튀게 붙인다."],["J-CUT","제이 컷","J-Cut","다음 장면의 소리가 화면보다 먼저 시작된다."],["L-CUT","엘 컷","L-Cut","앞 장면의 소리가 다음 화면까지 이어진다."],["사운드 브리지","사운드 브리지","Sound Bridge","소리로 두 장면을 잇는다."],["액션 컷","액션 컷","Cut on Action","움직이는 순간에 컷을 붙여 튀지 않게 한다."],
 ]);
 add("term","속도·특수",[
-["S/M","슬로 모션","Slow Motion","고속 촬영으로 느리게. 60·120fps 등 찍을 프레임을 적어 둔다."],["Q/M","퀵 모션","Quick Motion","저속 촬영이나 후반으로 빠르게."],["STOP","정지 화면","Freeze Frame","화면을 멈춘다. F.F와 헷갈리지 않게 적는다."],["T.L","타임랩스","Timelapse","긴 시간을 간격 촬영으로 압축한다."],["H.L","하이퍼랩스","Hyperlapse","이동하면서 찍는 타임랩스."],["REV M","역재생","Reverse Motion","동작을 거꾸로 재생한다."],["SPLIT","분할 화면","Split Screen","한 화면을 나눠 여러 장면을 보여 준다."],["VFX","시각 효과","Visual Effects","후반 합성이 필요한 컷."],["CG","컴퓨터 그래픽","Computer Graphics","후반 CG가 들어가는 컷."],["크로마","크로마키","Chroma Key","초록이나 파란 배경 합성. 조명을 고르게 깐다."],
+["S/M","슬로 모션","Slow Motion","재생보다 높은 프레임으로 찍어 느리게 보여 준다. 24p 작품이면 60, 120fps처럼 적어 둔다."],["Q/M","퀵 모션","Quick Motion","저속 촬영이나 후반으로 빠르게."],["FREEZE","정지 화면","Freeze Frame","화면을 멈춘다. 플래시 포워드(F.F)나 스톱 모션 애니메이션과 다르다."],["타임랩스","타임랩스","Timelapse","긴 시간을 간격 촬영으로 압축한다."],["하이퍼랩스","하이퍼랩스","Hyperlapse","이동하면서 찍는 타임랩스."],["역재생","역재생","Reverse Motion","동작을 거꾸로 재생한다."],["SPLIT","분할 화면","Split Screen","한 화면을 나눠 여러 장면을 보여 준다."],["VFX","시각 효과","Visual Effects","후반 합성이 필요한 컷."],["CG","컴퓨터 그래픽","Computer Graphics","후반 CG가 들어가는 컷."],["크로마","크로마키","Chroma Key","초록이나 파란 배경 합성. 조명을 고르게 깐다."],
 ]);
 add("term","현장",[
-["MOS","소리 없이","Without Sound","동시녹음 없이 영상만 찍는다."],["SYNC","동시녹음","Sync Sound","영상과 소리를 함께 녹음한다."],["WILD","와일드 사운드","Wild Sound","화면 없이 소리만 따로 녹음한다."],["ROOM","룸톤","Room Tone","공간의 빈 소리를 30초 이상 녹음한다."],["PICK UP","픽업","Pick-up","중간부터 다시 이어 찍는다."],["A CAM","A캠","A Camera","주 카메라."],["B CAM","B캠","B Camera","보조 카메라."],["MULTI","멀티캠","Multi Camera","여러 대로 동시에 찍는다."],["STUNT","액션·위험","Stunt","안전 확인이 필요한 컷."],["PROP","소품 필요","Prop","컷에 필요한 소품 확인."],["D4N","주간 야경","Day for Night","낮에 찍어 밤처럼 보이게 한다."],["매직아워","매직 아워","Magic Hour","해가 진 직후의 짧은 시간. 한 번에 찍어야 한다."],["HMR","헤드룸","Head Room","머리 위 여백."],["LR","룩 룸","Look Room","시선 방향 앞 여백. 노즈 룸이라고도 한다."],["180°","180도 규칙","180-Degree Rule","시선을 잇는 선을 넘지 않는다."],["30°","30도 규칙","30-Degree Rule","같은 피사체를 이을 때 30도 이상 옮긴다."],["2.39","시네마스코프","2.39:1","넓은 영화 화면비."],["1.85","비스타","1.85:1","극장 표준 화면비."],["16:9","16:9","1.78:1","일반 영상 화면비."],["9:16","세로형","9:16","쇼츠, 릴스 세로 화면."],
+["MOS","소리 없이","Without Sound","동시녹음 없이 영상만 찍는다."],["SYNC","동시녹음","Sync Sound","영상과 소리를 함께 녹음한다."],["WILD","와일드 사운드","Wild Sound","화면 없이 소리만 따로 녹음한다."],["ROOM","룸톤","Room Tone","촬영 공간의 빈 소리를 모두 조용히 한 채 30초~1분 녹음한다. 편집 때 빈틈을 메운다."],["PICK UP","픽업","Pick-up","중간부터 다시 이어 찍는다."],["A CAM","A캠","A Camera","주 카메라."],["B CAM","B캠","B Camera","보조 카메라."],["MULTI","멀티캠","Multi Camera","여러 대로 동시에 찍는다."],["STUNT","액션·위험","Stunt","안전 확인이 필요한 컷."],["PROP","소품 필요","Prop","컷에 필요한 소품 확인."],["D FOR N","데이 포 나이트","Day for Night","낮에 찍고 후반 색보정으로 밤처럼 보이게 한다."],["매직아워","매직 아워","Magic Hour","해 뜨기 직전과 해 진 직후의 짧은 시간. 빛이 금방 바뀌어 미리 준비해야 한다."],["헤드룸","헤드룸","Head Room","머리 위 여백."],["룩룸","룩 룸","Look Room","시선 방향 앞 여백. 노즈 룸이라고도 한다."],["180°","180도 규칙","180-Degree Rule","시선을 잇는 선을 넘지 않는다."],["30°","30도 규칙","30-Degree Rule","같은 피사체를 이을 때 30도 이상 옮긴다."],["2.39","시네마스코프","2.39:1","넓은 영화 화면비."],["1.85","비스타","1.85:1","극장 표준 화면비."],["16:9","16:9","1.78:1","일반 영상 화면비."],["9:16","세로형","9:16","쇼츠, 릴스 세로 화면."],
 ]);
 const SIZE_QUICK=["FS","WS","BS","CU","ECU","2S","OTS","INS"];
 const ANGLE_QUICK=["아이레벨","부감","앙각","탑","사선"];
@@ -672,7 +673,7 @@ function homeHtml(){
  <main style="padding-block:0 40px"><div class="plist">${list.map(p=>{const st=stats(p);return `<button class="pitem" data-act="open" data-id="${esc(p.id)}"><h3>${esc(p.name)}</h3><div class="pmeta">씬 ${p.scenes.length}개, 컷 ${st.total}개, 예상 ${minLabel(st.totalMin)}</div>${p.scenes.length?`<div class="strips">${p.scenes.map(sc=>`<i style="background:var(--s-${stripKey(sc)})" title="S#${esc(sc.no)}"></i>`).join("")}</div>`:""}${barHtml(p)}</button>`}).join("")}</div>
  ${list.length?"":`<div class="blank"><h3>첫 작품을 만들어 보세요</h3><p>작품 제목만 넣으면 바로 컷을 적을 수 있어요.</p></div>`}
  <div class="row" style="margin-top:14px"><button class="btn solid grow" data-act="new-project">새 작품 만들기</button><button class="btn quiet" data-act="import">백업 불러오기</button></div>
- <p class="sync" id="sync-line">${esc(syncText())}</p><p class="sync" style="margin-top:4px">앱 버전 2.2</p></main></div>`;
+ <p class="sync" id="sync-line">${esc(syncText())}</p><p class="sync" style="margin-top:4px">앱 버전 2.3</p></main></div>`;
 }
 function barHtml(p,nowId){const a=allCuts(p);if(!a.length)return"";const ordered=View.tab==="shoot"?shootList(p):a;return `<div class="bar" role="img" aria-label="전체 ${a.length}컷 중 ${a.filter(x=>x.c.status==="done").length}컷 완료">${ordered.map(x=>`<i class="${x.c.id===nowId?"now":x.c.status==="done"?"done":x.c.status==="skip"?"skip":""}"></i>`).join("")}</div>`}
 function projectHtml(p){
@@ -950,7 +951,7 @@ function snapshot(p){return JSON.stringify(p)}
 function restore(id,json){S.projects[id]=normP(JSON.parse(json));touch(S.projects[id]);render()}
 function goNextTodo(p,fromId){const l=shootView(p);const i=l.findIndex(x=>x.c.id===fromId);const after=l.slice(i+1).concat(l.slice(0,i+1));const n=after.find(x=>x.c.status==="todo");View.shootId=n?n.c.id:null;View.ngFor=null}
 const A={
- open(el){View.pid=el.dataset.id;View.tab="list";View.shootId=null;setHash("p-"+View.pid);render();scrollTo(0,0)},
+ open(el){View.pid=el.dataset.id;View.tab="list";View.shootId=null;View.filter="all";View.day="";setHash("p-"+View.pid);render();scrollTo(0,0)},
  home(){View.pid=null;setHash("");render();scrollTo(0,0)},
  tab(el){View.tab=el.dataset.tab;View.ngFor=null;render();scrollTo(0,0)},
  "new-project"(){textPrompt("새 작품","작품 제목","","만들기",v=>{const p=normP({id:uid(),name:v,updatedAt:Date.now()});S.projects[p.id]=p;saveLocal();queueSync(p);View.pid=p.id;View.tab="list";setHash("p-"+p.id);render()})},
@@ -973,7 +974,7 @@ const A={
  min(el){const p=cur(),f=findCut(p,Ed.id);f.c.min=+el.dataset.m;touch(p);$("#min-chips").innerHTML=minChips(f.c)},
  flag(el){const p=cur(),f=findCut(p,Ed.id),k=el.dataset.k;f.c[k]=!f.c[k];touch(p);el.setAttribute("aria-pressed",f.c[k])},
  "move-cut"(el){const p=cur(),f=findCut(p,Ed.id),j=f.i+ +el.dataset.d;if(j<0||j>=f.sc.cuts.length)return;f.sc.cuts.splice(f.i,1);f.sc.cuts.splice(j,0,f.c);touch(p);$(".sheet-head h2",el.closest(".sheet")).textContent=`컷 ${f.sc.no}-${j+1}`;toast(`${f.sc.no}-${j+1}번으로 옮겼어요.`)},
- "dup-cut"(){const p=cur(),f=findCut(p,Ed.id);const n=JSON.parse(JSON.stringify(f.c));n.id=uid();n.status="todo";n.takes=[];n.star=false;f.sc.cuts.splice(f.i+1,0,n);touch(p);closeSheet();render();openCutEditor(n.id);toast("컷을 복제했어요.")},
+ "dup-cut"(){const p=cur(),f=findCut(p,Ed.id);const n=JSON.parse(JSON.stringify(f.c));n.id=uid();n.status="todo";n.takes=[];n.star=false;if(n.img&&IMG[n.img]){const k="img_"+uid();imgPut(k,IMG[n.img]);n.img=k}else n.img="";f.sc.cuts.splice(f.i+1,0,n);touch(p);closeSheet();render();openCutEditor(n.id);toast("컷을 복제했어요.")},
  "del-cut"(){const p=cur(),snap=snapshot(p),id=p.id,f=findCut(p,Ed.id),label=f.sc.no+"-"+(f.i+1);f.sc.cuts.splice(f.i,1);p.order=p.order.filter(x=>x!==f.c.id);touch(p);closeSheet();toast(label+" 컷을 삭제했어요.",()=>restore(id,snap))},
  "shoot-go"(el){View.shootId=el.dataset.id;View.ngFor=null;render();const s=$(".slate");if(s&&innerWidth<860)scrollTo({top:0})},
  "shoot-step"(el){const p=cur(),l=shootView(p);if(!l.length)return;const i=l.findIndex(x=>x.c.id===View.shootId);const j=i+ +el.dataset.d;if(j<0){toast("첫 번째 컷이에요.");return}if(j>=l.length){toast("마지막 컷이에요.");return}View.shootId=l[j].c.id;View.ngFor=null;render()},
@@ -1103,7 +1104,7 @@ function setPressed(el,sel,v){el.closest(".row").querySelectorAll(sel).forEach(n
 let audioCtx=null;
 function openClap(){
  const p=cur(),x=currentShoot(p);if(!x)return;const c=x.c;const take=c.takes.length?Math.max(...c.takes.map(t=>t.n))+1:1;
- const d=p.date||new Date().toISOString().slice(0,10);const fps=c.fps||p.fps;
+ const nd=new Date(),d=p.date||`${nd.getFullYear()}-${String(nd.getMonth()+1).padStart(2,"0")}-${String(nd.getDate()).padStart(2,"0")}`;const fps=c.fps||p.fps;
  const meta=[d,x.sc.time+" "+x.sc.place,p.director&&"감독 "+p.director,p.dop&&"촬영 "+p.dop,fps&&fps+"fps",p.aspect,c.terms.includes("MOS")&&"MOS"].filter(Boolean);
  $("#clap-slot").innerHTML=`<div class="clap" role="dialog" aria-modal="true" aria-label="디지털 슬레이트"><div class="clap-top"><span>${esc(p.name)}</span><button data-act="clap-close">닫기</button></div>
  <div class="clap-nums"><div><small>씬</small><b>${esc(x.sc.no)}</b></div><div><small>컷</small><b>${esc(x.no.split("-").pop())}</b></div><div><small>테이크</small><b class="tk-n">${take}</b></div></div>
@@ -1121,7 +1122,7 @@ function clapNow(){
 function wrapHtml(p,st){
  if(!p.wrap||!st.remain)return"";
  const[h,m]=p.wrap.split(":").map(Number);if(isNaN(h))return"";
- const t=new Date();t.setHours(h,m||0,0,0);
+ const t=new Date();t.setHours(h,m||0,0,0);if(Date.now()-t.getTime()>6*3600000)t.setDate(t.getDate()+1);
  const diff=Math.round((t.getTime()-Date.now())/60000-st.remMin);
  if(diff>=0)return `<p class="wrapline">랩 ${esc(p.wrap)}까지 ${minLabel(diff)} 여유</p>`;
  const opts=allCuts(p).filter(x=>x.c.opt&&x.c.status==="todo"),om=opts.reduce((a,x)=>a+(+x.c.min||0),0);
@@ -1133,7 +1134,7 @@ function openInfo(){
  <div class="two"><div class="field"><label for="i-date">촬영일</label><input id="i-date" class="input" type="date" data-info="date" value="${esc(p.date)}"></div><div class="field"><label for="i-wrap">랩 목표 시각</label><input id="i-wrap" class="input" type="time" data-info="wrap" value="${esc(p.wrap)}"></div></div>
  <div class="field"><span class="flabel">화면비 (콘티 칸 크기도 바뀌어요)</span><div class="chips">${Object.keys(ASPECT).map(a=>`<button class="chip code" data-act="info-aspect" data-v="${a}" aria-pressed="${p.aspect===a}">${a}</button>`).join("")}</div></div>
  <div class="field"><span class="flabel">기본 프레임</span><div class="chips">${["23.98","24","25","30","60"].map(a=>`<button class="chip code" data-act="info-fps" data-v="${a}" aria-pressed="${p.fps===a}">${a}</button>`).join("")}</div></div>
- <div class="field"><label for="i-gear">쓸 수 있는 장비 (Claude 컷 초안에 반영)</label><input id="i-gear" class="input" data-info="gear" placeholder="A7S3, 50mm, 85mm, 짐벌, 삼각대" value="${esc(p.gear)}"></div>`,`<button class="btn solid grow" data-act="close-sheet">완료</button>`);
+ <div class="field"><label for="i-gear">쓸 수 있는 장비${Sample?" (Claude 컷 초안에 반영)":""}</label><input id="i-gear" class="input" data-info="gear" placeholder="A7S3, 50mm, 85mm, 짐벌, 삼각대" value="${esc(p.gear)}"></div>`,`<button class="btn solid grow" data-act="close-sheet">완료</button>`);
  w.addEventListener("input",e=>{const k=e.target.dataset.info;if(k){p[k]=e.target.value;touch(p)}});
 }
 
