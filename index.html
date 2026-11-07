@@ -281,6 +281,29 @@ a.btn{text-decoration:none;color:inherit}
 .log-v{margin-top:8px}.log-v b{color:var(--ink);font-size:13.5px}
 .log-v ul{margin:3px 0 0;padding-left:18px;display:grid;gap:2px;line-height:1.45}
 .trow{flex-wrap:wrap;align-items:center}
+.plan-tools .btn{flex:1 1 28%;white-space:nowrap;padding-inline:8px}
+.plan-stage{background:var(--raise);border:1px solid var(--line);border-radius:8px;touch-action:none;user-select:none;-webkit-user-select:none}
+.plan-stage svg{display:block;width:100%;height:auto}
+.plan-thumb{display:block;width:100%;text-align:left;padding:6px 12px;border-bottom:1px solid var(--line);background:transparent}
+.plan-thumb svg{display:block;width:170px;max-width:60%;height:auto;border:1px solid var(--line);border-radius:6px;background:var(--raise)}
+.plan-thumb.big svg{width:100%;max-width:340px}
+.shoot .plan-thumb{border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.sun{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.sun div{background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.sun small{display:block;font-size:12px;color:var(--muted)}.sun b{font:700 24px/1.1 var(--code);font-variant-numeric:tabular-nums}
+.sun .gold{border-color:var(--keep)}.sun .blue{border-color:var(--s-ni)}
+.csec{display:grid;gap:10px;margin-bottom:18px}
+.csec h2{font-size:15px;font-weight:700}
+.sched{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.srow{display:flex;gap:10px;padding:10px 12px;border-top:1px solid var(--line);align-items:flex-start}
+.srow:first-child{border-top:0}
+.srow .t{font:700 17px/1.2 var(--code);min-width:92px;font-variant-numeric:tabular-nums}
+.srow .sw{width:8px;align-self:stretch;flex:none;background:var(--sbg);box-shadow:inset 0 0 0 1px rgba(23,34,44,.25);border-radius:2px}
+.srow p{font-size:13px;color:var(--muted)}
+.vbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--ink);color:var(--paper);padding-block:10px}
+.vbar .wrap{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.vbar b{font-size:16px}.vbar span{font-size:12.5px;opacity:.8}
+.vbar .btn{border-color:var(--paper);color:var(--paper);min-height:38px;padding:4px 12px}
 .qr{background:#fff;padding:12px;width:fit-content;line-height:0}
 .qr img,.qr canvas{display:block}
 .steps{margin:0;padding-left:22px;display:grid;gap:9px;font-size:14.5px;line-height:1.5}
@@ -320,8 +343,10 @@ a.btn{text-decoration:none;color:inherit}
 <script>
 "use strict";
 const BUILD="web";
-const APP_VER="2.7";
+const VIEW_MODE=BUILD==="web"&&/^#view=/.test(location.hash);
+const APP_VER="2.8";
 const CHANGELOG=[
+ ["2.8",["콜시트: 회차별 집합 시간, 장소, 촬영 순서와 예상 시간, 출연, 소품을 한 장으로 만들고 복사해요.","배치도: 씬마다 위에서 본 평면도에 인물, 카메라, 조명, 사물, 180도 선을 놓아요.","해 시간: 촬영일과 지역으로 일출, 일몰, 골든아워, 블루아워를 알려 줘요. 인터넷 없이도 계산돼요.","스태프 공유: 감독, 스태프가 볼 수만 있는 링크를 보내요.","용어 사전에 현장·실무 용어를 크게 늘렸어요."]],
  ["2.7",["첫 화면 작품 카드에 삭제 버튼을 넣었어요.","휴지통: 지운 작품을 30일 동안 보관하고 언제든 되살릴 수 있어요.","작품 안 오른쪽 위 메뉴 아이콘을 점 세 개(⋯)로 바꿨어요."]],
  ["2.6",["업데이트 내역을 앱 버전 아래에서 볼 수 있게 했어요."]],
  ["2.5",["와이파이나 데이터가 없어도 앱이 열리고 모든 기능을 쓸 수 있어요.","인터넷이 다시 연결되면 그동안 바꾼 작품이 자동으로 맞춰져요.","인터넷 없을 때 지운 작품이 다시 살아나던 문제를 고쳤어요.","신호가 약해도 3초 안에 앱이 열려요."]],
@@ -338,7 +363,8 @@ const CATS={
  angle:{title:"앵글",single:true},
  move:{title:"카메라 무빙",single:false},
  lens:{title:"렌즈",single:true},
- term:{title:"시나리오·편집·현장 용어",single:false}
+ term:{title:"시나리오·편집 용어",single:false},
+ field:{title:"현장·실무 용어",single:false}
 };
 // [분류, 섹션, 코드, 한글, 원어, 설명, 그림]
 const T=[];
@@ -507,6 +533,207 @@ add("term","속도·특수",[
 add("term","현장",[
 ["MOS","소리 없이","Without Sound","동시녹음 없이 영상만 찍는다."],["SYNC","동시녹음","Sync Sound","영상과 소리를 함께 녹음한다."],["WILD","와일드 사운드","Wild Sound","화면 없이 소리만 따로 녹음한다."],["ROOM","룸톤","Room Tone","촬영 공간의 빈 소리를 모두 조용히 한 채 30초~1분 녹음한다. 편집 때 빈틈을 메운다."],["PICK UP","픽업","Pick-up","중간부터 다시 이어 찍는다."],["A CAM","A캠","A Camera","주 카메라."],["B CAM","B캠","B Camera","보조 카메라."],["MULTI","멀티캠","Multi Camera","여러 대로 동시에 찍는다."],["STUNT","액션·위험","Stunt","안전 확인이 필요한 컷."],["PROP","소품 필요","Prop","컷에 필요한 소품 확인."],["D FOR N","데이 포 나이트","Day for Night","낮에 찍고 후반 색보정으로 밤처럼 보이게 한다."],["매직아워","매직 아워","Magic Hour","해 뜨기 직전과 해 진 직후의 짧은 시간. 빛이 금방 바뀌어 미리 준비해야 한다."],["헤드룸","헤드룸","Head Room","머리 위 여백."],["룩룸","룩 룸","Look Room","시선 방향 앞 여백. 노즈 룸이라고도 한다."],["180°","180도 규칙","180-Degree Rule","시선을 잇는 선을 넘지 않는다."],["30°","30도 규칙","30-Degree Rule","같은 피사체를 이을 때 30도 이상 옮긴다."],["2.39","시네마스코프","2.39:1","넓은 영화 화면비."],["1.85","비스타","1.85:1","극장 표준 화면비."],["16:9","16:9","1.78:1","일반 영상 화면비."],["9:16","세로형","9:16","쇼츠, 릴스 세로 화면."],
 ]);
+add("field","현장 은어 (일본어에서 온 말)",[
+["나메","걸고 찍기","","앞쪽 사물이나 인물의 어깨, 머리를 프레임 가장자리에 걸고 찍는 것. 더티 샷, 전경 걸기라고 하면 된다."],
+["데마이","전경","","앵글 앞쪽에 걸리는 모든 것. 나메와 비슷하게 쓴다."],
+["데모찌","핸드헬드","","카메라를 손에 들고 찍는 것."],
+["와꾸","프레임, 구도","","화면의 틀이나 구도. \"와꾸 잡아\"는 구도를 정하라는 뜻."],
+["바레","티 남, 걸림","","가짜 티가 나거나, 보이면 안 되는 스태프·장비가 화면에 걸렸다는 뜻."],
+["니쥬","단, 받침","","바닥을 한 단 높이는 마루나 받침. 사과박스처럼 높이를 올릴 때 쓴다."],
+["누끼","같은 앵글 몰아 찍기","","한 씬에서 같은 앵글의 컷을 모아서 한 번에 찍는 것. 세팅을 덜 바꾸려고 한다."],
+["카트와리","컷 분할","","장면을 컷으로 나누는 것. 커트바리라고도 한다."],
+["구다리","장면, 흐름","","씬이나 시퀀스, 장면의 흐름."],
+["시바이","동선, 연기","","배우의 움직임과 동선, 블로킹."],
+["우께","리액션","","상대 연기에 대한 반응, 받아 주는 연기."],
+["다찌마리","액션 장면","","싸움이나 액션 장면."],
+["가에다마","대역","","배우 대신 찍는 대역."],
+["시보리","조리개","","렌즈 조리개."],
+["포카시","아웃포커스","","초점을 일부러 흐리게 하는 것."],
+["가게","그림자","","조명으로 만드는 그림자나 그늘."],
+["끼라끼라","반짝이는 반사광","","물에 비친 빛이 반짝이는 효과."],
+["덴깡","벽 떼기","","카메라 자리를 만들려고 세트 벽 한쪽을 떼어 내는 것."],
+["아시바","조명 비계","","조명을 올려 다는 철골 구조물."],
+["마꾸라끼","레일 받침목","","돌리 레일을 받치는 나무 받침."],
+["쐐기","웨지","","바닥이 고르지 않을 때 레일이나 장비 높이를 맞추는 삼각형 나무."],
+["오모리","무게 고정","","세트나 스탠드를 눌러 고정하는 무게."],
+["시루시","위치 표시","","배우나 장비 자리를 바닥에 테이프로 표시하는 것. 마크라고 하면 된다."],
+["혼방","본 촬영","","리허설이 아니라 실제로 찍는 것."],
+["오사마리","마무리 컷","","장면을 정리하며 끝내는 컷."],
+["돕뿌","첫 장면","","영화나 장면의 시작 부분."],
+["바라시","철수","","촬영 뒤 장비를 정리하고 철수하는 것."],
+["시마이","끝, 정리","","그날 촬영이나 작업을 끝내는 것."],
+["데마찌","대기","","손 놓고 기다리는 시간."],
+["겐또","어림짐작","","대충 짐작해서 맞추는 것. \"겐또로 맞춰\"."],
+["이빠이","끝까지, 가득","","\"줌 이빠이\"처럼 끝까지 당기거나 가득 채운다는 뜻."],
+["야마","핵심, 절정","","장면이나 이야기의 핵심, 가장 중요한 순간."],
+["빠꾸","되돌림","","다시 하거나 처음 자리로 돌아가는 것."],
+["간지","느낌","","화면의 느낌이나 분위기."],
+]);
+add("field","촬영 진행",[
+["스탠바이","준비","Standby","곧 찍으니 제자리에서 준비하라는 신호."],
+["레디","레디","Ready","찍기 직전 모두 준비됐는지 확인하는 말."],
+["롤","녹화 시작","Roll","카메라 녹화를 시작하라는 신호. 카메라는 \"롤링\", 녹음은 \"스피드\"로 답한다."],
+["스피드","녹음 시작됨","Speed","녹음기가 돌아가 준비됐다는 답."],
+["마크","슬레이트 치기","Mark","슬레이트를 치라는 신호. 배우 위치 표시를 뜻하기도 한다."],
+["액션","연기 시작","Action","연기를 시작하라는 신호."],
+["컷","정지","Cut","연기와 녹화를 멈추라는 신호. 감독만 부른다."],
+["홀드","멈춤","Hold","잠깐 그 자리에서 기다리라는 말."],
+["리셋","처음 상태로","Reset","소품, 배우, 카메라를 테이크 시작 상태로 되돌리는 것."],
+["백 투 원","첫 위치로","Back to One","배우와 카메라가 테이크 시작 위치로 돌아가라는 말."],
+["원 모어","한 번 더","One More","같은 세팅으로 한 테이크 더."],
+["세이프티","보험 테이크","Safety Take","OK가 나왔어도 혹시 몰라 한 번 더 찍는 테이크."],
+["테일 슬레이트","끝 슬레이트","Tail Slate","테이크 끝에 슬레이트를 뒤집어 치는 것. 처음에 못 쳤을 때 쓴다."],
+["세컨드 스틱","다시 치기","Second Sticks","슬레이트가 잘 안 보였을 때 다시 치는 것."],
+["드라이 리허설","동선 맞추기","Dry Rehearsal","카메라 없이 배우 동선만 맞춰 보는 리허설."],
+["카메라 리허설","카메라 리허설","Camera Rehearsal","카메라 무빙과 포커스까지 맞춰 보는 리허설."],
+["블로킹","동선 정하기","Blocking","배우와 카메라의 위치, 움직임을 정하는 것."],
+["스탠드인","대리 위치","Stand-in","조명과 카메라를 맞추는 동안 배우 대신 서 있는 사람."],
+["첫 슛","첫 촬영","First Shot","그날의 첫 컷."],
+["애비 싱어","끝에서 두 번째 컷","Abby Singer","그날 마지막 바로 앞 컷. 조감독 이름에서 왔다."],
+["마티니 샷","마지막 컷","Martini Shot","그날의 마지막 컷."],
+["랩","촬영 종료","Wrap","그날 촬영 끝. 작품 전체가 끝나면 올 랩."],
+["크랭크인","촬영 시작","Crank-in","작품의 첫 촬영일."],
+["크랭크업","촬영 완료","Crank-up","작품의 마지막 촬영일."],
+["고사","고사","","첫 촬영 전에 무사 촬영을 비는 한국 현장의 의식."],
+["콜타임","집합 시간","Call Time","스태프와 배우가 현장에 모이는 시간."],
+["콜시트","일일 촬영 안내","Call Sheet","그날의 집합 시간, 장소, 촬영할 씬, 출연, 준비물을 정리한 표."],
+["일촬표","일일 촬영 계획표","Daily Schedule","회차별로 찍을 씬과 순서, 시간을 정리한 표."],
+["브레이크다운","대본 분석","Script Breakdown","씬마다 필요한 배우, 소품, 장소를 뽑아 정리하는 것."],
+["스트립보드","촬영 일정판","Stripboard","씬을 색 띠로 만들어 촬영 순서를 짜는 판. 낮 실내는 흰색, 밤은 파랑처럼 색을 나눈다."],
+["로케 헌팅","장소 찾기","Location Scouting","찍을 장소를 찾아 다니는 것."],
+["테크 스카우트","기술 답사","Tech Scout","촬영·조명·녹음팀이 장소를 미리 보고 전기, 동선을 확인하는 답사."],
+["컨티뉴이티","연결","Continuity","컷과 컷 사이 의상, 소품, 동작, 시선이 이어지게 맞추는 것."],
+["스크립트 노트","스크립터 기록","Script Notes","테이크마다 OK, NG, 연결 사항을 적은 기록."],
+["카메라 리포트","카메라 기록지","Camera Report","카드 번호, 컷, 테이크, 렌즈, 설정을 적는 촬영부 기록지."],
+["레퍼런스","참고 자료","Reference","원하는 느낌을 보여 주는 참고 영상이나 사진."],
+["플레이백","다시 보기","Playback","찍은 테이크를 모니터로 다시 보는 것."],
+]);
+add("field","스태프",[
+["감독","감독","Director","작품 전체를 연출하고 컷을 결정한다."],
+["조감독","조감독","1st AD","현장 진행과 일정을 맡는다. 레디와 롤을 부른다."],
+["스크립터","스크립터","Script Supervisor","연결과 테이크 기록을 맡는다."],
+["촬영감독","촬영감독","DP, DoP","카메라와 조명으로 화면을 책임진다."],
+["카메라 오퍼레이터","카메라 오퍼레이터","Camera Operator","직접 카메라를 잡고 프레임을 맞춘다."],
+["퍼스트","촬영 1st","1st AC, Focus Puller","포커스를 맞추고 렌즈, 카메라 세팅을 맡는다."],
+["세컨드","촬영 2nd","2nd AC, Clapper","슬레이트를 치고 카메라 리포트와 메모리를 맡는다."],
+["DIT","DIT","Digital Imaging Technician","찍은 데이터를 백업하고 확인, 관리한다."],
+["개퍼","조명감독","Gaffer","촬영감독과 함께 조명을 설계하고 조명팀을 이끈다."],
+["키 그립","그립 팀장","Key Grip","돌리, 크레인, 스탠드 같은 장비 설치를 이끈다."],
+["그립","그립","Grip","카메라 지지 장비와 빛을 막는 장비를 다룬다."],
+["동시녹음","동시녹음","Sound Mixer","현장 소리를 녹음한다."],
+["붐 오퍼레이터","붐맨","Boom Operator","붐 마이크를 들고 배우 소리를 따라간다."],
+["미술감독","미술감독","Production Designer","세트와 소품, 공간의 색과 모양을 정한다."],
+["라인 PD","라인 PD","Line Producer","예산과 일정을 관리한다."],
+["제작부","제작부","Production Team","장소 섭외, 식사, 차량 같은 현장 운영을 맡는다."],
+]);
+add("field","카메라·노출",[
+["ISO","감도","ISO","센서의 빛 감도. 올리면 밝아지지만 노이즈가 는다."],
+["조리개","조리개","Aperture, f-stop","렌즈 구멍 크기. f값이 작을수록 밝고 심도가 얕다."],
+["T-스톱","T값","T-stop","렌즈를 실제로 지나는 빛으로 잰 조리개 값. 시네 렌즈에서 쓴다."],
+["셔터 스피드","셔터 스피드","Shutter Speed","한 프레임이 빛을 받는 시간."],
+["180도 셔터","180도 셔터 규칙","180° Shutter Rule","셔터 스피드를 프레임의 두 배로. 24fps면 1/48초(보통 1/50)."],
+["셔터 앵글","셔터 각도","Shutter Angle","셔터를 각도로 나타낸 값. 180도가 자연스러운 움직임."],
+["ND 필터","ND 필터","Neutral Density","색은 그대로 두고 빛만 줄이는 필터. 밝은 낮에 조리개를 열 때 쓴다."],
+["가변 ND","가변 ND","Variable ND","돌려서 빛 줄이는 양을 바꾸는 ND 필터."],
+["화이트밸런스","화이트밸런스","White Balance","흰색이 희게 보이도록 색온도를 맞추는 것."],
+["색온도","색온도","Color Temperature","빛의 색을 켈빈(K)으로 나타낸 값. 숫자가 낮으면 주황, 높으면 파랑."],
+["3200K","텅스텐 기준","3200K","실내 텅스텐 조명의 색온도 기준."],
+["5600K","주광 기준","5600K","낮 햇빛의 색온도 기준."],
+["스톱","스톱","Stop","노출 단위. 1스톱 올리면 빛이 두 배."],
+["언더","노출 부족","Underexposed","화면이 기준보다 어둡게 찍힌 것."],
+["오버","노출 과다","Overexposed","화면이 기준보다 밝게 찍힌 것. 하얗게 날아가면 되살리기 어렵다."],
+["피사계 심도","피사계 심도","Depth of Field","초점이 맞아 보이는 앞뒤 범위."],
+["풀프레임","풀프레임","Full Frame","35mm 필름 크기(36×24mm) 센서."],
+["크롭","크롭 센서","Crop Sensor","풀프레임보다 작은 센서. 같은 렌즈도 더 좁게 찍힌다."],
+["로그","로그 촬영","Log","S-Log3처럼 밝고 어두운 부분을 넓게 담는 밋밋한 화면. 후반 색보정이 필요하다."],
+["LUT","LUT","Look-Up Table","로그 화면을 보기 좋은 색으로 바꿔 주는 변환표."],
+["다이내믹 레인지","다이내믹 레인지","Dynamic Range","한 화면에 담을 수 있는 가장 밝은 곳과 어두운 곳의 폭."],
+["지브라","지브라","Zebra","하얗게 날아갈 부분에 줄무늬를 띄워 주는 노출 보조."],
+["폴스 컬러","폴스 컬러","False Color","밝기를 색으로 보여 주는 노출 보조."],
+["웨이브폼","웨이브폼","Waveform","화면 밝기 분포를 그래프로 보여 주는 도구."],
+["히스토그램","히스토그램","Histogram","밝기별 픽셀 수를 보여 주는 그래프."],
+["피킹","포커스 피킹","Focus Peaking","초점 맞은 테두리에 색을 띄워 주는 기능."],
+["롤링 셔터","롤링 셔터","Rolling Shutter","빠르게 움직이면 화면이 휘어 보이는 현상."],
+["모아레","모아레","Moiré","촘촘한 무늬를 찍을 때 생기는 물결무늬."],
+["플리커","플리커","Flicker","형광등, LED가 깜빡여 화면이 떨리는 현상. 셔터를 1/60이나 1/50으로 맞춰 줄인다."],
+["코덱","코덱","Codec","영상을 압축해 저장하는 방식. H.264, H.265, ProRes 등."],
+["비트레이트","비트레이트","Bitrate","1초에 저장하는 데이터 양. 높을수록 화질이 좋고 파일이 크다."],
+["10비트","10비트 4:2:2","10-bit 4:2:2","색 정보를 더 많이 담는 녹화 방식. 색보정에 유리하다."],
+["타임코드","타임코드","Timecode","프레임마다 붙는 시간 번호. 카메라와 녹음을 맞출 때 쓴다."],
+["매트박스","매트박스","Matte Box","렌즈 앞에서 빛을 막고 필터를 끼우는 상자."],
+["팔로우 포커스","팔로우 포커스 장치","Follow Focus","포커스 링을 돌리기 쉽게 다는 기어 장치."],
+]);
+add("field","조명",[
+["3점 조명","3점 조명","Three-Point Lighting","키, 필, 백 세 개로 인물을 비추는 기본 조명."],
+["키 라이트","주광","Key Light","인물을 비추는 가장 센 빛."],
+["필 라이트","보조광","Fill Light","키가 만든 그림자를 덜어 주는 약한 빛."],
+["백 라이트","역광","Back Light","인물 뒤에서 비춰 윤곽을 살리는 빛. 림 라이트라고도 한다."],
+["키커","키커","Kicker","뒤쪽 옆에서 얼굴 윤곽 한쪽을 살리는 빛."],
+["아이 라이트","캐치라이트","Eye Light","눈동자에 맺히는 작은 반사광을 만드는 빛."],
+["하이키","하이키","High Key","그림자가 적고 밝은 조명. 코미디, 광고에 많이 쓴다."],
+["로우키","로우키","Low Key","어둡고 대비가 강한 조명. 스릴러, 누아르에 많이 쓴다."],
+["렘브란트","렘브란트 조명","Rembrandt","그늘진 볼에 작은 삼각형 빛이 생기게 비추는 조명."],
+["루프","루프 조명","Loop","코 그림자가 볼 쪽으로 살짝 떨어지게 비추는 조명."],
+["버터플라이","버터플라이 조명","Butterfly","정면 위에서 비춰 코 아래 나비 모양 그림자가 생기는 조명."],
+["스플릿","스플릿 조명","Split","얼굴을 반으로 나눠 한쪽만 밝힌다."],
+["브로드","브로드 라이팅","Broad Lighting","카메라 쪽 얼굴 면을 밝히는 조명. 얼굴이 넓어 보인다."],
+["쇼트","쇼트 라이팅","Short Lighting","카메라 반대쪽 얼굴 면을 밝히는 조명. 입체감이 생긴다."],
+["하드 라이트","하드 라이트","Hard Light","그림자가 또렷한 작은 광원의 빛."],
+["소프트 라이트","소프트 라이트","Soft Light","그림자가 부드러운 큰 광원의 빛."],
+["바운스","반사광","Bounce","천장, 벽, 판에 빛을 튕겨 부드럽게 만드는 것."],
+["디퓨전","확산","Diffusion","천이나 필터로 빛을 퍼뜨려 부드럽게 하는 것."],
+["반사판","반사판","Reflector","빛을 반사해 그늘을 채우는 판. 흰색, 은색, 금색."],
+["플래그","플래그","Flag","빛을 가리는 검은 판."],
+["네거티브 필","네거티브 필","Negative Fill","검은 판으로 한쪽 빛을 빨아들여 그림자를 진하게 하는 것."],
+["실크","실크","Silk","햇빛 같은 큰 빛을 부드럽게 거르는 큰 천."],
+["스크림","스크림","Scrim","망사로 빛의 세기만 줄이는 것."],
+["반도어","반도어","Barn Door","조명 앞 날개로 빛이 퍼지는 범위를 막는 것."],
+["젤","젤","Gel","조명 앞에 대는 색 필터."],
+["CTO","CTO","Color Temperature Orange","빛을 주황(텅스텐 쪽)으로 바꾸는 젤."],
+["CTB","CTB","Color Temperature Blue","빛을 파랑(주광 쪽)으로 바꾸는 젤."],
+["프랙티컬","소품 조명","Practical","화면에 보이는 스탠드, 전등 같은 실제 조명."],
+["모티베이티드","동기 있는 빛","Motivated Light","창문, 전등처럼 화면 속 이유가 있는 방향에서 오는 빛."],
+["대비비","조명 대비","Lighting Ratio","키와 필의 밝기 비율. 2:1은 부드럽고 8:1은 강하다."],
+["헤이저","헤이저","Hazer","공기를 뿌옇게 해 빛줄기를 보이게 하는 기계."],
+["HMI","HMI","HMI","주광 색온도의 강한 조명."],
+["텅스텐","텅스텐 조명","Tungsten","3200K 주황빛 조명."],
+["LED","LED 조명","LED","가볍고 색온도를 바꿀 수 있는 조명. 플리커를 확인한다."],
+]);
+add("field","그립·장비",[
+["C스탠드","C스탠드","C-Stand","플래그나 작은 조명을 다는 다용도 스탠드."],
+["사과박스","사과박스","Apple Box","높이를 올릴 때 쓰는 나무 상자. 풀, 하프, 쿼터, 팬케이크 크기가 있다."],
+["샌드백","모래주머니","Sandbag","스탠드가 넘어지지 않게 다리에 얹는 무게."],
+["매직암","매직 암","Magic Arm","모니터, 조명 등을 원하는 각도로 고정하는 관절 팔."],
+["클램프","클램프","Clamp","장비를 기둥, 테이블에 물려 고정하는 집게."],
+["돌리 트랙","레일","Dolly Track","돌리가 움직이는 레일."],
+["하이햇","하이햇","High Hat","바닥이나 박스 위에 카메라를 낮게 올리는 받침."],
+["베이비 레그","짧은 삼각대","Baby Legs","낮은 앵글용 짧은 삼각대."],
+["지브","지브","Jib","카메라를 팔 끝에 달아 위아래로 움직이는 장비."],
+["모니터","모니터","Monitor","찍히는 화면을 크게 보는 화면."],
+["무선 송출","무선 송출","Wireless Video","카메라 화면을 무선으로 모니터에 보내는 장비."],
+]);
+add("field","사운드",[
+["붐 마이크","붐 마이크","Boom Mic","장대 끝에 달아 배우 머리 위에서 소리를 잡는 마이크."],
+["핀마이크","핀마이크","Lavalier","옷에 숨겨 다는 작은 마이크."],
+["후시녹음","후시녹음","ADR","촬영 뒤 스튜디오에서 대사를 다시 녹음하는 것."],
+["폴리","폴리","Foley","발소리, 옷 소리처럼 동작 소리를 따로 만들어 넣는 것."],
+["왈라","왈라","Walla","배경에서 웅성거리는 사람 소리."],
+["싱크","싱크 맞추기","Sync","영상과 소리를 맞추는 것. 슬레이트 소리로 맞춘다."],
+]);
+add("field","제작·후반",[
+["데일리","데일리","Dailies, Rushes","그날 찍은 영상을 확인하는 것. 러시라고도 한다."],
+["백업","데이터 백업","Backup","찍은 파일을 두 곳 이상에 복사해 두는 것."],
+["가편집","가편집","Rough Cut","컷을 대략 이어 붙인 첫 편집본."],
+["본편집","본편집","Fine Cut","타이밍을 다듬은 편집본."],
+["픽처 락","편집 확정","Picture Lock","더 이상 컷을 바꾸지 않기로 정한 상태."],
+["DI","DI","Digital Intermediate","색보정과 마무리를 하는 후반 단계."],
+["색보정","색보정","Color Correction","노출과 색을 맞추는 작업."],
+["컬러 그레이딩","컬러 그레이딩","Color Grading","장면 분위기에 맞게 색을 입히는 작업."],
+["믹싱","믹싱","Mixing","대사, 효과음, 음악 크기를 맞추는 작업."],
+["프록시","프록시","Proxy","편집하기 쉽게 만든 가벼운 복사본 파일."],
+["레터박스","레터박스","Letterbox","화면 위아래 검은 띠. 넓은 화면비를 보여 준다."],
+["크레딧","크레딧","Credits","출연, 스태프 이름이 나오는 자막."],
+]);
 const SIZE_QUICK=["FS","WS","BS","CU","ECU","2S","OTS","INS"];
 const ANGLE_QUICK=["아이레벨","부감","앙각","탑","사선"];
 const MOVE_QUICK=["고정","팬 R","틸트 업","달리 인","핸드헬드","짐벌"];
@@ -576,6 +803,7 @@ const ICON={
  trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>',
  list:'<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
  cam:'<svg viewBox="0 0 24 24"><rect x="3" y="7" width="13" height="11"/><path d="M16 11l5-3v9l-5-3"/></svg>',
+ sheet:'<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 3v3h6V3M8 11h8M8 15h8M8 19h5"/></svg>',
  book:'<svg viewBox="0 0 24 24"><path d="M5 4h14v17H7a2 2 0 0 1-2-2zM5 18a2 2 0 0 1 2-2h12"/></svg>',
  grip:'<svg viewBox="0 0 18 18"><circle cx="6" cy="4" r="1.6"/><circle cx="12" cy="4" r="1.6"/><circle cx="6" cy="9" r="1.6"/><circle cx="12" cy="9" r="1.6"/><circle cx="6" cy="14" r="1.6"/><circle cx="12" cy="14" r="1.6"/></svg>'
 };
@@ -592,9 +820,9 @@ let S={projects:{},synced:{},prefs:{},gone:{}};
 function loadLocal(){try{const r=localStorage.getItem(KEY);if(r){const v=JSON.parse(r);S.projects=v.projects||{};S.synced=v.synced||{};S.prefs=v.prefs||{};S.gone=v.gone||{};Object.keys(S.projects).forEach(k=>{S.projects[k]=normP(S.projects[k])})}}catch(e){}}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function normP(p){
- p=Object.assign({id:uid(),name:"제목 없는 작품",scenes:[],order:[],director:"",dop:"",date:"",wrap:"",aspect:"16:9",fps:"",gear:"",updatedAt:Date.now()},p);
+ p=Object.assign({id:uid(),name:"제목 없는 작품",scenes:[],order:[],calls:{},director:"",dop:"",date:"",wrap:"",aspect:"16:9",fps:"",gear:"",updatedAt:Date.now()},p);
  if(!Array.isArray(p.scenes))p.scenes=[];if(!Array.isArray(p.order))p.order=[];
- p.scenes=p.scenes.map(sc=>{sc=Object.assign({id:uid(),no:"1",time:"D",place:"INT",loc:"",note:"",day:"1",cuts:[]},sc);if(!Array.isArray(sc.cuts))sc.cuts=[];
+ p.scenes=p.scenes.map(sc=>{sc=Object.assign({id:uid(),no:"1",time:"D",place:"INT",loc:"",note:"",day:"1",cast:"",props:"",plan:null,cuts:[]},sc);if(!Array.isArray(sc.cuts))sc.cuts=[];
   sc.cuts=sc.cuts.map(c=>{c=Object.assign({id:uid(),size:"",angle:"",moves:[],lens:"",terms:[],desc:"",note:"",min:10,star:false,opt:false,status:"todo",takes:[],img:"",fps:""},c);["moves","terms","takes"].forEach(k=>{if(!Array.isArray(c[k]))c[k]=[]});return c});return sc});
  return p;
 }
@@ -688,6 +916,7 @@ function specLine(c){return [angleLabel(c),(c.moves||[]).join(" + "),c.lens,c.fp
 
 /* ───────── 그리기 ───────── */
 function render(){
+ if(VIEW_MODE){renderView();return}
  const app=$("#app");
  const p=cur();
  if(View.pid&&(!p||p.trashed)){View.pid=null;setHash("")}
@@ -710,9 +939,9 @@ function projectHtml(p){
  return `<header class="top"><div class="wrap${wide}"><div class="top-in"><button class="icon" data-act="home" aria-label="작품 목록으로">${ICON.back}</button><h1>${esc(p.name)}</h1><button class="icon" data-act="project-menu" aria-label="메뉴: 내보내기, 작품 설정, 삭제">${ICON.more}</button></div>
  ${st.total?`<div class="prog"><div class="prog-t"><span><b>${st.done}</b> / ${st.total}컷 완료${st.skip?`, ${st.skip}컷 건너뜀`:""}</span><span>남은 ${st.remain}컷, 약 <b>${minLabel(st.remMin)}</b>${st.remain?` · ${clock(Date.now()+st.remMin*60000)} 종료 예상`:""}</span></div>${wrapHtml(p,st)}${barHtml(p,nowId)}</div>`:""}
  </div></header>
- <main class="wrap${wide}" id="main">${View.tab==="list"?listHtml(p):View.tab==="shoot"?shootHtml(p):dictHtml()}</main>
+ <main class="wrap${wide}" id="main">${View.tab==="list"?listHtml(p):View.tab==="shoot"?shootHtml(p):View.tab==="call"?callHtml(p):dictHtml()}</main>
  <nav class="tabs" role="tablist" aria-label="화면">
-  ${[["list","샷리스트",ICON.list],["shoot","촬영",ICON.cam],["dict","용어",ICON.book]].map(t=>`<button role="tab" aria-selected="${View.tab===t[0]}" data-act="tab" data-tab="${t[0]}">${t[2]}<span>${t[1]}</span></button>`).join("")}
+  ${[["list","샷리스트",ICON.list],["shoot","촬영",ICON.cam],["call","콜시트",ICON.sheet],["dict","용어",ICON.book]].map(t=>`<button role="tab" aria-selected="${View.tab===t[0]}" data-act="tab" data-tab="${t[0]}">${t[2]}<span>${t[1]}</span></button>`).join("")}
  </nav>`;
 }
 function tapeHtml(c){const custom=c.size;return c.size?`<span class="tape">${esc(custom)}</span>`:`<span class="tape empty">사이즈</span>`}
@@ -724,7 +953,7 @@ function listHtml(p){
  const scenes=p.scenes.map(sc=>{const rows=sc.cuts.map((c,i)=>pass(c)?cutRow(sc,c,i,f!=="all"):"").join("");if(f!=="all"&&!rows)return"";
  return `<section class="scene" aria-label="씬 ${esc(sc.no)}">
   <div class="strip" style="${stripVars(sc)}"><button class="strip-main" data-act="edit-scene" data-id="${sc.id}" aria-label="씬 ${esc(sc.no)} 정보 고치기"><span class="strip-no">S#${esc(sc.no)}</span><span class="strip-tt"><b>${esc(sc.loc||"장소 미정")}</b><span>${sc.time} ${sc.place}${(+sc.day||1)>1||hasDays(p)?` / ${esc(sc.day)}회차`:""}</span></span></button><button class="strip-add" data-act="add-cut" data-id="${sc.id}" aria-label="씬 ${esc(sc.no)}에 컷 추가">+ 컷</button></div>
-  <div class="cuts" data-sort="cuts" data-scene="${sc.id}">${rows}</div>
+  ${planThumb(sc)}<div class="cuts" data-sort="cuts" data-scene="${sc.id}">${rows}</div>
   ${f==="all"?`<button class="add-set" data-act="preset" data-id="${sc.id}">컷 세트로 한 번에 추가</button>`:""}
  </section>`}).join("");
  const lint=lintOf(p);
@@ -768,7 +997,7 @@ function shootHtml(p){
   <p class="slate-spec" style="margin-top:9px">${esc(specLine(c))}</p>
   <p class="slate-desc">${esc(c.desc)}</p>${c.note?`<p class="slate-note">${esc(c.note)}</p>`:""}${c.img&&IMG[c.img]?`<img class="slate-img" src="${IMG[c.img]}" alt="콘티">`:""}
  </section>
- <div class="acts"><button class="act ng" data-act="take" data-r="ng">NG<small>다시 찍기</small></button><button class="act keep" data-act="take" data-r="keep">KEEP<small>일단 보관</small></button><button class="act okb" data-act="take" data-r="ok">OK<small>완료, 다음 컷</small></button></div>
+ ${planThumb(x.sc,true)}<div class="acts"><button class="act ng" data-act="take" data-r="ng">NG<small>다시 찍기</small></button><button class="act keep" data-act="take" data-r="keep">KEEP<small>일단 보관</small></button><button class="act okb" data-act="take" data-r="ok">OK<small>완료, 다음 컷</small></button></div>
  ${View.ngFor===c.id&&c.takes.length?`<div class="reasons"><span>테이크 ${c.takes[c.takes.length-1].n}을 왜 다시 찍나요? (안 눌러도 돼요)</span>${NG_REASONS.map(r=>`<button class="chip" data-act="reason" data-r="${esc(r)}" aria-pressed="${c.takes[c.takes.length-1].note===r}">${esc(r)}</button>`).join("")}</div>`:""}
  <div class="nav2"><button class="btn quiet" data-act="shoot-step" data-d="-1">이전 컷</button><button class="btn quiet" data-act="skip">${c.status==="skip"?"다시 찍기로":"건너뛰기"}</button><button class="btn quiet" data-act="shoot-step" data-d="1">다음 컷</button></div>
  ${c.takes.length?`<div class="takes" aria-label="테이크 기록">${[...c.takes].reverse().map(t=>`<div class="take"><b>T${t.n}</b><span class="tk ${t.r}">${t.r.toUpperCase()}</span><input class="take-note" data-n="${t.n}" value="${esc(t.note)}" placeholder="메모, 파일 번호" aria-label="테이크 ${t.n} 메모"><button class="icon" data-act="del-take" data-n="${t.n}" aria-label="테이크 ${t.n} 기록 지우기">${ICON.close}</button></div>`).join("")}</div>`:""}
@@ -885,6 +1114,8 @@ function sceneBody(sc){return `<div class="two"><div class="field"><label for="s
  <div class="field"><span class="flabel">시간대</span><div class="seg" id="seg-time">${segTime(sc)}</div></div>
  <div class="field"><span class="flabel">촬영 회차</span><div class="seg" id="seg-day">${segDay(sc)}</div></div>
  <div class="field"><label for="sc-loc">장소</label><input id="sc-loc" class="input" placeholder="동아리실" value="${esc(sc.loc)}"></div>
+ <div class="two"><div class="field"><label for="sc-cast">출연</label><input id="sc-cast" class="input" data-scf="cast" placeholder="민서, 지호" value="${esc(sc.cast||"")}"></div><div class="field"><label for="sc-props">소품·의상</label><input id="sc-props" class="input" data-scf="props" placeholder="교복, 안내문" value="${esc(sc.props||"")}"></div></div>
+ <button class="btn" data-act="plan" data-id="${sc.id}">배치도 ${sc.plan&&sc.plan.items&&sc.plan.items.length?"고치기":"그리기"}</button>
  <div id="sc-prev"><div class="strip" style="${stripVars(sc)};padding:8px 12px;font-size:13.5px">스트립보드 색: ${sc.time} ${sc.place}</div></div>
  <div class="row"><button class="btn quiet grow" data-act="move-scene" data-d="-1">씬 위로</button><button class="btn quiet grow" data-act="move-scene" data-d="1">씬 아래로</button><button class="btn danger grow" data-act="del-scene">씬 삭제</button></div>`}
 const segDay=sc=>["1","2","3","4","5","6"].map(v=>`<button data-act="sc-day" data-v="${v}" aria-pressed="${(sc.day||"1")===v}">${v}</button>`).join("");
@@ -928,7 +1159,7 @@ function printHtml(p){
  th{background:#eee;font-weight:700}.s th{-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:13px}.n{font-weight:700;overflow-wrap:anywhere}.bx{display:inline-block;width:13px;height:13px;border:1.5px solid #111}
  .p{margin-bottom:12px}button{padding:10px 16px;font:inherit}@media print{.p{display:none}body{margin:0}}</style></head><body>
  <div class="p"><button onclick="window.print()">인쇄 또는 PDF로 저장</button></div><h1>${esc(p.name)} 샷리스트</h1><p class="m">${esc([p.date,p.director&&"감독 "+p.director,p.dop&&"촬영 "+p.dop,p.aspect,p.fps&&p.fps+"fps"].filter(Boolean).join(" / "))}${p.date||p.director||p.dop?"<br>":""}씬 ${p.scenes.length}개, 컷 ${st.total}개, 예상 ${minLabel(st.totalMin)}</p>
- ${p.scenes.map(sc=>{const k=color[stripKey(sc)];return `<table><colgroup><col style="width:6%"><col style="width:9%"><col style="width:18%"><col style="width:32%"><col style="width:13%"><col style="width:4%"><col style="width:14%"><col style="width:4%"></colgroup><thead><tr class="s"><th colspan="8" style="background:${k[0]};color:${k[1]}">S#${esc(sc.no)}  ${sc.time} ${sc.place}  ${esc(sc.loc)}</th></tr><tr><th>컷</th><th>사이즈</th><th>앵글 / 무빙 / 렌즈</th><th>어떻게 찍을지</th><th>메모</th><th>분</th><th>테이크</th><th class="c">OK</th></tr></thead><tbody>${sc.cuts.map((c,i)=>`<tr><td class="n">${esc(sc.no)}-${i+1}${c.star?" ★":""}</td><td class="n">${esc(c.size)}${c.terms.length?"<br>"+esc(c.terms.join(", ")):""}</td><td>${esc(specLine(c))}</td><td>${c.img&&IMG[c.img]?`<img src="${IMG[c.img]}" alt="" style="display:block;width:100%;max-width:190px;margin-bottom:4px;border:1px solid #999">`:""}${esc(c.desc)}${c.opt?" (선택)":""}</td><td>${esc(c.note)}</td><td>${+c.min||""}</td><td>${esc(c.takes.map(t=>`T${t.n} ${t.r.toUpperCase()}${t.note?" "+t.note:""}`).join(", "))}</td><td class="c"><span class="bx" style="${c.status==="done"?"background:#111":""}"></span></td></tr>`).join("")}</tbody></table>`}).join("")}
+ ${p.scenes.map(sc=>{const k=color[stripKey(sc)];return `${sc.plan&&sc.plan.items&&sc.plan.items.length?`<div style="width:300px;margin:6px 0">${planSvg(sc.plan,{print:true})}</div>`:""}<table><colgroup><col style="width:6%"><col style="width:9%"><col style="width:18%"><col style="width:32%"><col style="width:13%"><col style="width:4%"><col style="width:14%"><col style="width:4%"></colgroup><thead><tr class="s"><th colspan="8" style="background:${k[0]};color:${k[1]}">S#${esc(sc.no)}  ${sc.time} ${sc.place}  ${esc(sc.loc)}</th></tr><tr><th>컷</th><th>사이즈</th><th>앵글 / 무빙 / 렌즈</th><th>어떻게 찍을지</th><th>메모</th><th>분</th><th>테이크</th><th class="c">OK</th></tr></thead><tbody>${sc.cuts.map((c,i)=>`<tr><td class="n">${esc(sc.no)}-${i+1}${c.star?" ★":""}</td><td class="n">${esc(c.size)}${c.terms.length?"<br>"+esc(c.terms.join(", ")):""}</td><td>${esc(specLine(c))}</td><td>${c.img&&IMG[c.img]?`<img src="${IMG[c.img]}" alt="" style="display:block;width:100%;max-width:190px;margin-bottom:4px;border:1px solid #999">`:""}${esc(c.desc)}${c.opt?" (선택)":""}</td><td>${esc(c.note)}</td><td>${+c.min||""}</td><td>${esc(c.takes.map(t=>`T${t.n} ${t.r.toUpperCase()}${t.note?" "+t.note:""}`).join(", "))}</td><td class="c"><span class="bx" style="${c.status==="done"?"background:#111":""}"></span></td></tr>`).join("")}</tbody></table>`}).join("")}
  </body></html>`;
 }
 function safeName(s){return String(s).replace(/[\\/:*?"<>|]/g,"").trim().slice(0,60)||"샷리스트"}
@@ -947,7 +1178,7 @@ function openExport(){
  const th=S.prefs.theme||"auto";
  openSheet("내보내기와 작품 설정",`
   <div class="field"><span class="flabel">작품</span><div class="row"><button class="btn grow" data-act="project-info">작품 정보와 랩 시간</button><button class="btn quiet grow" data-act="scenario">시나리오 붙여넣기</button>${BUILD==="web"?`<button class="btn quiet grow" data-act="link">기기 연동</button>`:""}</div></div>
-  <div class="field"><span class="flabel">보내기</span><div class="row"><button class="btn grow" data-act="copy-text">샷리스트 복사 (카톡, 노션)</button><button class="btn grow" data-act="copy-log">편집용 테이크 기록 복사</button></div></div>
+  <div class="field"><span class="flabel">보내기</span><div class="row"><button class="btn grow" data-act="share">스태프 공유 (보기 전용)</button><button class="btn grow" data-act="copy-text">샷리스트 복사 (카톡, 노션)</button><button class="btn grow" data-act="copy-log">편집용 테이크 기록 복사</button></div></div>
   <div class="field"><span class="flabel">파일로 저장</span><div class="row"><button class="btn grow" data-act="export-print">인쇄·PDF용</button><button class="btn grow" data-act="export-csv">엑셀용 CSV</button><button class="btn grow" data-act="export-json">백업 파일</button></div></div>
   <div class="field"><span class="flabel">화면</span><div class="seg" id="seg-theme">${["auto","light","dark"].map(v=>`<button data-act="theme" data-v="${v}" aria-pressed="${th===v}">${{auto:"자동",light:"밝게 (야외)",dark:"어둡게 (야간)"}[v]}</button>`).join("")}</div></div>
   <div class="field"><span class="flabel">정리</span><div class="row"><button class="btn quiet grow" data-act="rename">이름 바꾸기</button><button class="btn quiet grow" data-act="reset-shoot">촬영 기록 비우기</button><button class="btn danger grow" data-act="del-project">휴지통으로</button></div></div>`);
@@ -1031,7 +1262,8 @@ const A={
  "trash-empty-yes"(){Object.values(S.projects).filter(x=>x.trashed).forEach(x=>purgeP(x.id));while(sheetStack.length)closeSheet();render();toast("휴지통을 비웠어요.")},
  undo(){const u=toastUndo;$("#toast-slot").innerHTML="";toastUndo=null;if(u)u()}
 };
-document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;if(dragJustEnded)return;const f=A[el.dataset.act];if(f)f(el)});
+document.addEventListener("pointerdown",e=>{if(!e.target.closest("#plan-stage"))PL.down=false},true);
+document.addEventListener("click",e=>{if(PL.down&&!e.target.closest("#plan-stage")){PL.down=false;return}const el=e.target.closest("[data-act]");if(!el)return;if(dragJustEnded)return;const f=A[el.dataset.act];if(f)f(el)});
 document.addEventListener("input",e=>{if(e.target.id==="dict-q"){View.dictQ=e.target.value;$("#dict-list").innerHTML=dictList()}});
 $("#import-file").addEventListener("change",e=>{
  const f=e.target.files[0];e.target.value="";if(!f)return;
@@ -1416,8 +1648,194 @@ function openTrash(){
  openSheet("휴지통",`<p style="color:var(--muted);font-size:14px">지운 작품은 ${TRASH_DAYS}일 동안 여기 있다가 자동으로 지워져요.</p><div class="dict">${l.map(p=>{const left=Math.max(1,Math.ceil((p.trashed+TRASH_DAYS*864e5-Date.now())/864e5));return `<div class="ditem trow"><div style="min-width:0;flex:1"><h3>${esc(p.name)}</h3><p>씬 ${p.scenes.length}개, 컷 ${allCuts(p).length}개 · ${left}일 뒤 완전히 삭제</p></div><div class="row" style="flex:none"><button class="btn" data-act="trash-back" data-id="${esc(p.id)}">되살리기</button><button class="btn danger" data-act="trash-kill" data-id="${esc(p.id)}">완전 삭제</button></div></div>`}).join("")}</div>`,`<button class="btn danger grow" data-act="trash-empty">휴지통 비우기</button>`);
 }
 
+/* ───────── 해 시간 (SunCalc 방식, 인터넷 없이 계산) ───────── */
+const CITIES=[["서울",37.5665,126.978],["인천",37.4563,126.7052],["수원",37.2636,127.0286],["고양",37.6584,126.832],["성남",37.4201,127.1269],["천안",36.8151,127.1139],["청주",36.6424,127.489],["대전",36.3504,127.3845],["전주",35.8242,127.148],["광주",35.1595,126.8526],["목포",34.8118,126.3922],["여수",34.7604,127.6622],["대구",35.8714,128.6014],["안동",36.5684,128.7294],["포항",36.019,129.3435],["울산",35.5384,129.3114],["부산",35.1796,129.0756],["창원",35.228,128.6811],["춘천",37.8813,127.7298],["강릉",37.7519,128.8761],["제주",33.4996,126.5312],["서귀포",33.2541,126.56]];
+function sunTimes(dateStr,lat,lng){
+ const R=Math.PI/180,[y,m,d]=dateStr.split("-").map(Number),day0=Date.UTC(y,m-1,d);
+ const geo=ms=>{const jc=(ms/864e5+2440587.5-2451545)/36525;
+  const L0=((280.46646+jc*(36000.76983+jc*0.0003032))%360+360)%360,M=357.52911+jc*(35999.05029-0.0001537*jc),e=0.016708634-jc*(0.000042037+0.0000001267*jc);
+  const C=Math.sin(M*R)*(1.914602-jc*(0.004817+0.000014*jc))+Math.sin(2*M*R)*(0.019993-0.000101*jc)+Math.sin(3*M*R)*0.000289;
+  const om=125.04-1934.136*jc,lam=L0+C-0.00569-0.00478*Math.sin(om*R);
+  const eps=23+(26+(21.448-jc*(46.815+jc*(0.00059-jc*0.001813)))/60)/60+0.00256*Math.cos(om*R);
+  const dec=Math.asin(Math.sin(eps*R)*Math.sin(lam*R)),yy=Math.tan(eps*R/2)**2;
+  const eot=4/R*(yy*Math.sin(2*L0*R)-2*e*Math.sin(M*R)+4*e*yy*Math.sin(M*R)*Math.cos(2*L0*R)-0.5*yy*yy*Math.sin(4*L0*R)-1.25*e*e*Math.sin(2*M*R));
+  return{dec,eot}};
+ const ev=(zen,rise)=>{let t=day0+(720-4*lng)*6e4;for(let k=0;k<3;k++){const{dec,eot}=geo(t);const c=Math.cos(zen*R)/(Math.cos(lat*R)*Math.cos(dec))-Math.tan(lat*R)*Math.tan(dec);if(c<-1||c>1)return null;const ha=Math.acos(c)/R;t=day0+(720-4*(lng+(rise?ha:-ha))-eot)*6e4}return new Date(t)};
+ const o={dawn:ev(96,1),rise:ev(90.833,1),goldAmEnd:ev(84,1),goldPmStart:ev(84,0),set:ev(90.833,0),dusk:ev(96,0)};
+ return Object.values(o).every(Boolean)?o:null;
+}
+function sunHtml(c){
+ if(!c.date)return `<p class="scn-status">촬영일을 넣으면 해 시간이 나와요.</p>`;
+ const lat=+c.lat,lng=+c.lng;if(!c.lat||isNaN(lat))return `<p class="scn-status">지역을 고르면 해 시간이 나와요.</p>`;
+ const t=sunTimes(c.date,lat,lng);if(!t)return `<p class="scn-status">이 날짜와 위치에서는 해 시간을 계산할 수 없어요.</p>`;
+ const f=d=>clock(d.getTime());
+ return `<div class="sun"><div class="blue"><small>아침 블루아워</small><b>${f(t.dawn)}~${f(t.rise)}</b></div><div><small>일출</small><b>${f(t.rise)}</b></div><div class="gold"><small>아침 골든아워</small><b>~${f(t.goldAmEnd)}</b></div><div class="gold"><small>저녁 골든아워</small><b>${f(t.goldPmStart)}~</b></div><div><small>일몰</small><b>${f(t.set)}</b></div><div class="blue"><small>저녁 블루아워</small><b>${f(t.set)}~${f(t.dusk)}</b></div></div><p class="scn-status">${esc(c.city||"선택한 위치")} 기준, 이 기기 시간대로 표시해요. 골든아워는 해 높이 6도 아래, 블루아워는 해가 진 뒤 -6도까지예요.</p>`;
+}
+
+/* ───────── 콜시트 ───────── */
+const callDays=p=>{const d=[...new Set(p.scenes.map(s=>s.day||"1"))].sort((a,b)=>a-b);return d.length?d:["1"]};
+function callOf(p,day){if(!p.calls||typeof p.calls!=="object")p.calls={};if(!p.calls[day])p.calls[day]={};return p.calls[day]}
+function hm(str){const m=/^(\d{1,2}):(\d{2})/.exec(str||"");return m?+m[1]*60+ +m[2]:null}
+const fmtHm=m=>`${String(Math.floor(m/60)%24).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;
+function schedule(p,day){
+ const c=callOf(p,day);let t=hm(c.start)??hm(c.call);
+ const order=[];shootList(p).filter(x=>(x.sc.day||"1")===day).forEach(x=>{let g=order.find(o=>o.sc===x.sc);if(!g){g={sc:x.sc,cuts:[]};order.push(g)}g.cuts.push(x.c)});
+ p.scenes.filter(sc=>(sc.day||"1")===day&&!order.some(o=>o.sc===sc)).forEach(sc=>order.push({sc,cuts:[]}));
+ return order.map(o=>{const min=o.cuts.reduce((a,c)=>a+(+c.min||0),0);const row={sc:o.sc,n:o.cuts.length,min,from:t,to:t==null?null:t+min};if(t!=null)t+=min;return row});
+}
+function curDay(p){const ds=callDays(p);return ds.includes(View.callDay)?View.callDay:ds[0]}
+function callHtml(p){
+ const ds=callDays(p),day=curDay(p),c=callOf(p,day);
+ const dateV=c.date||(day==="1"?p.date:"")||"";
+ const rows=schedule(p,day);const total=rows.reduce((a,r)=>a+r.min,0);
+ const cast=[...new Set(rows.flatMap(r=>(r.sc.cast||"").split(/[,，、]/).map(x=>x.trim()).filter(Boolean)))];
+ const props=[...new Set(rows.flatMap(r=>(r.sc.props||"").split(/[,，、]/).map(x=>x.trim()).filter(Boolean)))];
+ return `${ds.length>1?`<div class="filter" role="group" aria-label="회차">${ds.map(d=>`<button class="chip" data-act="call-day" data-d="${esc(d)}" aria-pressed="${d===day}">${esc(d)}회차</button>`).join("")}</div>`:""}
+ <section class="csec"><h2>${esc(day)}회차 기본 정보</h2>
+  <div class="two"><div class="field"><label for="cl-date">촬영일</label><input id="cl-date" class="input" type="date" data-call="date" value="${esc(dateV)}"></div><div class="field"><label for="cl-call">집합 시간</label><input id="cl-call" class="input" type="time" data-call="call" value="${esc(c.call||"")}"></div></div>
+  <div class="two"><div class="field"><label for="cl-start">첫 촬영</label><input id="cl-start" class="input" type="time" data-call="start" value="${esc(c.start||"")}"></div><div class="field"><label for="cl-contact">연락처</label><input id="cl-contact" class="input" data-call="contact" inputmode="tel" placeholder="조감독 010-0000-0000" value="${esc(c.contact||"")}"></div></div>
+  <div class="field"><label for="cl-place">집합 장소</label><input id="cl-place" class="input" data-call="place" placeholder="학교 정문 앞" value="${esc(c.place||"")}"></div>
+  <div class="field"><label for="cl-note">공지</label><textarea id="cl-note" class="input" data-call="note" rows="2" placeholder="우천 시 실내 씬부터, 점심 12:30">${esc(c.note||"")}</textarea></div>
+ </section>
+ <section class="csec"><h2>해 시간</h2>
+  <div class="row"><select id="cl-city" class="input" style="flex:1;min-width:0" aria-label="지역">${[`<option value="">지역 고르기</option>`,...CITIES.map(x=>`<option ${c.city===x[0]?"selected":""}>${x[0]}</option>`),c.city==="현재 위치"?`<option selected>현재 위치</option>`:""].join("")}</select><button class="btn" data-act="call-geo">현재 위치</button></div>
+  <div id="sun-box">${sunHtml(Object.assign({},c,{date:dateV}))}</div>
+ </section>
+ <section class="csec"><h2>촬영 순서 ${rows.length?`(${minLabel(total)})`:""}</h2>
+  ${rows.length?`<div class="sched">${rows.map(r=>`<div class="srow"><span class="sw" style="${stripVars(r.sc)}"></span><span class="t">${r.from!=null?fmtHm(r.from)+"~"+fmtHm(r.to):"시간 미정"}</span><div style="min-width:0"><b>S#${esc(r.sc.no)} ${esc(r.sc.loc||"장소 미정")}</b><p>${r.sc.time} ${r.sc.place}, ${r.n}컷, ${minLabel(r.min)}${r.sc.cast?` · 출연 ${esc(r.sc.cast)}`:""}</p></div></div>`).join("")}</div><p class="scn-status">촬영 탭의 순서와 컷별 예상 시간으로 계산해요. ${hm(c.start)==null&&hm(c.call)==null?"첫 촬영이나 집합 시간을 넣으면 시각이 나와요.":""}</p>`:`<div class="blank"><h3>${esc(day)}회차에 씬이 없어요</h3><p>씬 정보에서 촬영 회차를 정해 주세요.</p></div>`}
+ </section>
+ <section class="csec"><h2>출연과 준비물</h2><p>${cast.length?"출연: "+esc(cast.join(", ")):"출연을 적은 씬이 없어요. 씬 정보에서 적을 수 있어요."}</p><p>${props.length?"소품·의상: "+esc(props.join(", ")):""}</p></section>
+ <div class="row"><button class="btn solid grow" data-act="call-copy">콜시트 복사 (카톡)</button></div>`;
+}
+function callText(p,day){
+ const c=callOf(p,day),dateV=c.date||(day==="1"?p.date:"")||"";const rows=schedule(p,day);
+ const out=[`[${p.name}] ${day}회차 콜시트`];
+ if(dateV)out.push("날짜: "+dateV);if(c.call)out.push("집합: "+c.call+(c.place?" / "+c.place:""));else if(c.place)out.push("집합 장소: "+c.place);if(c.start)out.push("첫 촬영: "+c.start);if(c.contact)out.push("연락: "+c.contact);
+ if(dateV&&c.lat){const t=sunTimes(dateV,+c.lat,+c.lng);if(t){const f=d=>clock(d.getTime());out.push(`해: 일출 ${f(t.rise)}, 일몰 ${f(t.set)}, 저녁 골든아워 ${f(t.goldPmStart)}~`)}}
+ out.push("","촬영 순서");rows.forEach(r=>out.push(`${r.from!=null?fmtHm(r.from)+"~"+fmtHm(r.to)+" ":""}S#${r.sc.no} ${r.sc.time} ${r.sc.place} ${r.sc.loc||""} (${r.n}컷)${r.sc.cast?" 출연: "+r.sc.cast:""}${r.sc.props?" 준비: "+r.sc.props:""}`));
+ if(c.note)out.push("","공지: "+c.note);
+ return out.join("\n");
+}
+
+/* ───────── 배치도 ───────── */
+const PW=100,PH=70;
+function planOf(sc){if(!sc.plan||!Array.isArray(sc.plan.items))sc.plan={items:[],line:null};return sc.plan}
+function lensMm(v){const m=/(\d+)/.exec(v||"");if(m)return+m[1];return /초광각/.test(v)?16:/광각/.test(v)?28:/망원/.test(v)?135:50}
+function planSvg(plan,o={}){
+ const P=o.print;const ink=P?"#17222C":"var(--ink)",mut=P?"#9AA4AA":"var(--line)",red=P?"#CF1F2E":"var(--tally)",amb=P?"#A86A00":"var(--keep)",blu=P?"#2F67B8":"var(--s-ni)",bg=P?"#fff":"var(--raise)",soft=P?"#E3E7E6":"var(--soft)";
+ let g=`<rect x="0" y="0" width="${PW}" height="${PH}" fill="${bg}"/><g pointer-events="none">`;
+ for(let x=10;x<PW;x+=10)g+=`<line x1="${x}" y1="0" x2="${x}" y2="${PH}" stroke="${mut}" stroke-width=".15"/>`;for(let y=10;y<PH;y+=10)g+=`<line x1="0" y1="${y}" x2="${PW}" y2="${y}" stroke="${mut}" stroke-width=".15"/>`;g+=`</g>`;
+ const L=plan.line;if(L){g+=`<line x1="${L.x1}" y1="${L.y1}" x2="${L.x2}" y2="${L.y2}" stroke="${red}" stroke-width=".6" stroke-dasharray="2 1.4"/><text x="${(L.x1+L.x2)/2}" y="${(L.y1+L.y2)/2-1.6}" font-size="2.6" fill="${red}" text-anchor="middle" font-weight="700">180°</text>`;if(o.edit)g+=`<circle data-h="1" cx="${L.x1}" cy="${L.y1}" r="2.4" fill="${red}" opacity=".8"/><circle data-h="2" cx="${L.x2}" cy="${L.y2}" r="2.4" fill="${red}" opacity=".8"/>`}
+ const cone=(deg,len,col,op)=>{const a=deg/2*Math.PI/180,w=Math.tan(a)*len;return `<path d="M0 0L${-w} ${-len}L${w} ${-len}Z" fill="${col}" opacity="${op}" pointer-events="none"/>`};
+ const items=[...plan.items].sort((a,b)=>(a.t==="o"?0:1)-(b.t==="o"?0:1));
+ items.forEach(it=>{
+  let body="";
+  if(it.t==="p")body=`<circle r="3.2" fill="${blu}"/><path d="M-1.6 -2.8L0 -5.2L1.6 -2.8Z" fill="${blu}"/>`;
+  else if(it.t==="c"){const f=lensMm(it.lens);body=cone(2*Math.atan(18/f)*180/Math.PI,26,red,.13)+`<rect x="-2.6" y="-1.8" width="5.2" height="3.6" rx=".6" fill="${ink}"/><rect x="-1.1" y="-3.2" width="2.2" height="1.6" fill="${ink}"/>`}
+  else if(it.t==="l")body=cone(50,16,amb,.16)+`<circle r="2.1" fill="${amb}"/><rect x="-1.6" y="-3" width="3.2" height="1" fill="${amb}"/>`;
+  else body=`<rect x="-5" y="-3" width="10" height="6" rx=".8" fill="${soft}" stroke="${ink}" stroke-width=".25"/>`;
+  const sel=o.edit&&o.sel===it.id?`<circle cx="${it.x}" cy="${it.y}" r="6.2" fill="none" stroke="${red}" stroke-width=".4" stroke-dasharray="1.2 1"/>`:"";
+  const lab=[it.label,it.t==="c"?(it.lens||"50mm"):""].filter(Boolean).join(" ");
+  g+=`<g ${o.edit?`data-pi="${it.id}" style="cursor:grab"`:""}>${sel}<g transform="translate(${it.x} ${it.y}) rotate(${it.r||0})">${body}</g><text x="${it.x}" y="${it.y+(it.t==="o"?.9:6.4)}" font-size="2.5" fill="${ink}" text-anchor="middle" font-family="IBM Plex Sans KR,Malgun Gothic,sans-serif" pointer-events="none">${esc(lab)}</text></g>`;
+ });
+ return `<svg viewBox="0 0 ${PW} ${PH}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="배치도">${g}</svg>`;
+}
+function planThumb(sc,big){const pl=sc.plan;if(!pl||!pl.items||!pl.items.length)return "";return `<button class="plan-thumb${big?" big":""}" data-act="plan" data-id="${sc.id}" aria-label="S#${esc(sc.no)} 배치도 고치기">${planSvg(pl)}</button>`}
+const PL={sc:null,sel:null};
+function planSelHtml(){
+ const it=PL.sc&&planOf(PL.sc).items.find(x=>x.id===PL.sel);
+ if(!it)return `<p class="scn-status">항목을 눌러 고르고, 끌어서 옮겨요. 화살표 쪽이 보는 방향이에요.</p>`;
+ return `<div class="field"><label for="pl-label">이름</label><input id="pl-label" class="input" value="${esc(it.label||"")}" maxlength="12"></div>
+ ${it.t==="c"?`<div class="chips">${["16mm","24mm","35mm","50mm","85mm","135mm"].map(v=>`<button class="chip" data-act="pl-lens" data-v="${v}" aria-pressed="${(it.lens||"50mm")===v}">${v}</button>`).join("")}</div>`:""}
+ ${it.t==="l"?`<div class="chips">${["키","필","백","키커","창문빛","프랙티컬"].map(v=>`<button class="chip" data-act="pl-name" data-v="${v}" aria-pressed="${it.label===v}">${v}</button>`).join("")}</div>`:""}
+ <div class="row"><button class="btn quiet grow" data-act="pl-rot" data-d="-45">↺ 45°</button><button class="btn quiet grow" data-act="pl-rot" data-d="-15">↺ 15°</button><button class="btn quiet grow" data-act="pl-rot" data-d="15">↻ 15°</button><button class="btn quiet grow" data-act="pl-rot" data-d="45">↻ 45°</button></div>
+ <div class="row"><button class="btn quiet grow" data-act="pl-dup">복제</button><button class="btn danger grow" data-act="pl-del">삭제</button></div>`;
+}
+function planRedraw(){const sv=$("#plan-svg");if(sv)sv.outerHTML=planSvg(planOf(PL.sc),{edit:true,sel:PL.sel}).replace("<svg ",'<svg id="plan-svg" ');const b=$("#plan-sel");if(b)b.innerHTML=planSelHtml();const t=$("#pl-line");if(t)t.setAttribute("aria-pressed",!!planOf(PL.sc).line)}
+function openPlan(id){
+ const p=cur(),sc=p.scenes.find(s=>s.id===id);if(!sc)return;PL.sc=sc;PL.sel=null;planOf(sc);
+ const w=openSheet(`S#${sc.no} 배치도`,`<div class="plan-stage" id="plan-stage">${planSvg(sc.plan,{edit:true}).replace("<svg ",'<svg id="plan-svg" ')}</div>
+  <div class="row plan-tools"><button class="btn grow" data-act="pl-add" data-t="p">+ 인물</button><button class="btn grow" data-act="pl-add" data-t="c">+ 카메라</button><button class="btn grow" data-act="pl-add" data-t="l">+ 조명</button><button class="btn grow" data-act="pl-add" data-t="o">+ 사물</button><button class="btn grow" id="pl-line" data-act="pl-line" aria-pressed="${!!sc.plan.line}">180도 선</button></div>
+  <div id="plan-sel" style="min-height:240px">${planSelHtml()}</div>`,`<button class="btn solid grow" data-act="close-sheet">완료</button>`,{onClose:()=>{PL.sc=null;PL.sel=null}});
+ const stage=$("#plan-stage",w);let drag=null;
+ const pt=e=>{const sv=$("#plan-svg");const m=sv.getScreenCTM();if(!m)return[0,0];const q=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse());return[Math.min(PW,Math.max(0,q.x)),Math.min(PH,Math.max(0,q.y))]};
+ stage.addEventListener("pointerdown",e=>{
+  PL.down=true;const pl=planOf(PL.sc);const h=e.target.closest("[data-h]"),gi=e.target.closest("[data-pi]");const[x,y]=pt(e);
+  if(h){drag={h:h.dataset.h,dx:0,dy:0}}else if(gi){const it=pl.items.find(i=>i.id===gi.dataset.pi);PL.sel=it.id;drag={it,dx:it.x-x,dy:it.y-y}}else{PL.sel=null}
+  e.preventDefault();try{stage.setPointerCapture(e.pointerId)}catch(_){}drag&&(drag.moved=false);planRedraw();
+ });
+ stage.addEventListener("pointermove",e=>{if(!drag)return;e.preventDefault();const[x,y]=pt(e);const pl=planOf(PL.sc);
+  if(drag.h){pl.line["x"+drag.h]=+x.toFixed(1);pl.line["y"+drag.h]=+y.toFixed(1)}else{drag.it.x=+(x+drag.dx).toFixed(1);drag.it.y=+(y+drag.dy).toFixed(1)}drag.moved=true;planRedraw()});
+ const end=()=>{if(drag&&drag.moved)touch(cur());drag=null};stage.addEventListener("pointerup",end);stage.addEventListener("pointercancel",end);
+ w.addEventListener("input",e=>{if(e.target.id==="pl-label"){const it=planOf(PL.sc).items.find(x=>x.id===PL.sel);if(it){it.label=e.target.value.slice(0,12);touch(cur());const sv=$("#plan-svg");if(sv)sv.outerHTML=planSvg(planOf(PL.sc),{edit:true,sel:PL.sel}).replace("<svg ",'<svg id="plan-svg" ')}}});
+}
+function plSel(){return PL.sc&&planOf(PL.sc).items.find(x=>x.id===PL.sel)}
+
+/* ───────── 스태프 공유 (보기 전용) ───────── */
+let VIEW=null;
+function shareUrl(p){return location.origin+location.pathname+"#view="+GH.cfg.gist+"."+p.id}
+function openShare(){
+ const p=cur();
+ if(BUILD!=="web"){openSheet("스태프 공유",`<p>이 링크 버전은 Claude 계정 안에서만 열려요. 스태프에게는 공유용 파일을 보내 주세요. 받은 사람은 휴대폰이나 컴퓨터에서 열어 볼 수만 있어요.</p>`,`<button class="btn solid grow" data-act="export-print">공유용 파일 저장</button>`);return}
+ ghLoad();
+ if(!GH.cfg||p.example){openSheet("스태프 공유",`<p>${p.example?"예시 작품은 공유할 수 없어요. 내 작품에서 써 주세요.":"보기 전용 링크는 기기 연동을 켜야 만들 수 있어요."} 대신 공유용 파일을 보낼 수 있어요.</p>`,`${p.example?"":`<button class="btn grow" data-act="link">기기 연동 켜기</button>`}<button class="btn solid grow" data-act="export-print">공유용 파일 저장</button>`);return}
+ const u=shareUrl(p);
+ openSheet("스태프 공유",`<p>이 링크를 받은 사람은 <b>${esc(p.name)}</b>의 샷리스트, 콜시트, 콘티, 배치도를 <b>볼 수만</b> 있어요. 여기서 고치면 1~2분 안에 링크에도 반영돼요.</p>
+ <div class="field"><label for="sh-u">보기 전용 링크</label><input id="sh-u" class="input" readonly value="${esc(u)}"></div>
+ <p class="scn-status">링크에는 연동 열쇠가 들어 있지 않아 수정은 못 해요. 다만 링크를 아는 사람은 이 기기 연동 공간의 다른 작품도 GitHub에서 찾아볼 수 있어요. 공개되면 곤란한 내용은 적지 마세요.</p>`,`<button class="btn solid grow" data-act="share-copy">링크 복사</button>`);
+}
+async function loadView(){
+ const m=location.hash.match(/^#view=([A-Za-z0-9]+)\.([A-Za-z0-9]+)$/);if(!m)return;
+ const [_,gist,pid]=m;$("#app").innerHTML=`<div class="wrap" style="padding-block:40px"><p>샷리스트를 불러오는 중이에요.</p></div>`;
+ try{
+  const r=await fetch("https://api.github.com/gists/"+gist,{cache:"no-store",headers:{"Accept":"application/vnd.github+json"}});
+  if(r.status===403||r.status===429)throw{msg:"잠시 뒤 다시 열어 주세요. GitHub가 너무 잦은 요청을 막았어요."};
+  if(!r.ok)throw{msg:"공유가 끝났거나 링크가 잘못됐어요. 보낸 사람에게 다시 받아 주세요."};
+  const g=await r.json();const files=g.files||{};
+  const get=async name=>{const f=files[name];if(!f)return null;let t=f.content;if(f.truncated){t=await (await fetch(f.raw_url,{cache:"no-store"})).text()}return JSON.parse(t)};
+  const raw=await get("cbc_"+pid+".json");if(!raw)throw{msg:"작품을 찾을 수 없어요. 삭제됐거나 아직 올라가지 않았어요."};
+  if(raw.trashed)throw{msg:"보낸 사람이 이 작품을 삭제했어요."};
+  const p=normP(raw);
+  for(const x of allCuts(p)){if(x.c.img&&!IMG[x.c.img]){try{const d=await get("cbc_"+x.c.img+".json");if(d&&typeof d.data==="string"&&d.data.startsWith("data:image/"))IMG[x.c.img]=d.data}catch(e){}}}
+  VIEW=p;renderView();
+ }catch(e){$("#app").innerHTML=`<div class="wrap" style="padding-block:40px"><div class="blank"><h3>샷리스트를 열 수 없어요</h3><p>${esc(e&&e.msg||"인터넷 연결을 확인하고 다시 열어 주세요.")}</p><button class="btn" data-act="view-refresh">다시 불러오기</button></div></div>`}
+}
+function renderView(){
+ const p=VIEW;if(!p)return;const st=stats(p);
+ $("#app").innerHTML=`<header class="vbar"><div class="wrap"><div style="min-width:0"><b>${esc(p.name)}</b><br><span>보기 전용 · 씬 ${p.scenes.length}개, 컷 ${st.total}개</span></div><button class="btn" data-act="view-refresh">새로고침</button></div></header>
+ <main class="wrap" style="padding-block:16px 40px">
+ ${callDays(p).map(d=>{const t=callText(p,d).split("\n");return `<section class="csec"><h2>${esc(d)}회차 콜시트</h2><div class="sched" style="padding:10px 12px;white-space:pre-wrap;font-size:14px;line-height:1.55">${esc(t.slice(1).join("\n").trim())}</div></section>`}).join("")}
+ <h2 style="font-size:15px;margin:6px 0 10px">샷리스트</h2>
+ ${p.scenes.map(sc=>`<section class="scene"><div class="strip" style="${stripVars(sc)}"><div class="strip-main"><span class="strip-no">S#${esc(sc.no)}</span><span class="strip-tt"><b>${esc(sc.loc||"장소 미정")}</b><span>${sc.time} ${sc.place}${sc.cast?" · "+esc(sc.cast):""}</span></span></div></div>${sc.plan&&sc.plan.items&&sc.plan.items.length?`<div class="plan-thumb big">${planSvg(sc.plan)}</div>`:""}<div class="cuts">${sc.cuts.map((c,i)=>`<article class="cut ${c.status==="done"?"is-done":c.status==="skip"?"is-skip":""}"><div class="cut-main"><span class="cut-l1"><span class="cut-no">${esc(sc.no)}-${i+1}</span>${tapeHtml(c)}${c.star?'<span class="star">★</span>':""}<span class="cut-spec">${esc(specLine(c))}</span>${c.terms.map(t=>`<span class="tape term">${esc(t)}</span>`).join("")}${c.opt?'<span class="mark opt">선택</span>':""}${c.status==="done"?'<span class="mark ok">OK</span>':""}</span><span class="cut-desc">${esc(c.desc)}</span>${c.note?`<span class="cut-note">${esc(c.note)}</span>`:""}${c.img&&IMG[c.img]?`<img class="cut-thumb" src="${IMG[c.img]}" alt="콘티">`:""}</div><div class="cut-side"><span class="cut-min">${+c.min||0}분</span></div></article>`).join("")}</div></section>`).join("")}
+ </main>`;
+}
+
+Object.assign(A,{
+ "call-day"(el){View.callDay=el.dataset.d;render()},
+ "call-copy"(){const p=cur();copyText(callText(p,curDay(p)))},
+ "call-geo"(){if(!navigator.geolocation){toast("이 기기에서는 위치를 쓸 수 없어요. 지역을 골라 주세요.");return}toast("위치를 찾는 중이에요.");navigator.geolocation.getCurrentPosition(pos=>{const p=cur(),c=callOf(p,curDay(p));c.lat=+pos.coords.latitude.toFixed(4);c.lng=+pos.coords.longitude.toFixed(4);c.city="현재 위치";touch(p);render();toast("현재 위치로 해 시간을 계산했어요.")},()=>toast("위치를 가져오지 못했어요. 지역을 골라 주세요."),{timeout:10000,maximumAge:600000})},
+ plan(el){const id=el.dataset.id;while(sheetStack.length)closeSheet();openPlan(id)},
+ "pl-add"(el){const pl=planOf(PL.sc),t=el.dataset.t;const n=pl.items.filter(x=>x.t===t).length;const k=pl.items.length;const it={id:"i"+uid(),t,x:14+(k%5)*18,y:t==="c"?58:t==="l"?12:22+(Math.floor(k/5)%3)*12,r:t==="c"?0:t==="p"?180:0,label:t==="p"?String.fromCharCode(65+n%26):t==="c"?String.fromCharCode(65+n%26)+"캠":t==="l"?"키":"책상"};if(t==="c")it.lens="50mm";pl.items.push(it);PL.sel=it.id;touch(cur());planRedraw()},
+ "pl-line"(){const pl=planOf(PL.sc);pl.line=pl.line?null:{x1:15,y1:35,x2:85,y2:35};touch(cur());planRedraw()},
+ "pl-rot"(el){const it=plSel();if(!it)return;it.r=((it.r||0)+ +el.dataset.d+360)%360;touch(cur());planRedraw()},
+ "pl-lens"(el){const it=plSel();if(!it)return;it.lens=el.dataset.v;touch(cur());planRedraw()},
+ "pl-name"(el){const it=plSel();if(!it)return;it.label=el.dataset.v;touch(cur());planRedraw()},
+ "pl-dup"(){const it=plSel();if(!it)return;const n=Object.assign({},it,{id:"i"+uid(),x:Math.min(PW,it.x+6),y:Math.min(PH,it.y+6)});planOf(PL.sc).items.push(n);PL.sel=n.id;touch(cur());planRedraw()},
+ "pl-del"(){const pl=planOf(PL.sc);pl.items=pl.items.filter(x=>x.id!==PL.sel);PL.sel=null;touch(cur());planRedraw()},
+ share(){while(sheetStack.length)closeSheet();openShare()},
+ async "share-copy"(){const u=$("#sh-u").value;try{await navigator.clipboard.writeText(u);toast("보기 전용 링크를 복사했어요.")}catch(e){const i=$("#sh-u");i.focus();i.select();toast("링크를 길게 눌러 복사해 주세요.")}},
+ "view-refresh"(){loadView()}
+});
+document.addEventListener("input",e=>{
+ const t=e.target;if(!t.dataset)return;
+ if(t.dataset.call){const p=cur();if(!p)return;const c=callOf(p,curDay(p));c[t.dataset.call]=t.value;touch(p);if(t.dataset.call==="date"){const b=$("#sun-box");if(b)b.innerHTML=sunHtml(c)}}
+ else if(t.dataset.scf&&ScEd){const p=cur(),sc=p.scenes.find(s=>s.id===ScEd.id);if(sc){sc[t.dataset.scf]=t.value.slice(0,120);touch(p)}}
+});
+document.addEventListener("change",e=>{if(e.target.id==="cl-city"){const p=cur(),c=callOf(p,curDay(p)),x=CITIES.find(k=>k[0]===e.target.value);if(x){c.city=x[0];c.lat=x[1];c.lng=x[2]}else if(!e.target.value){delete c.city;delete c.lat;delete c.lng}touch(p);const b=$("#sun-box");if(b)b.innerHTML=sunHtml(Object.assign({},c,{date:c.date||(curDay(p)==="1"?p.date:"")}))}});
+
 /* ───────── 시작 ───────── */
 function routeFromHash(){const h=location.hash.slice(1);if(h.startsWith("p-")&&S.projects[h.slice(2)]){View.pid=h.slice(2)}else if(!h)View.pid=null}
+if(VIEW_MODE){loadView()}else{
 loadLocal();
 if(!S.prefs.seeded){S.prefs.seeded=true;const e=normP(exampleProject());S.projects[e.id]=e;saveLocal()}
 const justLinked=BUILD==="web"&&consumeLink();
@@ -1427,6 +1845,7 @@ if(BUILD==="web"){ghLoad();if(GH.cfg){startGh();if(justLinked)toast("이 기기�
 window.addEventListener("hashchange",()=>{if(sheetStack.length)return;routeFromHash();render()});
 setInterval(()=>{if(View.pid&&!sheetStack.length&&!document.activeElement.matches?.("input,textarea")&&!document.querySelector(".dragging")){const t=document.querySelector(".prog-t");if(t){const st=stats(cur());const spans=t.querySelectorAll("span");if(spans[1])spans[1].innerHTML=`남은 ${st.remain}컷, 약 <b>${minLabel(st.remMin)}</b>${st.remain?` · ${clock(Date.now()+st.remMin*60000)} 종료 예상`:""}`}}},30000);
 initSync();
+}
 </script>
 
 <script>if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{})</script>
