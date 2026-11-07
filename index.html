@@ -565,8 +565,8 @@ function clock(ms){const d=new Date(ms);return String(d.getHours()).padStart(2,"
 /* ───────── 저장 ───────── */
 const IMG={};
 const KEY="cutbycut.v1";
-let S={projects:{},synced:{},prefs:{}};
-function loadLocal(){try{const r=localStorage.getItem(KEY);if(r){const v=JSON.parse(r);S.projects=v.projects||{};S.synced=v.synced||{};S.prefs=v.prefs||{};Object.keys(S.projects).forEach(k=>{S.projects[k]=normP(S.projects[k])})}}catch(e){}}
+let S={projects:{},synced:{},prefs:{},gone:{}};
+function loadLocal(){try{const r=localStorage.getItem(KEY);if(r){const v=JSON.parse(r);S.projects=v.projects||{};S.synced=v.synced||{};S.prefs=v.prefs||{};S.gone=v.gone||{};Object.keys(S.projects).forEach(k=>{S.projects[k]=normP(S.projects[k])})}}catch(e){}}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function normP(p){
  p=Object.assign({id:uid(),name:"제목 없는 작품",scenes:[],order:[],director:"",dop:"",date:"",wrap:"",aspect:"16:9",fps:"",gear:"",updatedAt:Date.now()},p);
@@ -575,7 +575,7 @@ function normP(p){
   sc.cuts=sc.cuts.map(c=>{c=Object.assign({id:uid(),size:"",angle:"",moves:[],lens:"",terms:[],desc:"",note:"",min:10,star:false,opt:false,status:"todo",takes:[],img:"",fps:""},c);["moves","terms","takes"].forEach(k=>{if(!Array.isArray(c[k]))c[k]=[]});return c});return sc});
  return p;
 }
-function touch(p){p.updatedAt=Date.now();delete p.example;saveLocal();queueSync(p)}
+function touch(p){p.updatedAt=Date.now();delete p.example;if(S.gone[p.id])delete S.gone[p.id];saveLocal();queueSync(p)}
 
 /* 기기 간 동기화: 있으면 쓰고, 없으면 이 기기에만 저장 */
 const Sync={db:null,col:null,state:"local",timers:{},busy:{},pendingRemote:{}};
@@ -592,7 +592,7 @@ async function initSync(){
 function onRemote(snap){
  const seen={},seenImg={};
  let changed=false;
- snap.docs.forEach(d=>{const r=d.data();if(r&&r.kind==="img"){seenImg[d.id]=true;if(!IMG[d.id]&&typeof r.data==="string"){IMG[d.id]=r.data;idbPut(d.id,r.data);changed=true}return}if(!r||!r.id||!Array.isArray(r.scenes))return;seen[r.id]=true;const l=S.projects[r.id];
+ snap.docs.forEach(d=>{if(S.gone[d.id]){seen[d.id]=true;delRemote(d.id);return}const r=d.data();if(r&&r.kind==="img"){seenImg[d.id]=true;if(!IMG[d.id]&&typeof r.data==="string"){IMG[d.id]=r.data;idbPut(d.id,r.data);changed=true}return}if(!r||!r.id||!Array.isArray(r.scenes))return;seen[r.id]=true;const l=S.projects[r.id];
   if(!l||(r.updatedAt||0)>(l.updatedAt||0)||l.example){
     if(sheetStack.length&&View.pid===r.id){Sync.pendingRemote[r.id]=r}
     else{S.projects[r.id]=normP(JSON.parse(JSON.stringify(r)));changed=true}
@@ -625,8 +625,8 @@ async function pushP(id,retry){
  }
  Sync.busy[id]=false;
 }
-async function delRemote(id){delete S.synced[id];if(!Sync.col)return;clearTimeout(Sync.timers[id]);delete Sync.timers[id];try{await Sync.col.doc(id).delete()}catch(e){}}
-function syncText(){return {bad:"연동 열쇠가 만료됐거나 지워졌어요. 기기 연동에서 다시 연결해 주세요.",local:BUILD==="web"?"이 기기에만 저장돼요. 기기 연동을 켜면 컴퓨터와 폰의 작품이 자동으로 맞춰져요.":"이 기기의 브라우저에 저장돼요. 다른 기기로 옮기려면 백업 파일을 쓰세요.",syncing:"저장된 작품을 불러오는 중이에요.",on:BUILD==="web"?"기기 연동이 켜져 있어요. 연동한 컴퓨터와 폰의 작품이 자동으로 맞춰져요.":"같은 계정의 폰, 태블릿, 컴퓨터에 자동으로 맞춰져요.",retry:"인터넷이 끊겨 이 기기에만 저장 중이에요. 연결되면 다음 수정 때 올라가요."}[Sync.state]}
+async function delRemote(id){delete S.synced[id];if(!Sync.col)return;clearTimeout(Sync.timers[id]);delete Sync.timers[id];S.gone[id]=Date.now();saveLocal();try{await Sync.col.doc(id).delete();if(!Sync.col)return;delete S.gone[id];saveLocal()}catch(e){}}
+function syncText(){return {bad:"연동 열쇠가 만료됐거나 지워졌어요. 기기 연동에서 다시 연결해 주세요.",local:BUILD==="web"?"이 기기에만 저장돼요. 기기 연동을 켜면 컴퓨터와 폰의 작품이 자동으로 맞춰져요.":"이 기기의 브라우저에 저장돼요. 다른 기기로 옮기려면 백업 파일을 쓰세요.",syncing:"저장된 작품을 불러오는 중이에요.",on:BUILD==="web"?"기기 연동이 켜져 있어요. 연동한 컴퓨터와 폰의 작품이 자동으로 맞춰져요.":"같은 계정의 폰, 태블릿, 컴퓨터에 자동으로 맞춰져요.",retry:"인터넷이 없어 이 기기에 저장 중이에요. 다시 연결되면 자동으로 맞춰져요."}[Sync.state]}
 function refreshSync(){const el=$("#sync-line");if(el)el.textContent=syncText()}
 
 /* ───────── 예시 ───────── */
@@ -678,7 +678,7 @@ function homeHtml(){
  <main style="padding-block:0 40px"><div class="plist">${list.map(p=>{const st=stats(p);return `<button class="pitem" data-act="open" data-id="${esc(p.id)}"><h3>${esc(p.name)}</h3><div class="pmeta">씬 ${p.scenes.length}개, 컷 ${st.total}개, 예상 ${minLabel(st.totalMin)}</div>${p.scenes.length?`<div class="strips">${p.scenes.map(sc=>`<i style="background:var(--s-${stripKey(sc)})" title="S#${esc(sc.no)}"></i>`).join("")}</div>`:""}${barHtml(p)}</button>`}).join("")}</div>
  ${list.length?"":`<div class="blank"><h3>첫 작품을 만들어 보세요</h3><p>작품 제목만 넣으면 바로 컷을 적을 수 있어요.</p></div>`}
  <div class="row" style="margin-top:14px"><button class="btn solid grow" data-act="new-project">새 작품 만들기</button><button class="btn quiet" data-act="import">백업 불러오기</button>${BUILD==="web"?`<button class="btn quiet" data-act="link">기기 연동</button>`:""}</div>
- <p class="sync" id="sync-line">${esc(syncText())}</p><p class="sync" style="margin-top:4px">앱 버전 2.4</p></main></div>`;
+ <p class="sync" id="sync-line">${esc(syncText())}</p><p class="sync" style="margin-top:4px">앱 버전 2.5</p></main></div>`;
 }
 function barHtml(p,nowId){const a=allCuts(p);if(!a.length)return"";const ordered=View.tab==="shoot"?shootList(p):a;return `<div class="bar" role="img" aria-label="전체 ${a.length}컷 중 ${a.filter(x=>x.c.status==="done").length}컷 완료">${ordered.map(x=>`<i class="${x.c.id===nowId?"now":x.c.status==="done"?"done":x.c.status==="skip"?"skip":""}"></i>`).join("")}</div>`}
 function projectHtml(p){
@@ -1346,7 +1346,7 @@ function startGh(){
  if(!GH.cfg)return;
  Sync.col={doc:id=>({
    set:async d=>{await ghPatch({["cbc_"+id+".json"]:{content:JSON.stringify(d)}});if(Sync.state==="retry"){Sync.state="on";refreshSync()}},
-   delete:async()=>{try{await ghPatch({["cbc_"+id+".json"]:null})}catch(e){}}})};
+   delete:async()=>{try{await ghPatch({["cbc_"+id+".json"]:null})}catch(e){if(e&&e.code==="net"&&/422/.test(e.message))return;throw e}}})};
  Sync.state="syncing";refreshSync();GH.cb=onRemote;ghPoll();clearInterval(GH.timer);GH.timer=setInterval(ghPoll,20000);
 }
 const linkUrl=()=>location.origin+location.pathname+"#link="+btoa(GH.cfg.token+":"+GH.cfg.gist);
@@ -1374,6 +1374,8 @@ Object.assign(A,{
 });
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&GH.cb)ghPoll()});
 window.addEventListener("focus",()=>{if(GH.cb)ghPoll()});
+window.addEventListener("online",()=>{if(GH.cb){GH.lastWrite=0;ghPoll()}});
+window.addEventListener("offline",()=>{if(GH.cb){Sync.state="retry";refreshSync()}});
 
 /* ───────── 시작 ───────── */
 function routeFromHash(){const h=location.hash.slice(1);if(h.startsWith("p-")&&S.projects[h.slice(2)]){View.pid=h.slice(2)}else if(!h)View.pid=null}
