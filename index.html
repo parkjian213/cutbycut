@@ -54,6 +54,10 @@ main{padding-block:14px 110px}
 .home-head h2{font:700 54px/.95 var(--code);letter-spacing:.005em}
 .home-head p{color:var(--muted);margin-top:8px;max-width:34em}
 .plist{display:grid;gap:10px}
+.pwrap{position:relative}
+.pdel{position:absolute;top:6px;right:6px;color:var(--muted);z-index:1}
+.pdel:hover{color:var(--tally)}
+.pitem h3{padding-right:40px}
 .pitem{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);padding:14px 14px 12px}
 .pitem:hover{border-color:var(--ink)}
 .pitem h3{font-size:17px;font-weight:700;line-height:1.3}
@@ -276,6 +280,7 @@ a.btn{text-decoration:none;color:inherit}
 .log summary::-webkit-details-marker{display:none}.log summary::before{content:"▸";margin-right:6px}.log[open] summary::before{content:"▾"}
 .log-v{margin-top:8px}.log-v b{color:var(--ink);font-size:13.5px}
 .log-v ul{margin:3px 0 0;padding-left:18px;display:grid;gap:2px;line-height:1.45}
+.trow{flex-wrap:wrap;align-items:center}
 .qr{background:#fff;padding:12px;width:fit-content;line-height:0}
 .qr img,.qr canvas{display:block}
 .steps{margin:0;padding-left:22px;display:grid;gap:9px;font-size:14.5px;line-height:1.5}
@@ -315,8 +320,9 @@ a.btn{text-decoration:none;color:inherit}
 <script>
 "use strict";
 const BUILD="web";
-const APP_VER="2.6";
+const APP_VER="2.7";
 const CHANGELOG=[
+ ["2.7",["첫 화면 작품 카드에 삭제 버튼을 넣었어요.","휴지통: 지운 작품을 30일 동안 보관하고 언제든 되살릴 수 있어요.","작품 안 오른쪽 위 메뉴 아이콘을 점 세 개(⋯)로 바꿨어요."]],
  ["2.6",["업데이트 내역을 앱 버전 아래에서 볼 수 있게 했어요."]],
  ["2.5",["와이파이나 데이터가 없어도 앱이 열리고 모든 기능을 쓸 수 있어요.","인터넷이 다시 연결되면 그동안 바꾼 작품이 자동으로 맞춰져요.","인터넷 없을 때 지운 작품이 다시 살아나던 문제를 고쳤어요.","신호가 약해도 3초 안에 앱이 열려요."]],
  ["2.4",["기기 연동: 컴퓨터와 폰의 작품이 GitHub를 통해 자동으로 맞춰져요."]],
@@ -566,7 +572,8 @@ const $=(s,r=document)=>r.querySelector(s);
 const ICON={
  back:'<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
  close:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
- more:'<svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.500-4.500M5 20h14"/></svg>',
+ more:'<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/></svg>',
+ trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>',
  list:'<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
  cam:'<svg viewBox="0 0 24 24"><rect x="3" y="7" width="13" height="11"/><path d="M16 11l5-3v9l-5-3"/></svg>',
  book:'<svg viewBox="0 0 24 24"><path d="M5 4h14v17H7a2 2 0 0 1-2-2zM5 18a2 2 0 0 1 2-2h12"/></svg>',
@@ -683,24 +690,24 @@ function specLine(c){return [angleLabel(c),(c.moves||[]).join(" + "),c.lens,c.fp
 function render(){
  const app=$("#app");
  const p=cur();
- if(View.pid&&!p){View.pid=null;setHash("")}
+ if(View.pid&&(!p||p.trashed)){View.pid=null;setHash("")}
  if(!View.pid){app.innerHTML=homeHtml();releaseWake();return}
  app.innerHTML=projectHtml(p);
  if(View.tab==="shoot")requestWake();else releaseWake();
 }
 function homeHtml(){
- const list=Object.values(S.projects).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+ purgeOld();const list=Object.values(S.projects).filter(p=>!p.trashed).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));const nTrash=Object.values(S.projects).filter(p=>p.trashed).length;
  return `<div class="wrap"><header class="home-head"><h2>컷바이컷</h2><p>찍을 컷을 두 줄로 적고, 현장에서 하나씩 지워 나가는 샷리스트예요.</p></header>
- <main style="padding-block:0 40px"><div class="plist">${list.map(p=>{const st=stats(p);return `<button class="pitem" data-act="open" data-id="${esc(p.id)}"><h3>${esc(p.name)}</h3><div class="pmeta">씬 ${p.scenes.length}개, 컷 ${st.total}개, 예상 ${minLabel(st.totalMin)}</div>${p.scenes.length?`<div class="strips">${p.scenes.map(sc=>`<i style="background:var(--s-${stripKey(sc)})" title="S#${esc(sc.no)}"></i>`).join("")}</div>`:""}${barHtml(p)}</button>`}).join("")}</div>
+ <main style="padding-block:0 40px"><div class="plist">${list.map(p=>{const st=stats(p);return `<div class="pwrap"><button class="pdel icon" data-act="del-project" data-id="${esc(p.id)}" aria-label="${esc(p.name)} 삭제">${ICON.trash}</button><button class="pitem" data-act="open" data-id="${esc(p.id)}"><h3>${esc(p.name)}</h3><div class="pmeta">씬 ${p.scenes.length}개, 컷 ${st.total}개, 예상 ${minLabel(st.totalMin)}</div>${p.scenes.length?`<div class="strips">${p.scenes.map(sc=>`<i style="background:var(--s-${stripKey(sc)})" title="S#${esc(sc.no)}"></i>`).join("")}</div>`:""}${barHtml(p)}</button></div>`}).join("")}</div>
  ${list.length?"":`<div class="blank"><h3>첫 작품을 만들어 보세요</h3><p>작품 제목만 넣으면 바로 컷을 적을 수 있어요.</p></div>`}
- <div class="row" style="margin-top:14px"><button class="btn solid grow" data-act="new-project">새 작품 만들기</button><button class="btn quiet" data-act="import">백업 불러오기</button>${BUILD==="web"?`<button class="btn quiet" data-act="link">기기 연동</button>`:""}</div>
+ <div class="row" style="margin-top:14px"><button class="btn solid" style="flex:1 1 100%" data-act="new-project">새 작품 만들기</button><button class="btn quiet" data-act="import">백업 불러오기</button>${nTrash?`<button class="btn quiet" data-act="trash">휴지통 ${nTrash}</button>`:""}${BUILD==="web"?`<button class="btn quiet" data-act="link">기기 연동</button>`:""}</div>
  <p class="sync" id="sync-line">${esc(syncText())}</p><details class="log"><summary>앱 버전 ${APP_VER} · 업데이트 내역</summary>${CHANGELOG.map(v=>`<div class="log-v"><b>${v[0]}</b><ul>${v[1].map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}</details></main></div>`;
 }
 function barHtml(p,nowId){const a=allCuts(p);if(!a.length)return"";const ordered=View.tab==="shoot"?shootList(p):a;return `<div class="bar" role="img" aria-label="전체 ${a.length}컷 중 ${a.filter(x=>x.c.status==="done").length}컷 완료">${ordered.map(x=>`<i class="${x.c.id===nowId?"now":x.c.status==="done"?"done":x.c.status==="skip"?"skip":""}"></i>`).join("")}</div>`}
 function projectHtml(p){
  const st=stats(p);const nowId=View.tab==="shoot"?currentShoot(p)?.c.id:null;
  const wide=View.tab==="shoot"?" wide":"";
- return `<header class="top"><div class="wrap${wide}"><div class="top-in"><button class="icon" data-act="home" aria-label="작품 목록으로">${ICON.back}</button><h1>${esc(p.name)}</h1><button class="icon" data-act="project-menu" aria-label="내보내기와 작품 설정">${ICON.more}</button></div>
+ return `<header class="top"><div class="wrap${wide}"><div class="top-in"><button class="icon" data-act="home" aria-label="작품 목록으로">${ICON.back}</button><h1>${esc(p.name)}</h1><button class="icon" data-act="project-menu" aria-label="메뉴: 내보내기, 작품 설정, 삭제">${ICON.more}</button></div>
  ${st.total?`<div class="prog"><div class="prog-t"><span><b>${st.done}</b> / ${st.total}컷 완료${st.skip?`, ${st.skip}컷 건너뜀`:""}</span><span>남은 ${st.remain}컷, 약 <b>${minLabel(st.remMin)}</b>${st.remain?` · ${clock(Date.now()+st.remMin*60000)} 종료 예상`:""}</span></div>${wrapHtml(p,st)}${barHtml(p,nowId)}</div>`:""}
  </div></header>
  <main class="wrap${wide}" id="main">${View.tab==="list"?listHtml(p):View.tab==="shoot"?shootHtml(p):dictHtml()}</main>
@@ -943,7 +950,7 @@ function openExport(){
   <div class="field"><span class="flabel">보내기</span><div class="row"><button class="btn grow" data-act="copy-text">샷리스트 복사 (카톡, 노션)</button><button class="btn grow" data-act="copy-log">편집용 테이크 기록 복사</button></div></div>
   <div class="field"><span class="flabel">파일로 저장</span><div class="row"><button class="btn grow" data-act="export-print">인쇄·PDF용</button><button class="btn grow" data-act="export-csv">엑셀용 CSV</button><button class="btn grow" data-act="export-json">백업 파일</button></div></div>
   <div class="field"><span class="flabel">화면</span><div class="seg" id="seg-theme">${["auto","light","dark"].map(v=>`<button data-act="theme" data-v="${v}" aria-pressed="${th===v}">${{auto:"자동",light:"밝게 (야외)",dark:"어둡게 (야간)"}[v]}</button>`).join("")}</div></div>
-  <div class="field"><span class="flabel">정리</span><div class="row"><button class="btn quiet grow" data-act="rename">이름 바꾸기</button><button class="btn quiet grow" data-act="reset-shoot">촬영 기록 비우기</button><button class="btn danger grow" data-act="del-project">작품 삭제</button></div></div>`);
+  <div class="field"><span class="flabel">정리</span><div class="row"><button class="btn quiet grow" data-act="rename">이름 바꾸기</button><button class="btn quiet grow" data-act="reset-shoot">촬영 기록 비우기</button><button class="btn danger grow" data-act="del-project">휴지통으로</button></div></div>`);
 }
 async function copyText(t){
  try{await navigator.clipboard.writeText(t);toast("샷리스트를 복사했어요.");return true}
@@ -1015,8 +1022,13 @@ const A={
  "export-json"(){const p=cur();saveFile(safeName(p.name)+" 백업.json",JSON.stringify({app:"cutbycut",version:2,projects:[p],images:imagesOf(p)}),"application/json")},
  rename(){const p=cur();closeSheet();textPrompt("이름 바꾸기","작품 제목",p.name,"바꾸기",v=>{p.name=v;touch(p);render()})},
  "reset-shoot"(){const p=cur(),snap=snapshot(p),id=p.id;allCuts(p).forEach(x=>{x.c.status="todo";x.c.takes=[]});View.shootId=null;touch(p);closeSheet();toast("촬영 기록을 비웠어요.",()=>restore(id,snap))},
- "del-project"(){openSheet("작품을 삭제할까요?",`<p>"${esc(cur().name)}"의 씬, 컷, 촬영 기록이 모두 사라져요. 삭제 후 몇 초 안에는 되돌릴 수 있어요.</p>`,`<button class="btn quiet grow" data-act="close-sheet">취소</button><button class="btn danger grow" data-act="del-project-yes">삭제</button>`)},
- "del-project-yes"(){const p=cur(),snap=snapshot(p),id=p.id;delete S.projects[id];saveLocal();delRemote(id);while(sheetStack.length)closeSheet();View.pid=null;setHash("");render();toast("작품을 삭제했어요.",()=>{S.projects[id]=normP(JSON.parse(snap));touch(S.projects[id]);render()})},
+ "del-project"(el){const id=el.dataset.id||View.pid,p=S.projects[id];if(!p)return;while(sheetStack.length)closeSheet();setTrash(p,Date.now());if(View.pid===id){View.pid=null;setHash("")}render();toast(`"${p.name}"을 휴지통으로 옮겼어요.`,()=>{setTrash(p,0);render()})},
+ trash(){openTrash()},
+ "trash-back"(el){const p=S.projects[el.dataset.id];if(!p)return;setTrash(p,0);closeSheet();render();if(Object.values(S.projects).some(x=>x.trashed))openTrash();toast(`"${p.name}"을 되살렸어요.`)},
+ "trash-kill"(el){const p=S.projects[el.dataset.id];if(!p)return;openSheet("완전히 삭제할까요?",`<p>"${esc(p.name)}"은 되살릴 수 없게 지워져요.</p>`,`<button class="btn quiet grow" data-act="close-sheet">취소</button><button class="btn danger grow" data-act="trash-kill-yes" data-id="${esc(p.id)}">완전히 삭제</button>`)},
+ "trash-kill-yes"(el){purgeP(el.dataset.id);while(sheetStack.length)closeSheet();render();if(Object.values(S.projects).some(x=>x.trashed))openTrash();toast("완전히 삭제했어요.")},
+ "trash-empty"(){const n=Object.values(S.projects).filter(x=>x.trashed).length;openSheet("휴지통을 비울까요?",`<p>작품 ${n}개가 되살릴 수 없게 지워져요.</p>`,`<button class="btn quiet grow" data-act="close-sheet">취소</button><button class="btn danger grow" data-act="trash-empty-yes">휴지통 비우기</button>`)},
+ "trash-empty-yes"(){Object.values(S.projects).filter(x=>x.trashed).forEach(x=>purgeP(x.id));while(sheetStack.length)closeSheet();render();toast("휴지통을 비웠어요.")},
  undo(){const u=toastUndo;$("#toast-slot").innerHTML="";toastUndo=null;if(u)u()}
 };
 document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;if(dragJustEnded)return;const f=A[el.dataset.act];if(f)f(el)});
@@ -1392,6 +1404,17 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 window.addEventListener("focus",()=>{if(GH.cb)ghPoll()});
 window.addEventListener("online",()=>{if(GH.cb){GH.lastWrite=0;ghPoll()}});
 window.addEventListener("offline",()=>{if(GH.cb){Sync.state="retry";refreshSync()}});
+
+/* ───────── 휴지통 ───────── */
+const TRASH_DAYS=30;
+function setTrash(p,t){if(t)p.trashed=t;else delete p.trashed;if(p.example){saveLocal();return}touch(p)}
+function purgeP(id){const p=S.projects[id];if(!p)return;const used=new Set();Object.values(S.projects).forEach(q=>{if(q.id!==id)allCuts(q).forEach(x=>{if(x.c.img)used.add(x.c.img)})});allCuts(p).forEach(x=>{if(x.c.img&&!used.has(x.c.img))imgDel(x.c.img)});delete S.projects[id];saveLocal();if(!p.example)delRemote(id)}
+function purgeOld(){const lim=Date.now()-TRASH_DAYS*864e5;Object.values(S.projects).forEach(p=>{if(p.trashed&&p.trashed<lim)purgeP(p.id)})}
+function openTrash(){
+ purgeOld();const l=Object.values(S.projects).filter(p=>p.trashed).sort((a,b)=>b.trashed-a.trashed);
+ if(!l.length){toast("휴지통이 비어 있어요.");return}
+ openSheet("휴지통",`<p style="color:var(--muted);font-size:14px">지운 작품은 ${TRASH_DAYS}일 동안 여기 있다가 자동으로 지워져요.</p><div class="dict">${l.map(p=>{const left=Math.max(1,Math.ceil((p.trashed+TRASH_DAYS*864e5-Date.now())/864e5));return `<div class="ditem trow"><div style="min-width:0;flex:1"><h3>${esc(p.name)}</h3><p>씬 ${p.scenes.length}개, 컷 ${allCuts(p).length}개 · ${left}일 뒤 완전히 삭제</p></div><div class="row" style="flex:none"><button class="btn" data-act="trash-back" data-id="${esc(p.id)}">되살리기</button><button class="btn danger" data-act="trash-kill" data-id="${esc(p.id)}">완전 삭제</button></div></div>`}).join("")}</div>`,`<button class="btn danger grow" data-act="trash-empty">휴지통 비우기</button>`);
+}
 
 /* ───────── 시작 ───────── */
 function routeFromHash(){const h=location.hash.slice(1);if(h.startsWith("p-")&&S.projects[h.slice(2)]){View.pid=h.slice(2)}else if(!h)View.pid=null}
