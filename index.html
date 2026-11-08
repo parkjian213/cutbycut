@@ -478,8 +478,9 @@ main .more{background:var(--card)}
 "use strict";
 const BUILD="web";
 const VIEW_MODE=BUILD==="web"&&/^#view=/.test(location.hash);
-const APP_VER="3.8";
+const APP_VER="3.9";
 const CHANGELOG=[
+ ["3.9",["예시 작품(마지막 동아리실)을 없앴어요."]],
  ["3.8",["씬마다 배치도 그림을 넣을 수 있어요. Shot Designer 같은 앱에서 저장한 이미지를 붙이면 샷리스트, 촬영 화면, 공유 화면, 출력에 같이 나와요.","다른 앱 샷리스트(CSV, TSV, 텍스트)를 불러올 수 있어요. 홈의 '백업·샷리스트 불러오기'에서 골라요."]],
  ["3.7",["뷰파인더 모드를 넣었어요. 폰 카메라에 화면비 틀과 렌즈 화각을 겹쳐 보고, 그 틀대로 찍으면 콘티로 저장돼요.","컷마다 카메라 세팅(ISO, 셔터, 조리개, 화이트밸런스, ND)을 적을 수 있어요. 새 컷은 앞 컷 세팅을 이어받아요."]],
  ["3.6",["콜시트에 하루 타임라인을 넣었어요. 골든아워, 블루아워, 시간별 비 확률, 촬영 씬이 한 줄에 보여요.","해가 안 맞거나 비 올 확률이 높은 시간에 잡힌 야외 씬을 알려 줘요.","배치도에서 카메라 센서(풀프레임, 슈퍼35, 마이크로포서드)를 고를 수 있고, 화각 각도도 보여요.","콘티에 화살표 도구를 넣었어요.","스태프 공유 화면이 1분마다 알아서 새로고침돼요.","두 기기에서 같은 작품을 따로 고쳐도 컷 단위로 합쳐져요."]],
@@ -2290,7 +2291,9 @@ document.addEventListener("change",e=>{if(e.target.id==="c-label"&&Ed){const p=c
 function routeFromHash(){const h=location.hash.slice(1);if(h.startsWith("p-")&&S.projects[h.slice(2)]){View.pid=h.slice(2)}else if(!h)View.pid=null}
 if(VIEW_MODE){loadView()}else{
 loadLocal();applyMyTerms();
-if(!S.prefs.seeded){S.prefs.seeded=true;const e=normP(exampleProject());S.projects[e.id]=e;saveLocal()}
+/* 예시 작품은 3.9부터 기본으로 넣지 않고, 이미 있던 것도 지운다 (?demo=1 일 때만 보기용으로 넣음) */
+if(/[?&]demo=1/.test(location.search)){if(!S.projects.example){const e=normP(exampleProject());S.projects[e.id]=e}}
+else if(S.projects.example){delete S.projects.example;saveLocal()}
 const justLinked=BUILD==="web"&&consumeLink();
 routeFromHash();
 render();
