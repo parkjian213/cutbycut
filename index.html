@@ -455,8 +455,9 @@ main .more{background:var(--card)}
 "use strict";
 const BUILD="web";
 const VIEW_MODE=BUILD==="web"&&/^#view=/.test(location.hash);
-const APP_VER="3.3";
+const APP_VER="3.4";
 const CHANGELOG=[
+ ["3.4",["첫 화면 큰 '컷바이컷' 제목을 지웠어요."]],
  ["3.3",["첫 화면 설명 문구를 지웠어요."]],
  ["3.2",["새 디자인: 연회색 바탕에 흰 둥근 카드, 진행률 원, 전환 버튼으로 화면 전체를 정돈했어요.","컷 목록이 왼쪽 샷 사이즈 배지, 가운데 설명, 아래 정보 순서로 바뀌었어요."]],
  ["3.1",["날씨를 더 정확하게: 촬영 장소를 이름으로 찾아 그 자리 예보를 받아요.","집합 시간부터 1시간 단위 예보와 비 양(mm)을 보여 줘요.","예보 기준 시각과 며칠 뒤 예보인지에 따른 믿을 정도를 알려 줘요.","네이버 날씨로 바로 비교해 볼 수 있어요."]],
@@ -1051,8 +1052,8 @@ function render(){
 }
 function homeHtml(){
  purgeOld();const list=Object.values(S.projects).filter(p=>!p.trashed).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));const nTrash=Object.values(S.projects).filter(p=>p.trashed).length;
- return `<div class="wrap"><header class="home-head"><h2>컷바이컷</h2></header>
- <main style="padding-block:0 40px"><div class="plist">${list.map(p=>{const st=stats(p);return `<div class="pwrap"><button class="pdel icon" data-act="del-project" data-id="${esc(p.id)}" aria-label="${esc(p.name)} 삭제">${ICON.trash}</button><button class="pitem" data-act="open" data-id="${esc(p.id)}"><h3>${esc(p.name)}</h3><div class="pmeta">씬 ${p.scenes.length}개, 컷 ${st.total}개, 예상 ${minLabel(st.totalMin)}</div>${p.scenes.length?`<div class="strips">${p.scenes.map(sc=>`<i style="background:var(--s-${stripKey(sc)})" title="S#${esc(sc.no)}"></i>`).join("")}</div>`:""}${barHtml(p)}</button></div>`}).join("")}</div>
+ return `<div class="wrap">
+ <main style="padding-block:20px 40px"><div class="plist">${list.map(p=>{const st=stats(p);return `<div class="pwrap"><button class="pdel icon" data-act="del-project" data-id="${esc(p.id)}" aria-label="${esc(p.name)} 삭제">${ICON.trash}</button><button class="pitem" data-act="open" data-id="${esc(p.id)}"><h3>${esc(p.name)}</h3><div class="pmeta">씬 ${p.scenes.length}개, 컷 ${st.total}개, 예상 ${minLabel(st.totalMin)}</div>${p.scenes.length?`<div class="strips">${p.scenes.map(sc=>`<i style="background:var(--s-${stripKey(sc)})" title="S#${esc(sc.no)}"></i>`).join("")}</div>`:""}${barHtml(p)}</button></div>`}).join("")}</div>
  ${list.length?"":`<div class="blank"><h3>첫 작품을 만들어 보세요</h3><p>작품 제목만 넣으면 바로 컷을 적을 수 있어요.</p></div>`}
  <div class="row" style="margin-top:14px"><button class="btn solid" style="flex:1 1 100%" data-act="new-project">새 작품 만들기</button><button class="btn quiet" data-act="import">백업 불러오기</button>${nTrash?`<button class="btn quiet" data-act="trash">휴지통 ${nTrash}</button>`:""}${BUILD==="web"?`<button class="btn quiet" data-act="link">기기 연동</button>`:""}</div>
  <p class="sync" id="sync-line">${esc(syncText())}</p><details class="log"><summary>앱 버전 ${APP_VER} · 업데이트 내역</summary>${CHANGELOG.map(v=>`<div class="log-v"><b>${v[0]}</b><ul>${v[1].map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}</details></main></div>`;
