@@ -478,8 +478,9 @@ main .more{background:var(--card)}
 "use strict";
 const BUILD="web";
 const VIEW_MODE=BUILD==="web"&&/^#view=/.test(location.hash);
-const APP_VER="3.9";
+const APP_VER="3.10";
 const CHANGELOG=[
+ ["3.10",["사진 같은 파일을 샷리스트로 잘못 불러와서 생긴 컷 수천 개짜리 작품을 자동으로 지워요.","샷리스트 불러오기에서 사진, 영상, PDF 파일은 받지 않아요."]],
  ["3.9",["예시 작품(마지막 동아리실)을 없앴어요."]],
  ["3.8",["씬마다 배치도 그림을 넣을 수 있어요. Shot Designer 같은 앱에서 저장한 이미지를 붙이면 샷리스트, 촬영 화면, 공유 화면, 출력에 같이 나와요.","다른 앱 샷리스트(CSV, TSV, 텍스트)를 불러올 수 있어요. 홈의 '백업·샷리스트 불러오기'에서 골라요."]],
  ["3.7",["뷰파인더 모드를 넣었어요. 폰 카메라에 화면비 틀과 렌즈 화각을 겹쳐 보고, 그 틀대로 찍으면 콘티로 저장돼요.","컷마다 카메라 세팅(ISO, 셔터, 조리개, 화이트밸런스, ND)을 적을 수 있어요. 새 컷은 앞 컷 세팅을 이어받아요."]],
@@ -995,7 +996,7 @@ async function initSync(){
 function onRemote(snap){
  const seen={},seenImg={};let seenPrefs=false;
  let changed=false;
- snap.docs.forEach(d=>{if(S.gone[d.id]){seen[d.id]=true;delRemote(d.id);return}const r=d.data();if(r&&r.kind==="prefs"){seenPrefs=true;const lc=PC();if((r.updatedAt||0)>(lc.updatedAt||0)&&r.data&&typeof r.data==="object"){S.prefs.c=r.data;PC();applyMyTerms();changed=true}else if((lc.updatedAt||0)>(r.updatedAt||0))pushPrefs();return}if(r&&r.kind==="img"){seenImg[d.id]=true;if(!IMG[d.id]&&typeof r.data==="string"){IMG[d.id]=r.data;idbPut(d.id,r.data);changed=true}return}if(!r||!r.id||!Array.isArray(r.scenes))return;seen[r.id]=true;const l=S.projects[r.id];
+ snap.docs.forEach(d=>{if(S.gone[d.id]){seen[d.id]=true;delRemote(d.id);return}const r=d.data();if(r&&r.kind==="prefs"){seenPrefs=true;const lc=PC();if((r.updatedAt||0)>(lc.updatedAt||0)&&r.data&&typeof r.data==="object"){S.prefs.c=r.data;PC();applyMyTerms();changed=true}else if((lc.updatedAt||0)>(r.updatedAt||0))pushPrefs();return}if(r&&r.kind==="img"){seenImg[d.id]=true;if(!IMG[d.id]&&typeof r.data==="string"){IMG[d.id]=r.data;idbPut(d.id,r.data);changed=true}return}if(!r||!r.id||!Array.isArray(r.scenes))return;seen[r.id]=true;if(isJunk(r)){if(S.projects[r.id]){purgeP(r.id);changed=true}else{S.gone[r.id]=Date.now();delRemote(r.id)}return}const l=S.projects[r.id];
   if(!l||l.example||needMerge(l,r)||(r.updatedAt||0)>(l.updatedAt||0)){
     if(sheetStack.length&&View.pid===r.id){Sync.pendingRemote[r.id]=r}
     else if(applyRemote(r))changed=true
@@ -1473,6 +1474,8 @@ document.addEventListener("click",e=>{if(PL.down&&!e.target.closest("#plan-stage
 document.addEventListener("input",e=>{if(e.target.id==="dict-q"){View.dictQ=e.target.value;$("#dict-list").innerHTML=dictList()}});
 $("#import-file").addEventListener("change",e=>{
  const f=e.target.files[0];e.target.value="";if(!f)return;
+ if(/^(image|video|audio)\//.test(f.type)||/\.(jpe?g|png|gif|webp|heic|heif|bmp|mp4|mov|pdf|zip)$/i.test(f.name)){toast("샷리스트 파일이 아니에요. CSV나 텍스트 파일을 골라 주세요. 그림은 씬 정보의 '배치도 그림'에서 넣어요.");return}
+ if(f.size>5e6){toast("파일이 너무 커요. 5MB 이하 샷리스트 파일을 골라 주세요.");return}
  const r=new FileReader();
  r.onload=()=>{const txt=String(r.result||"").replace(/^\uFEFF/,"");if(!/\.json$/i.test(f.name)&&!/^\s*[\[{]/.test(txt)){importShotList(txt,f.name);return}
   try{const v=JSON.parse(txt);const arr=Array.isArray(v.projects)?v.projects:(v.scenes?[v]:null);if(!arr||!arr.length)throw 0;
@@ -1560,7 +1563,12 @@ function splitRows(txt){const lines=txt.split(/\r?\n/).filter(l=>l.trim());if(!l
  for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){cell+='"';i++}else q=false}else cell+=ch}else if(ch==='"'&&cell==="")q=true;else if(ch===d){row.push(cell);cell=""}else if(ch==="\n"){row.push(cell);if(row.some(x=>x.trim()))out.push(row);row=[];cell=""}else cell+=ch}
  row.push(cell);if(row.some(x=>x.trim()))out.push(row);return out.map(r=>r.map(x=>x.trim()))}
 const COLS=[["scene",/^(scene|sc|씬|s#|scene#|sceneno|scenenumber|씬번호)$/],["shot",/^(shot|shot#|shotno|shotnumber|cut|cut#|컷|컷번호|setup|no|#|번호)$/],["size",/(shotsize|size|shottype|type|framing|사이즈|샷사이즈|크기)/],["angle",/(angle|앵글|각도)/],["move",/(movement|move|cameramove|camera(motion|movement)|무빙|움직임)/],["lens",/(lens|focal|렌즈|화각)/],["desc",/(description|desc|action|subject|content|내용|설명|어떻게|장면)/],["note",/(note|notes|comment|memo|메모|비고)/],["loc",/(location|set|장소|로케)/],["ie",/^(intext|ie|i\/e|int|ext|실내외)$/],["dn",/^(daynight|dn|d\/n|time|낮밤|시간대)$/],["min",/(duration|dur|minutes|min|예상|소요|분)$/],["fps",/(fps|framerate|프레임)/],["cam",/^(camera|cam|카메라)$/]];
+/* 3.8에서 사진 같은 파일을 샷리스트로 잘못 불러와 생긴 컷 수천 개짜리 작품 판별 */
+function isJunk(p){let n=0,bad=0;(p.scenes||[]).forEach(sc=>(sc.cuts||[]).forEach(c=>{n++;if(/[\uFFFD\u0000-\u0008\u000E-\u001F]/.test(String(c.desc||"")+String(c.note||"")))bad++}));return n>=50&&bad/n>.5}
+function cleanJunk(){let k=0;Object.keys(S.projects).forEach(id=>{const p=S.projects[id];if(p&&!p.example&&isJunk(p)){if(GH.cfg||Sync.col)S.gone[id]=Date.now();purgeP(id);k++}});return k}
+function looksBinary(txt){const head=txt.slice(0,20000);if(/\u0000/.test(head))return true;const bad=(head.match(/[\uFFFD\u0001-\u0008\u000E-\u001F]/g)||[]).length;return bad>head.length*.02}
 function importShotList(txt,name){
+ if(looksBinary(txt)){toast("샷리스트 파일이 아니에요. CSV나 텍스트 파일을 골라 주세요. 그림은 씬 정보의 '배치도 그림'에서 넣어요.");return}
  const rows=splitRows(txt);if(!rows.length){toast("파일이 비어 있어요.");return}
  const head=rows[0].map(normK);const map={};head.forEach((h,i)=>{for(const [k,re] of COLS){if(map[k]==null&&re.test(h)){map[k]=i;break}}});
  const hasHead=Object.keys(map).length>=2&&(map.desc!=null||map.size!=null||map.shot!=null);
@@ -1582,7 +1590,7 @@ function importShotList(txt,name){
   const min=Math.round(parseFloat(g("min")));const fps=g("fps").replace(/[^\d.]/g,"");
   const c={size,angle:angle||"아이레벨",moves:moves.length?moves:["고정"],lens:lens.slice(0,20),desc:desc.slice(0,300),note:note.slice(0,200),min:min>=1&&min<=600?min:10,fps:+fps>0&&+fps<=2000?fps:""};
   if(shot&&/[A-Za-z가-힣]/.test(shot))c.label=shot.slice(0,6);
-  if(c.desc||c.size||c.note){scenes[scNo].cuts.push(c);n++}});
+  if((c.desc||c.size||c.note)&&n<2000){scenes[scNo].cuts.push(c);n++}});
  if(!n){toast("컷을 찾지 못했어요. 씬, 컷, 사이즈, 내용 같은 칸이 있는 CSV나 한 줄에 컷 하나씩 적힌 텍스트 파일을 골라 주세요.");return}
  const p=normP({name:(name||"불러온 샷리스트").replace(/\.[^.]+$/,"").slice(0,40),scenes:order.map(k=>scenes[k])});delete p.example;p.updatedAt=Date.now();S.projects[p.id]=p;saveLocal();queueSync(p);A.open({dataset:{id:p.id}});
  toast(`씬 ${order.length}개, 컷 ${n}개를 불러왔어요. 사이즈나 무빙이 안 맞으면 컷을 눌러 고쳐 주세요.`)}
@@ -2294,6 +2302,7 @@ loadLocal();applyMyTerms();
 /* 예시 작품은 3.9부터 기본으로 넣지 않고, 이미 있던 것도 지운다 (?demo=1 일 때만 보기용으로 넣음) */
 if(/[?&]demo=1/.test(location.search)){if(!S.projects.example){const e=normP(exampleProject());S.projects[e.id]=e}}
 else if(S.projects.example){delete S.projects.example;saveLocal()}
+if(BUILD==="web")ghLoad();{const k=cleanJunk();if(k)setTimeout(()=>toast(`잘못 불러와진 작품 ${k}개를 지웠어요.`),600)}
 const justLinked=BUILD==="web"&&consumeLink();
 routeFromHash();
 render();
