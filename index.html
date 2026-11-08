@@ -452,6 +452,13 @@ main .more{background:var(--card)}
 .tl-ticks{position:absolute;left:0;right:0;bottom:0;height:16px}.tl-ticks span{position:absolute;transform:translateX(-50%);font-size:11px;color:var(--muted);white-space:nowrap}
 .tl-key{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);margin:4px 0 0}.tl-key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}.tl-key .tl-r{background:#4C8DF6}.tl-key .tl-s{background:var(--s-de)}
 .tl-warn{font-size:13px;color:var(--tally);margin:6px 0 0;font-weight:600}
+.cam-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px}.cam-grid .field{margin-bottom:10px}
+.vf-stage{position:relative;background:#000;border-radius:12px;overflow:hidden;line-height:0;min-height:180px;text-align:center}
+.vf-box{position:relative;display:inline-block;overflow:hidden;vertical-align:top}
+.vf-stage video{display:block;max-width:100%;max-height:62vh;width:auto;height:auto}
+.vf-frame{position:absolute;box-shadow:0 0 0 9999px rgba(0,0,0,.55);outline:2px solid #fff;outline-offset:-1px;pointer-events:none}
+.vf-lab{position:absolute;left:6px;top:6px;line-height:1.3;font-size:12px;font-weight:700;color:#fff;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:4px}
+.vf-msg{position:absolute;inset:0;display:grid;place-items:center;color:#fff;line-height:1.5;padding:16px;text-align:center;font-size:14px;margin:0}
 </style>
 
 <div id="app"></div>
@@ -465,8 +472,9 @@ main .more{background:var(--card)}
 "use strict";
 const BUILD="web";
 const VIEW_MODE=BUILD==="web"&&/^#view=/.test(location.hash);
-const APP_VER="3.6";
+const APP_VER="3.7";
 const CHANGELOG=[
+ ["3.7",["뷰파인더 모드를 넣었어요. 폰 카메라에 화면비 틀과 렌즈 화각을 겹쳐 보고, 그 틀대로 찍으면 콘티로 저장돼요.","컷마다 카메라 세팅(ISO, 셔터, 조리개, 화이트밸런스, ND)을 적을 수 있어요. 새 컷은 앞 컷 세팅을 이어받아요."]],
  ["3.6",["콜시트에 하루 타임라인을 넣었어요. 골든아워, 블루아워, 시간별 비 확률, 촬영 씬이 한 줄에 보여요.","해가 안 맞거나 비 올 확률이 높은 시간에 잡힌 야외 씬을 알려 줘요.","배치도에서 카메라 센서(풀프레임, 슈퍼35, 마이크로포서드)를 고를 수 있고, 화각 각도도 보여요.","콘티에 화살표 도구를 넣었어요.","스태프 공유 화면이 1분마다 알아서 새로고침돼요.","두 기기에서 같은 작품을 따로 고쳐도 컷 단위로 합쳐져요."]],
  ["3.5",["앱 아이콘을 렌즈 디자인으로 바꿨어요."]],
  ["3.4",["첫 화면 큰 '컷바이컷' 제목을 지웠어요."]],
@@ -959,7 +967,7 @@ function normP(p){
  p=Object.assign({id:uid(),name:"제목 없는 작품",scenes:[],order:[],calls:{},director:"",dop:"",date:"",wrap:"",aspect:"16:9",fps:"",gear:"",updatedAt:Date.now()},p);
  if(!Array.isArray(p.scenes))p.scenes=[];if(!Array.isArray(p.order))p.order=[];
  p.scenes=p.scenes.map(sc=>{sc=Object.assign({id:uid(),no:"1",time:"D",place:"INT",loc:"",note:"",day:"1",cast:"",props:"",plan:null,cuts:[]},sc);if(!Array.isArray(sc.cuts))sc.cuts=[];
-  sc.cuts=sc.cuts.map(c=>{c=Object.assign({id:uid(),size:"",angle:"",moves:[],lens:"",terms:[],desc:"",note:"",min:10,star:false,opt:false,status:"todo",takes:[],img:"",fps:""},c);["moves","terms","takes"].forEach(k=>{if(!Array.isArray(c[k]))c[k]=[]});return c});return sc});
+  sc.cuts=sc.cuts.map(c=>{c=Object.assign({id:uid(),size:"",angle:"",moves:[],lens:"",terms:[],desc:"",note:"",min:10,star:false,opt:false,status:"todo",takes:[],img:"",fps:""},c);["moves","terms","takes"].forEach(k=>{if(!Array.isArray(c[k]))c[k]=[]});if(!c.cam||typeof c.cam!=="object"||Array.isArray(c.cam))c.cam={};return c});return sc});
  return p;
 }
 function touch(p){p.updatedAt=Date.now();if(S.gone[p.id])delete S.gone[p.id];saveLocal();queueSync(p)}
@@ -1073,7 +1081,10 @@ function shootList(p){
 }
 function stats(p){const a=allCuts(p);const done=a.filter(x=>x.c.status==="done").length,skip=a.filter(x=>x.c.status==="skip").length;const rem=a.filter(x=>x.c.status==="todo");return{total:a.length,done,skip,remain:rem.length,remMin:rem.reduce((s,x)=>s+(+x.c.min||0),0),totalMin:a.reduce((s,x)=>s+(+x.c.min||0),0)}}
 function angleLabel(c){return c.angle||""}
-function specLine(c){return [angleLabel(c),(c.moves||[]).join(" + "),c.lens,c.fps?c.fps+"fps":""].filter(Boolean).join(" · ")}
+function specLine(c){return [angleLabel(c),(c.moves||[]).join(" + "),c.lens,c.fps?c.fps+"fps":"",camLine(c)].filter(Boolean).join(" · ")}
+const CAM_F=[["iso","ISO","800","numeric",["100","200","400","640","800","1250","1600","3200","6400","12800"]],["sh","셔터","1/50","text",["1/24","1/25","1/48","1/50","1/60","1/100","1/120","1/250","1/500","180°","90°"]],["f","조리개","2.8","decimal",["1.4","1.8","2","2.8","4","5.6","8","11","16"]],["wb","화이트밸런스","5600","numeric",["2800","3200","4300","5000","5600","6500","오토"]],["nd","ND","0.6","text",["0.3","0.6","0.9","1.2","1.5","1.8","가변"]]];
+function camLine(c){const m=c&&c.cam||{};const o=[];if(m.iso)o.push("ISO "+m.iso);if(m.sh)o.push(m.sh);if(m.f)o.push("f"+String(m.f).replace(/^[fF]\/?/,""));if(m.wb)o.push(/^\d+$/.test(m.wb)?m.wb+"K":m.wb);if(m.nd)o.push("ND "+m.nd);return o.join(" · ")}
+function camHtml(c){const m=c.cam||{};return `<details class="more" id="cam-box"><summary>카메라 세팅${camLine(c)?": "+esc(camLine(c)):" (ISO, 셔터, 조리개, WB, ND)"}</summary><div class="more-in"><div class="cam-grid">${CAM_F.map(([k,l,ph,im,list])=>`<div class="field"><label for="cam-${k}">${l}</label><input id="cam-${k}" class="input" data-cam="${k}" inputmode="${im}" maxlength="12" placeholder="${ph}" list="cam-l-${k}" value="${esc(m[k]||"")}" autocomplete="off"><datalist id="cam-l-${k}">${list.map(v=>`<option value="${v}">`).join("")}</datalist></div>`).join("")}</div><div class="row"><button class="btn quiet grow" data-act="cam-prev">앞 컷 세팅 가져오기</button><button class="btn quiet" data-act="cam-clear">비우기</button></div></div></details>`}
 
 /* ───────── 그리기 ───────── */
 function render(){
@@ -1233,13 +1244,14 @@ function quickChips(field,c){
  const used=Object.keys(cnt).filter(v=>!q.includes(v)).sort((a,b)=>cnt[b]-cnt[a]).slice(0,3);q=used.concat(q);
  return `<div class="chips">${q.map(v=>{const on=Array.isArray(c[field])?c[field].includes(v):c[field]===v;return `<button class="chip ${field==="size"||field==="terms"?"code":""}" data-act="quick" data-field="${field}" data-v="${esc(v)}" aria-pressed="${on}">${esc(v)}</button>`}).join("")}</div>`;
 }
-function imgField(c){const src=c.img&&IMG[c.img];return src?`<button class="sb-prev" data-act="sketch" aria-label="콘티 고치기"><img src="${src}" alt="현재 콘티"></button><div class="row"><button class="btn quiet grow" data-act="sketch">콘티 고치기</button><button class="btn quiet" data-act="sketch-del">콘티 지우기</button></div>`:`<button class="btn quiet" data-act="sketch">콘티 그리기, 사진 넣기</button>`}
+function imgField(c){const src=c.img&&IMG[c.img];return src?`<button class="sb-prev" data-act="sketch" aria-label="콘티 고치기"><img src="${src}" alt="현재 콘티"></button><div class="row"><button class="btn quiet grow" data-act="sketch">콘티 고치기</button><button class="btn quiet grow" data-act="vf">뷰파인더로 다시 찍기</button><button class="btn quiet" data-act="sketch-del">콘티 지우기</button></div>`:`<div class="row"><button class="btn quiet grow" data-act="sketch">콘티 그리기, 사진 넣기</button><button class="btn quiet grow" data-act="vf">뷰파인더로 찍기</button></div>`}
 function editorHtml(c){
  return `<div class="field"><label for="c-desc">어떻게 찍을지</label><textarea id="c-desc" class="input" rows="2" placeholder="카메라 위치, 담을 것, 핵심 한 가지. 예: 노트북 너머 정면, 다가오는 인물로 초점을 넘김.">${esc(c.desc)}</textarea></div>`+
  ["size","angle","moves","lens","terms"].map(f=>`<div class="field" id="f-${f}">${pickBtn(f,c)}${quickChips(f,c)}</div>`).join("")+
  `<div class="field"><span class="flabel">예상 시간</span><div class="chips" id="min-chips">${minChips(c)}</div></div>
  <div class="two"><button class="toggle" data-act="flag" data-k="star" aria-pressed="${!!c.star}">★ 핵심 컷</button><button class="toggle" data-act="flag" data-k="opt" aria-pressed="${!!c.opt}">선택 컷</button></div>
  <div class="field" id="f-img">${imgField(c)}</div>
+ ${camHtml(c)}
  <details class="more" ${S.prefs.edMore?"open":""}><summary>자세히: 메모, 직접 입력, FPS, 컷 번호, 순서·삭제</summary><div class="more-in">
  <div class="field"><label for="c-note">메모</label><input id="c-note" class="input" placeholder="소품, 배우, 주의할 점" value="${esc(c.note)}"></div>
  <div class="row" style="align-items:center"><input id="c-min" class="input" type="number" inputmode="numeric" min="1" max="600" style="width:110px" value="${+c.min||""}" aria-label="예상 시간 직접 입력(분)"><span>분 직접 입력</span></div>
@@ -1262,7 +1274,10 @@ function bindEditor(){
  const p=cur(),f=findCut(p,Ed.id);
  $("#c-desc",top).addEventListener("input",e=>{f.c.desc=e.target.value;touch(p)});
  $("#c-note",top).addEventListener("input",e=>{f.c.note=e.target.value;touch(p)});
+ top.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.cam;if(!k)return;const q=findCut(cur(),Ed.id);if(!q)return;const v=e.target.value.trim().slice(0,12);if(v)q.c.cam[k]=v;else delete q.c.cam[k];touch(cur());camSum(q.c)});
 }
+function camSum(c){const s=$("#cam-box summary");if(s)s.textContent="카메라 세팅"+(camLine(c)?": "+camLine(c):" (ISO, 셔터, 조리개, WB, ND)")}
+function camFill(c){CAM_F.forEach(([k])=>{const i=$("#cam-"+k);if(i)i.value=c.cam[k]||""});camSum(c)}
 function refreshField(field){const p=cur(),f=findCut(p,Ed.id);const box=$("#f-"+field);if(box)box.innerHTML=pickBtn(field,f.c)+quickChips(field,f.c)}
 function setValue(field,v,c){
  if(Array.isArray(c[field])){const i=c[field].indexOf(v);if(i>=0)c[field].splice(i,1);else c[field].push(v);if(field==="moves"&&v==="고정"&&i<0)c.moves=["고정"];else if(field==="moves"&&i<0)c.moves=c.moves.filter(x=>x!=="고정")}
@@ -1310,7 +1325,7 @@ function openSceneEditor(id){
 function refreshSceneSeg(sc){$("#seg-day").innerHTML=segDay(sc);$("#seg-place").innerHTML=segPlace(sc);$("#seg-time").innerHTML=segTime(sc);$("#sc-prev").innerHTML=`<div class="strip" style="${stripVars(sc)};padding:8px 12px;font-size:13.5px">스트립보드 색: ${sc.time} ${sc.place}</div>`}
 function nextSceneNo(p){const n=p.scenes.map(s=>parseInt(s.no,10)).filter(x=>!isNaN(x));return String(n.length?Math.max(...n)+1:1)}
 function newScene(p){const prev=p.scenes[p.scenes.length-1];const sc={id:uid(),no:nextSceneNo(p),time:prev?prev.time:"D",place:prev?prev.place:"INT",loc:"",note:"",day:prev?prev.day:"1",cuts:[]};p.scenes.push(sc);touch(p);return sc}
-function newCut(p,sc){const prev=sc.cuts[sc.cuts.length-1];const c=normP({scenes:[{cuts:[{size:"",angle:"아이레벨",moves:["고정"],lens:prev?prev.lens:"",fps:prev?prev.fps:""}]}]}).scenes[0].cuts[0];sc.cuts.push(c);touch(p);return c}
+function newCut(p,sc){const prev=sc.cuts[sc.cuts.length-1];const c=normP({scenes:[{cuts:[{size:"",angle:"아이레벨",moves:["고정"],lens:prev?prev.lens:"",fps:prev?prev.fps:"",cam:prev&&prev.cam?JSON.parse(JSON.stringify(prev.cam)):{}}]}]}).scenes[0].cuts[0];sc.cuts.push(c);touch(p);return c}
 function textPrompt(title,label,val,okLabel,cb,ph){
  const w=openSheet(title,`<div class="field"><label for="tp-v">${esc(label)}</label><input id="tp-v" class="input" value="${esc(val)}" placeholder="${esc(ph||"예: 마지막 동아리실")}"></div>`,`<button class="btn solid grow" data-act="tp-ok">${esc(okLabel)}</button>`);
  const inp=$("#tp-v",w);setTimeout(()=>{inp.focus();inp.select()},30);
@@ -1326,8 +1341,8 @@ function textOf(p){
 }
 function csvOf(p){
  const q=v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`;
- const rows=[["씬","컷","시간","장소구분","장소","샷 사이즈","앵글","무빙","렌즈","FPS","용어","어떻게 찍을지","메모","예상(분)","핵심","선택","상태","OK 테이크","테이크 기록"]];
- p.scenes.forEach(sc=>sc.cuts.forEach((c,i)=>{const ok=c.takes.filter(t=>t.r==="ok").map(t=>t.n).join(",");rows.push([sc.no,cutNo(sc,i),sc.time,sc.place,sc.loc,c.size,c.angle,c.moves.join(" + "),c.lens,c.fps,c.terms.join(", "),c.desc,c.note,c.min,c.star?"O":"",c.opt?"O":"",{todo:"대기",done:"완료",skip:"건너뜀"}[c.status],ok,c.takes.map(t=>`T${t.n} ${t.r.toUpperCase()}${t.note?" "+t.note:""}`).join(" / ")])}));
+ const rows=[["씬","컷","시간","장소구분","장소","샷 사이즈","앵글","무빙","렌즈","FPS","카메라 세팅","용어","어떻게 찍을지","메모","예상(분)","핵심","선택","상태","OK 테이크","테이크 기록"]];
+ p.scenes.forEach(sc=>sc.cuts.forEach((c,i)=>{const ok=c.takes.filter(t=>t.r==="ok").map(t=>t.n).join(",");rows.push([sc.no,cutNo(sc,i),sc.time,sc.place,sc.loc,c.size,c.angle,c.moves.join(" + "),c.lens,c.fps,camLine(c),c.terms.join(", "),c.desc,c.note,c.min,c.star?"O":"",c.opt?"O":"",{todo:"대기",done:"완료",skip:"건너뜀"}[c.status],ok,c.takes.map(t=>`T${t.n} ${t.r.toUpperCase()}${t.note?" "+t.note:""}`).join(" / ")])}));
  return "﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n");
 }
 function printHtml(p){
@@ -1523,6 +1538,33 @@ idbReady.then(()=>{if(!idb)return;try{const out=idb.transaction("i").objectStore
 
 /* ───────── 콘티 그리기 ───────── */
 const ASPECT={"16:9":16/9,"1.85:1":1.85,"2.39:1":2.39,"4:3":4/3,"1:1":1,"9:16":9/16};
+/* ───────── 뷰파인더: 폰 카메라에 화면비 틀과 렌즈 화각을 겹쳐 보고, 그 틀대로 찍어 콘티로 저장 ───────── */
+let VF=null;const VF_BASE=26;
+function openVF(){
+ const p=cur(),f=findCut(p,Ed.id);const lm=/\d/.test(f.c.lens||"")?lensMm(f.c.lens):0;
+ VF={cutId:Ed.id,asp:ASPECT[p.aspect]?p.aspect:"16:9",mm:lm>=VF_BASE?lm:0,stream:null};
+ const lenses=[...new Set(PC().lenses.map(lensMm).filter(m=>m>VF_BASE).concat(lm>VF_BASE?[lm]:[]))].sort((a,b)=>a-b);
+ openSheet(`뷰파인더 ${f.sc.no}-${cutNo(f.sc,f.i)}`,`<div class="vf-stage" id="vf-stage"><div class="vf-box"><video id="vf-v" playsinline muted autoplay></video><div class="vf-frame" id="vf-frame" hidden><div class="sk-grid" id="vf-grid" hidden></div></div><span class="vf-lab" id="vf-lab"></span></div><p class="vf-msg" id="vf-msg">카메라를 켜는 중이에요.</p></div>
+  <div class="chips" role="group" aria-label="화면비">${Object.keys(ASPECT).map(k=>`<button class="chip" data-act="vf-asp" data-v="${k}" aria-pressed="${k===VF.asp}">${k}</button>`).join("")}</div>
+  <div class="chips" role="group" aria-label="렌즈"><button class="chip" data-act="vf-lens" data-v="0" aria-pressed="${!VF.mm}">폰 그대로</button>${lenses.map(m=>`<button class="chip" data-act="vf-lens" data-v="${m}" aria-pressed="${VF.mm===m}">${m}mm</button>`).join("")}<button class="chip" data-act="vf-grid" aria-pressed="false">3분할선</button></div>
+  <p class="scn-status">폰 기본 카메라를 풀프레임 ${VF_BASE}mm 정도로 보고 화각을 계산해요. 폰마다 조금 달라서 대략 맞춰 보는 용도예요. ${VF_BASE}mm보다 넓은 렌즈는 폰 화면 전체로 보여요.</p>`,
+  `<button class="btn quiet grow" data-act="close-sheet">닫기</button><button class="btn solid grow" data-act="vf-shot" id="vf-shot" disabled>찍어서 콘티로</button>`,{onClose:vfStop});
+ const v=$("#vf-v"),msg=$("#vf-msg");
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.textContent="이 기기나 브라우저에서는 카메라를 열 수 없어요. 콘티 그리기에서 사진을 넣어 주세요.";return}
+ navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}},audio:false}).then(st=>{
+  if(!VF){st.getTracks().forEach(t=>t.stop());return}VF.stream=st;v.srcObject=st;
+  v.addEventListener("loadedmetadata",()=>{msg.hidden=true;$("#vf-frame").hidden=false;const b=$("#vf-shot");if(b)b.disabled=false;vfLayout();v.play&&v.play().catch(()=>{})},{once:true});
+ }).catch(e=>{msg.textContent=e&&e.name==="NotAllowedError"?"카메라 권한이 막혀 있어요. 브라우저 설정에서 이 앱의 카메라를 허용해 주세요.":BUILD!=="web"?"이 링크 버전에서는 카메라를 못 열어요. 폰에 설치한 앱에서 써 주세요.":"카메라를 열지 못했어요. 다른 앱이 카메라를 쓰고 있는지 확인해 주세요."});
+ VF.onResize=()=>vfLayout();addEventListener("resize",VF.onResize);
+}
+function vfStop(){if(!VF)return;if(VF.stream)VF.stream.getTracks().forEach(t=>t.stop());if(VF.onResize)removeEventListener("resize",VF.onResize);VF=null;const b=$("#f-img");if(b&&Ed){const q=findCut(cur(),Ed.id);if(q)b.innerHTML=imgField(q.c)}}
+function vfRect(){const v=$("#vf-v");if(!v||!v.videoWidth)return null;const W=v.videoWidth,H=v.videoHeight,k=VF.mm>VF_BASE?VF_BASE/VF.mm:1,lw=W*k,lh=H*k,r=ASPECT[VF.asp]||16/9;let w,h;if(lw/lh>r){h=lh;w=lh*r}else{w=lw;h=lw/r}return{x:(W-w)/2,y:(H-h)/2,w,h,W,H}}
+function vfLayout(){const R=vfRect(),fr=$("#vf-frame");if(!R||!fr)return;fr.style.left=R.x/R.W*100+"%";fr.style.top=R.y/R.H*100+"%";fr.style.width=R.w/R.W*100+"%";fr.style.height=R.h/R.H*100+"%";
+ $("#vf-lab").textContent=(VF.mm?VF.mm+"mm":"폰 그대로")+" · "+VF.asp+(R.H>R.W&&ASPECT[VF.asp]>1?" · 폰을 가로로 돌리면 크게 보여요":"")}
+function vfShot(){const R=vfRect(),v=$("#vf-v");if(!R)return;const sc=Math.min(1,1280/R.w),cv=document.createElement("canvas");cv.width=Math.round(R.w*sc);cv.height=Math.round(R.h*sc);
+ const g=cv.getContext("2d");g.drawImage(v,R.x,R.y,R.w,R.h,0,0,cv.width,cv.height);let d;try{d=cv.toDataURL("image/jpeg",.8)}catch(e){toast("사진을 저장하지 못했어요.");return}
+ const p=cur(),f=findCut(p,VF.cutId);if(!f)return;if(f.c.img)imgDel(f.c.img);const id="img_"+uid();imgPut(id,d);f.c.img=id;touch(p);closeSheet();toast("뷰파인더 사진을 콘티로 저장했어요.")}
+
 let Sk=null;
 function openSketch(){
  const p=cur(),f=findCut(p,Ed.id),r=ASPECT[p.aspect]||16/9;
@@ -1722,6 +1764,13 @@ Object.assign(A,{
  "sc-day"(el){const p=cur(),sc=p.scenes.find(s=>s.id===ScEd.id);sc.day=el.dataset.v;touch(p);refreshSceneSeg(sc);const i=$("#sc-dayn");if(i)i.value=sc.day},
  fps(el){const p=cur(),f=findCut(p,Ed.id);f.c.fps=el.dataset.m;touch(p);$("#fps-chips").innerHTML=fpsChips(f.c);const i=$("#c-fps");if(i)i.value=f.c.fps},
  sketch(){openSketch()},
+ vf(){openVF()},
+ "vf-asp"(el){VF.asp=el.dataset.v;el.parentNode.querySelectorAll('[data-act="vf-asp"]').forEach(n=>n.setAttribute("aria-pressed",n===el));vfLayout()},
+ "vf-lens"(el){VF.mm=+el.dataset.v||0;el.parentNode.querySelectorAll('[data-act="vf-lens"]').forEach(n=>n.setAttribute("aria-pressed",n===el));vfLayout()},
+ "vf-grid"(el){const g=$("#vf-grid");g.hidden=!g.hidden;el.setAttribute("aria-pressed",!g.hidden)},
+ "vf-shot"(){vfShot()},
+ "cam-prev"(){const p=cur(),f=findCut(p,Ed.id);const all=allCuts(p);const i=all.findIndex(x=>x.c.id===f.c.id);let src=null;for(let j=i-1;j>=0;j--){if(Object.keys(all[j].c.cam||{}).length){src=all[j].c;break}}if(!src){toast("세팅을 적은 앞 컷이 없어요.");return}f.c.cam=JSON.parse(JSON.stringify(src.cam));touch(p);camFill(f.c);toast("앞 컷 세팅을 가져왔어요.")},
+ "cam-clear"(){const p=cur(),f=findCut(p,Ed.id);f.c.cam={};touch(p);camFill(f.c)},
  "sketch-del"(){const p=cur(),f=findCut(p,Ed.id);if(f.c.img)imgDel(f.c.img);f.c.img="";touch(p);$("#f-img").innerHTML=imgField(f.c);toast("콘티를 지웠어요.")},
  "sk-color"(el){Sk.color=el.dataset.v;Sk.eraser=false;setPressed(el,".pcolor",el);el.closest(".row").querySelector('[data-act="sk-eraser"]').setAttribute("aria-pressed",false)},
  "sk-size"(el){Sk.size=+el.dataset.v;setPressed(el,'[data-act="sk-size"]',el)},
