@@ -478,8 +478,9 @@ main .more{background:var(--card)}
 "use strict";
 const BUILD="web";
 const VIEW_MODE=BUILD==="web"&&/^#view=/.test(location.hash);
-const APP_VER="3.10";
+const APP_VER="3.11";
 const CHANGELOG=[
+ ["3.11",["받은 날씨 예보를 기기에 저장해서, 인터넷 없는 곳에서도 마지막으로 받은 예보를 볼 수 있어요.","인터넷이 끊기거나 다시 연결되면 알려 줘요."]],
  ["3.10",["사진 같은 파일을 샷리스트로 잘못 불러와서 생긴 컷 수천 개짜리 작품을 자동으로 지워요.","샷리스트 불러오기에서 사진, 영상, PDF 파일은 받지 않아요."]],
  ["3.9",["예시 작품(마지막 동아리실)을 없앴어요."]],
  ["3.8",["씬마다 배치도 그림을 넣을 수 있어요. Shot Designer 같은 앱에서 저장한 이미지를 붙이면 샷리스트, 촬영 화면, 공유 화면, 출력에 같이 나와요.","다른 앱 샷리스트(CSV, TSV, 텍스트)를 불러올 수 있어요. 홈의 '백업·샷리스트 불러오기'에서 골라요."]],
@@ -2209,7 +2210,10 @@ document.addEventListener("change",e=>{const t=e.target,p=cur();if(!p)return;
 });
 
 /* ───────── 날씨 예보 (Open-Meteo, 웹 앱 전용) ───────── */
-const WX={};
+const WX={};const WX_KEY="cutbycut.wx";
+/* 받은 예보는 기기에 저장해 두고, 인터넷 없는 곳에서는 마지막으로 받은 예보를 보여 준다 */
+try{const o=JSON.parse(localStorage.getItem(WX_KEY)||"{}");Object.keys(o).forEach(k=>{if(o[k]&&o[k].d&&Array.isArray(o[k].h))WX[k]=o[k]})}catch(e){}
+function wxSave(){try{const ks=Object.keys(WX).filter(k=>WX[k]&&WX[k].d&&WX[k].at).sort((a,b)=>WX[b].at-WX[a].at).slice(0,30);const o={};ks.forEach(k=>{o[k]={at:WX[k].at,d:WX[k].d,h:WX[k].h}});localStorage.setItem(WX_KEY,JSON.stringify(o))}catch(e){}}
 const wmo=c=>c==null?"-":c===0?"맑음":c===1?"대체로 맑음":c===2?"구름 조금":c===3?"흐림":c<=48?"안개":c<=57?"이슬비":c<=67?"비":c<=77?"눈":c<=82?"소나기":c<=86?"눈 소나기":"뇌우";
 function wxKey(c,date){return c&&c.lat&&date?`${(+c.lat).toFixed(2)},${(+c.lng).toFixed(2)},${date}`:""}
 function wxHtml(c,date){
@@ -2219,7 +2223,7 @@ function wxHtml(c,date){
  if(diff>15)return `<p class="scn-status">날씨 예보는 촬영일 16일 전부터 나와요.</p>`;
  if(diff<-60)return "";
  const w=WX[k];
- if(!w||(!w.loading&&!w.err&&Date.now()-w.at>30*6e4)){loadWx(k,c,date);if(!w||w.err||!w.d)return `<p class="scn-status">날씨를 불러오는 중이에요.</p>`}
+ if(!w||(!w.loading&&!w.err&&Date.now()-w.at>30*6e4&&navigator.onLine!==false)){loadWx(k,c,date);if(!w||w.err||!w.d)return `<p class="scn-status">날씨를 불러오는 중이에요.</p>`}
  if(w.loading&&!w.d)return `<p class="scn-status">날씨를 불러오는 중이에요.</p>`;
  if(w.err)return `<p class="scn-status">${esc(w.err)} <button class="chip" data-act="wx-retry" data-k="${esc(k)}">다시 불러오기</button></p>`;
  const d=w.d,trust=diff<=2?"1~2일 안 예보라 비교적 정확해요.":diff<=6?"3~6일 뒤 예보라 참고용이에요. 전날 다시 확인하세요.":"일주일 넘게 남은 예보라 많이 바뀔 수 있어요.";
@@ -2228,7 +2232,7 @@ function wxHtml(c,date){
  const q=encodeURIComponent((c.city&&c.city!=="현재 위치"?c.city.split(",")[0]:"")+" 날씨");
  return `<div class="wx"><p class="wx-d"><b>${esc(wmo(d.code))}</b> ${Math.round(d.min)}~${Math.round(d.max)}°C · 강수확률 ${d.rain??"-"}%${d.sum>0?` · 비 ${d.sum.toFixed(1)}mm`:""} · 바람 최대 ${Math.round(d.wind)}m/s</p>
  <div class="wx-h">${hrs.map(x=>`<div><span>${String(x.hr).padStart(2,"0")}시</span><b>${Math.round(x.temp)}°</b><span>${esc(wmo(x.code))}</span><span class="rain">${x.mm>0?x.mm.toFixed(1)+"mm":(x.rain??"-")+"%"}</span><span>${Math.round(x.wind)}m/s</span></div>`).join("")}</div>
- <p class="scn-status">${esc(c.city||"선택한 위치")} 기준 · ${clock(w.at)}에 받은 예보. ${trust} 날씨 자료: Open-Meteo</p>
+ <p class="scn-status">${navigator.onLine===false?"<b>지금은 인터넷이 없어서 마지막으로 받은 예보를 보여 줘요.</b> ":""}${esc(c.city||"선택한 위치")} 기준 · ${new Date(w.at).toDateString()===new Date().toDateString()?"":(new Date(w.at).getMonth()+1)+"/"+new Date(w.at).getDate()+" "}${clock(w.at)}에 받은 예보. ${trust} 날씨 자료: Open-Meteo</p>
  <div class="row"><a class="btn quiet" href="https://search.naver.com/search.naver?query=${q}" target="_blank" rel="noopener">네이버 날씨로 비교</a><button class="btn quiet" data-act="wx-retry" data-k="${esc(k)}">새로 받기</button></div></div>`;
 }
 async function loadWx(k,c,date){
@@ -2240,7 +2244,7 @@ async function loadWx(k,c,date){
   const r=await fetch(u,{signal:ctl.signal,cache:"no-store"});clearTimeout(tm);if(!r.ok)throw 0;const j=await r.json();
   const dl=j.daily||{},hr=j.hourly||{};if(!dl.time||!dl.time.length)throw 0;const g=(o,n,i)=>o[n]?o[n][i]:null;
   WX[k]={at:Date.now(),d:{code:g(dl,"weather_code",0),max:g(dl,"temperature_2m_max",0),min:g(dl,"temperature_2m_min",0),rain:g(dl,"precipitation_probability_max",0),sum:g(dl,"precipitation_sum",0)||0,wind:g(dl,"wind_speed_10m_max",0)||0},
-   h:(hr.time||[]).map((t,i)=>({hr:+t.slice(11,13),temp:g(hr,"temperature_2m",i),rain:g(hr,"precipitation_probability",i),mm:g(hr,"precipitation",i)||0,code:g(hr,"weather_code",i),wind:g(hr,"wind_speed_10m",i)||0}))};
+   h:(hr.time||[]).map((t,i)=>({hr:+t.slice(11,13),temp:g(hr,"temperature_2m",i),rain:g(hr,"precipitation_probability",i),mm:g(hr,"precipitation",i)||0,code:g(hr,"weather_code",i),wind:g(hr,"wind_speed_10m",i)||0}))};wxSave();
  }catch(e){WX[k]=old?Object.assign(old,{loading:false}):{err:navigator.onLine===false?"인터넷이 없어 날씨를 못 불러왔어요.":"날씨를 불러오지 못했어요."}}
  const b=$("#wx-box"),p=cur();if(b&&p&&View.tab==="call"){const day=curDay(p),cc=callOf(p,day),dv=cc.date||(day==="1"?p.date:"")||"";if(wxKey(cc,dv)===k){b.innerHTML=wxHtml(cc,dv);tlRefresh()}}
 }
@@ -2294,6 +2298,10 @@ Object.assign(A,{
 document.addEventListener("toggle",e=>{const d=e.target;if(d.classList&&d.classList.contains("more")&&d.closest("#f-img")===null&&$("#c-desc")&&d.contains($("#c-min"))){S.prefs.edMore=d.open;saveLocal()}},true);
 document.addEventListener("input",e=>{if(e.target.id==="list-q"){View.q=e.target.value;const b=$("#list-body"),p=cur();if(b&&p)b.innerHTML=listBody(p)}});
 document.addEventListener("change",e=>{if(e.target.id==="c-label"&&Ed){const p=cur(),f=findCut(p,Ed.id);const v=e.target.value.trim().replace(/[^\w가-힣]/g,"").slice(0,6);if(v)f.c.label=v;else delete f.c.label;e.target.value=v;touch(p);const h=$(".sheet-head h2",e.target.closest(".sheet"));if(h)h.textContent=`컷 ${f.sc.no}-${cutNo(f.sc,f.sc.cuts.indexOf(f.c))}`}});
+
+/* 인터넷이 끊기거나 다시 연결될 때 알려 준다. 앱은 끊겨도 그대로 쓸 수 있다 */
+addEventListener("offline",()=>{if(!VIEW_MODE)toast("인터넷이 끊겼어요. 앱은 그대로 쓸 수 있고, 연결되면 자동으로 맞춰요.")});
+addEventListener("online",()=>{if(!VIEW_MODE)toast("인터넷이 다시 연결됐어요.")});
 
 /* ───────── 시작 ───────── */
 function routeFromHash(){const h=location.hash.slice(1);if(h.startsWith("p-")&&S.projects[h.slice(2)]){View.pid=h.slice(2)}else if(!h)View.pid=null}
